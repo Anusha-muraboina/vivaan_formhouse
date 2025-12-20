@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ room_category.name }} | Book Now</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        .btn-primary {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #b91c1c, #991b1b);
+        }
+        input, textarea, select {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+            ring: 2px solid #dc2626;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+
+<!-- PAGE CONTAINER -->
+<div class="max-w-7xl mx-auto px-4 py-16">
+
+    <!-- HEADER -->
+    <div class="mb-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            {{ room_category.name }}
+        </h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+            {{ room_category.description }}
+        </p>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+        <!-- LEFT CONTENT -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-4">Room Details</h2>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 text-gray-700">
+                    <div><strong>Size:</strong> {{ room_category.size_sqft }} sqft</div>
+                    <div><strong>Max Guests:</strong> {{ room_category.max_occupancy }}</div>
+                    <div><strong>Floor:</strong> {{ room_category.floor }}</div>
+                    <div><strong>View:</strong> {{ room_category.view_type|title }}</div>
+                    <div><strong>Balcony:</strong> {{ room_category.has_balcony|yesno:"Yes,No" }}</div>
+                    <div><strong>Bathtub:</strong> {{ room_category.has_bathtub|yesno:"Yes,No" }}</div>
+                </div>
+            </div>
+
+            {% if booked_dates %}
+            <div class="bg-amber-50 border border-amber-300 rounded-xl p-6">
+                <p class="text-amber-800 text-sm">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>{{ booked_dates|length }} dates</strong> are already booked.
+                    Please avoid selecting them.
+                </p>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- BOOKING CARD (YOUR SECTION) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-xl p-8 sticky top-32">
+
+                <div class="text-center mb-6">
+                    <div class="text-4xl font-bold text-red-600 mb-2">
+                        ₹{{ room_category.base_price }}
+                    </div>
+                    <p class="text-gray-600">per night</p>
+
+                    {% if available_rooms_count > 0 %}
+                    <div class="mt-4 bg-green-100 text-green-700 px-4 py-2 rounded-full inline-block">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        {{ available_rooms_count }} rooms available
+                    </div>
+                    {% else %}
+                    <div class="mt-4 bg-red-100 text-red-700 px-4 py-2 rounded-full inline-block">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        Not available
+                    </div>
+                    {% endif %}
+                </div>
+
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div>
+                        <label class="font-semibold block mb-1">Full Name</label>
+                        {{ form.guest_name }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Email</label>
+                        {{ form.guest_email }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Phone</label>
+                        {{ form.guest_phone }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Guests</label>
+                        {{ form.guest_count }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Check-in</label>
+                        {{ form.check_in }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Check-out</label>
+                        {{ form.check_out }}
+                    </div>
+
+                    <div>
+                        <label class="font-semibold block mb-1">Special Requests</label>
+                        {{ form.special_requests }}
+                    </div>
+
+                    <!-- DATE ERROR -->
+                    <div id="dateNotification"
+                         class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span id="dateNotificationText"></span>
+                    </div>
+
+                    {% if available_rooms_count == 0 %}
+                    <button disabled
+                            class="w-full btn-primary text-white py-4 rounded-lg font-bold text-lg opacity-50">
+                        Book Now
+                    </button>
+                    {% else %}
+                    <button type="submit"
+                            class="w-full btn-primary text-white py-4 rounded-lg font-bold text-lg">
+                        <i class="fas fa-calendar-check mr-2"></i>Book Now
+                    </button>
+                    {% endif %}
+                </form>
+
+                <div class="mt-6 pt-6 border-t text-sm text-gray-600 flex items-start">
+                    <i class="fas fa-info-circle text-red-600 mr-2 mt-1"></i>
+                    Free cancellation up to 24 hours before check-in
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- DATE VALIDATION SCRIPT -->
+<script>
+    const checkIn = document.getElementById("id_check_in");
+    const checkOut = document.getElementById("id_check_out");
+    const box = document.getElementById("dateNotification");
+    const text = document.getElementById("dateNotificationText");
+    const btn = document.querySelector("button[type='submit']");
+
+    const bookedDates = {{ booked_dates|safe }};
+
+    function showError(msg) {
+        text.innerText = msg;
+        box.classList.remove("hidden");
+        btn.disabled = true;
+        btn.classList.add("opacity-50");
+    }
+
+    function clearError() {
+        box.classList.add("hidden");
+        btn.disabled = false;
+        btn.classList.remove("opacity-50");
+    }
+
+    function validate() {
+        if (!checkIn.value || !checkOut.value) return;
+
+        if (checkIn.value >= checkOut.value) {
+            showError("Check-out date must be after check-in date.");
+            return;
+        }
+
+        let start = new Date(checkIn.value);
+        let end = new Date(checkOut.value);
+
+        while (start <= end) {
+            let d = start.toISOString().split("T")[0];
+            if (bookedDates.includes(d)) {
+                showError("Selected dates include unavailable dates.");
+                return;
+            }
+            start.setDate(start.getDate() + 1);
+        }
+        clearError();
+    }
+
+    checkIn.addEventListener("change", validate);
+    checkOut.addEventListener("change", validate);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1047 @@
+{% extends 'resort/base.html' %}
+
+{% block content %}
+
+{% load static %}
+
+<style>
+.carousel-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.carousel-img.active {
+  opacity: 1;
+  position: relative;
+}
+</style>
+<!-- GLOBAL FIXED BACKGROUND -->
+<div class="fixed inset-0 -z-10">
+  <div class="absolute inset-0 bg-cover bg-center"
+       style="background-image: url('{% static "images/vihan-group1.webp" %}');">
+  </div>
+  <div class="absolute inset-0 bg-white/90"></div>
+</div>
+
+
+<!-- Hero Carousel Section -->
+<section id="home"
+  class="relative h-[220px] sm:h-[300px] md:h-screen overflow-hidden flex items-center justify-center text-white">
+
+  <!-- Carousel Wrapper -->
+  <div id="hero-carousel" class="absolute inset-0 z-0">
+
+    <!-- Slide 1 -->
+    <div
+      class="carousel-item absolute inset-0
+             bg-center bg-no-repeat
+             bg-contain md:bg-cover
+             transition-opacity duration-1000 opacity-100"
+      style="background-image: url('{% static "images/vihan-group1.webp" %}');">
+    </div>
+
+    <!-- Slide 2 -->
+    <div
+      class="carousel-item absolute inset-0
+             bg-center bg-no-repeat
+             bg-contain md:bg-cover
+             transition-opacity duration-1000 opacity-0"
+      style="background-image: url('{% static "images/vihan-group2.webp" %}');">
+    </div>
+
+    <!-- Slide 3 -->
+    <div
+      class="carousel-item absolute inset-0
+             bg-center bg-no-repeat
+             bg-contain md:bg-cover
+             transition-opacity duration-1000 opacity-0"
+      style="background-image: url('{% static "images/vihan-group3.webp" %}');">
+    </div>
+
+  </div>
+
+  <!-- PREV BUTTON -->
+  <button id="prevBtn"
+    class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20
+           bg-black/60 hover:bg-black/80
+           p-3 md:p-4 rounded-full transition">
+    <i class="fas fa-chevron-left text-lg md:text-2xl"></i>
+  </button>
+
+  <!-- NEXT BUTTON -->
+  <button id="nextBtn"
+    class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20
+           bg-black/60 hover:bg-black/80
+           p-3 md:p-4 rounded-full transition">
+    <i class="fas fa-chevron-right text-lg md:text-2xl"></i>
+  </button>
+
+</section>
+
+{% comment %} 
+<!-- About Section -->
+<section id="about" class="py-24  scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {
+            <div class="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+    <img 
+        src="{% static 'images/vihan-group1.webp' %}" 
+        alt="About Resort"
+        class="w-full h-full object-cover"
+        loading="eager"
+        decoding="sync"
+    >
+</div>
+            <div>
+                
+                <h2 class="text-4xl font-bold text-gray-900 section-title mb-6">About Us</h2>
+                <h3 class="text-2xl font-serif text-gray-700 mb-4">Where Luxury Meets Nature</h3>
+              
+
+                   <p class="text-black leading-relaxed">
+                    
+                   Nestled on the serene outskirts of Hyderabad, Vivaan Farmhouse offers a peaceful escape where nature, 
+                   comfort, and elegance come together. Designed for relaxation and memorable gatherings, 
+                   the farmhouse provides a perfect retreat away from the city’s bustle while still being easily accessible.
+                </p>
+                <br>
+                <p class="text-black leading-relaxed">
+Surrounded by lush greenery and open landscapes, Vivaan Farmhouse features thoughtfully designed spaces that 
+blend modern amenities with a natural, rustic charm. Whether you’re planning a weekend getaway, a family celebration,
+ or a private event, every corner of the property is crafted to offer comfort, privacy, and tranquility.
+                </p>
+                   <br>
+                <p class="text-black leading-relaxed">
+                   At Vivaan Farmhouse, we believe in creating experiences that feel both personal and refreshing.
+                    Spend your time unwinding by the pool, enjoying outdoor activities, hosting intimate celebrations, 
+                    or simply soaking in the calm surroundings. With warm hospitality and attention to detail, 
+                   Vivaan Farmhouse is the perfect destination to relax, reconnect, and create lasting memories.
+                </p>
+              
+                
+            </div>
+            
+        </div>
+        
+    </div>
+    
+</section> {% endcomment %}
+
+<!-- Villa Pricing / Rooms Section -->
+{% comment %} <section id="rooms" class="py-10  scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-red-900 section-title mb-4">Entire Villa Packages</h2>
+            <p class="text-gray-900 text-lg max-w-2xl mx-auto">
+                Exclusive use of the property for complete privacy and comfort.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+            <!-- Weekday Card -->
+            <div
+                class=" rounded-2xl shadow-xl overflow-hidden card-hover group transform transition hover:-translate-y-2">
+                <div class="h-64 bg-teal-700 relative overflow-hidden flex items-center justify-center">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+                    <h3 class="relative text-3xl font-bold text-white z-10">Weekday Bliss</h3>
+                    <div
+                        class="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded text-sm">
+                        Mon - Fri</div>
+                </div>
+                <div class="p-8 text-center bg-white relative">
+                    <div class="text-5xl font-bold text-teal-700 mb-2">₹{{ pricing.weekday_price }}</div>
+                    <p class="text-gray-500 mb-8">per night</p>
+
+                    <ul class="text-left text-gray-600 space-y-4 mb-8 max-w-xs mx-auto text-lg">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3"></i> Entire {{
+                            default_room.name|default:"Luxury Villa" }}</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3"></i> Serene
+                            Environment</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3"></i> Full
+                            Amenities Access</li>
+                    </ul>
+
+                    {% if default_room %}
+                    <a href="{% url 'room_detail' default_room.slug %}?package=weekday"
+                        class="block w-full text-center btn-primary text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition">
+                        Book Weekday Stay
+                    </a>
+                    {% else %}
+                    <button disabled
+                        class="w-full bg-gray-300 text-white py-4 rounded-xl font-bold cursor-not-allowed">Coming
+                        Soon</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Weekend Card -->
+            <div
+                class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover group transform transition hover:-translate-y-2">
+                <div class="h-64 bg-amber-600 relative overflow-hidden flex items-center justify-center">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+                    <h3 class="relative text-3xl font-bold text-white z-10">Weekend Retreat</h3>
+                    <div
+                        class="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded text-sm">
+                        Sat - Sun</div>
+                </div>
+                <div class="p-8 text-center bg-white relative">
+                    <div class="text-5xl font-bold text-amber-600 mb-2">₹{{ pricing.weekend_price }}</div>
+                    <p class="text-gray-500 mb-8">per night</p>
+
+                    <ul class="text-left text-gray-600 space-y-4 mb-8 max-w-xs mx-auto text-lg">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-amber-500 mr-3"></i> Premium
+                            Weekend Vibes</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-amber-500 mr-3"></i> Strawberry
+                            Plucking</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-amber-500 mr-3"></i> Bonfire &
+                            Music</li>
+                    </ul>
+
+                    {% if default_room %}
+                    <a href="{% url 'room_detail' default_room.slug %}?package=weekend"
+                        class="block w-full text-center btn-secondary text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition">
+                        Book Weekend Stay
+                    </a>
+                    {% else %}
+                    <button disabled
+                        class="w-full bg-gray-300 text-white py-4 rounded-xl font-bold cursor-not-allowed">Coming
+                        Soon</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+<!-- About Section -->
+ {% comment %} <section id="about" class="py-24 scroll-mt-20 relative overflow-hidden">
+    <div class="container mx-auto px-4 relative">
+
+       
+        <div class="absolute top-0 right-0 h-full w-full md:w-2/3 bg-emerald-50
+ rounded-l-3xl -z-10"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
+
+            
+            <div class="relative w-full md:h-[480px]  h-full rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                    src="{% static 'images/vihan-group1.webp' %}" 
+                    alt="About Resort"
+                    class="w-full h-full object-cover"
+                >
+            </div>
+
+           
+            <div class="text-gray-900 px-6 md:px-12 py-10">
+
+                <h2 class="text-4xl font-bold mb-6">
+                    About Us
+                </h2>
+
+                <h3 class="text-2xl font-serif text-gray-900 mb-4">
+                    Where Luxury Meets Nature
+                </h3>
+
+                <p class="leading-relaxed mb-4 text-gray-900">
+                    Nestled on the serene outskirts of Hyderabad, Vivaan Farmhouse offers a peaceful escape where nature,
+                    comfort, and elegance come together. Designed for relaxation and memorable gatherings, the farmhouse
+                    provides a perfect retreat away from the city’s bustle while still being easily accessible.
+                </p>
+
+                <p class="leading-relaxed mb-4 text-gray-900">
+                    Surrounded by lush greenery and open landscapes, Vivaan Farmhouse features thoughtfully designed
+                    spaces that blend modern amenities with a natural, rustic charm. Whether you’re planning a weekend
+                    getaway, a family celebration, or a private event, every corner of the property is crafted to offer
+                    comfort, privacy, and tranquility.
+                </p>
+
+                <p class="leading-relaxed text-gray-900">
+                    At Vivaan Farmhouse, we believe in creating experiences that feel both personal and refreshing.
+                    Spend your time unwinding by the pool, enjoying outdoor activities, hosting intimate celebrations,
+                    or simply soaking in the calm surroundings.
+                </p>
+
+            </div>
+
+        </div>
+    </div>
+</section> {% endcomment %}
+
+
+
+<!-- Featured Rooms -->
+<section id="rooms" class="md:py-24 py-4 ">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 section-title mb-4">Our Farmhouse</h2>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                Choose from our collection of elegantly designed rooms, each offering comfort and breathtaking views
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 ">
+            {% for room in featured_rooms %}
+            <div class="bg-emerald-50 rounded-2xl shadow-xl overflow-hidden card-hover">
+                <div class="h-96 bg-gradient-to-br from-red-400 to-red-600 relative overflow-hidden">
+                    {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="absolute inset-0 flex items-center justify-center text-white text-6xl">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4 bg-emerald-600 text-white px-4 py-2 rounded-full font-semibold">
+                        ₹{{ room.base_price }}/night
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ room.name }}</h3>
+                    <div class="flex items-center text-sm text-gray-600 mb-3 space-x-4">
+                        <span><i class="fas fa-ruler-combined mr-1"></i>{{ room.size_sqft }} sq ft</span>
+                        <span><i class="fas fa-users mr-1"></i>{{ room.max_occupancy }} Guests</span>
+                        {% if room.has_balcony %}<span><i class="fas fa-door-open mr-1"></i>Balcony</span>{% endif %}
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-3">{{ room.description|truncatewords:20 }}</p>
+                    <a href="{% url 'room_detail' room.slug %}"
+                        class="block w-full text-center bg-emerald-600 text-white py-3 rounded-lg font-semibold">
+                        View Details & Book
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center py-12">
+                <p class="text-gray-500">No rooms available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Amenities -->
+ <section id="amenities" class="py-8 md:py-20 text-gray-900">
+    <div class="max-w-7xl mx-auto px-4">
+
+        <!-- Heading -->
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                World-Class Amenities
+            </h2>
+            <p class="text-lg text-gray-900">
+                Everything you need for a perfect stay
+            </p>
+        </div>
+
+        <!-- Grid: 3 cards per row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            {% if amenities %}
+                {% for amenity in amenities %}
+                <div class="bg-emerald-50 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+
+                    <!-- Amenity Image -->
+                    {% if amenity.amenity_image %}
+                    <img src="{{ amenity.amenity_image.url }}"
+                         alt="{{ amenity.name }}"
+                         class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                        No Image
+                    </div>
+                    {% endif %}
+
+                    <!-- Content -->
+                    <div class="p-6 text-center">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2">
+                            {{ amenity.name }}
+                        </h4>
+
+                        {% if amenity.description %}
+                        <p class="text-sm text-gray-600">
+                            {{ amenity.description|truncatewords:12 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-3 text-center">
+                    <p class="text-gray-400">Amenities coming soon...</p>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</section>
+<!-- Amenities Section -->
+{% comment %} <section id="amenities" class="py-24 bg-gray-900 text-white scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold section-title mb-4">World-Class Amenities</h2>
+            <p class="text-gray-300 text-lg">Everything you need for a perfect stay</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {% for amenity in amenities %}
+            <div
+                class="bg-gray-800 p-8 rounded-2xl text-center card-hover border border-gray-700 hover:border-amber-500 transition">
+                
+
+                <h4 class="font-semibold text-xl">{{ amenity.name }}</h4>
+            </div>
+            {% empty %}
+           
+            <div class="bg-gray-800 p-8 rounded-2xl text-center card-hover">
+                <i class="fas fa-wifi text-4xl text-amber-400 mb-4"></i>
+                <h4 class="font-semibold text-xl">High-Speed WiFi</h4>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-2xl text-center card-hover">
+                <i class="fas fa-swimming-pool text-4xl text-amber-400 mb-4"></i>
+                <h4 class="font-semibold text-xl">Infinity Pool</h4>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-2xl text-center card-hover">
+                <i class="fas fa-car text-4xl text-amber-400 mb-4"></i>
+                <h4 class="font-semibold text-xl">Free Parking</h4>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-2xl text-center card-hover">
+                <i class="fas fa-utensils text-4xl text-amber-400 mb-4"></i>
+                <h4 class="font-semibold text-xl">In-house Dining</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section> {% endcomment %}
+
+<!-- Offers Section -->
+{% comment %} <section id="offers" class="py-24 bg-white scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-800 section-title mb-4">Exclusive Offers</h2>
+            <p class="text-gray-600 text-lg">Save more with our special deals</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for offer in offers %}
+            <div
+                class="bg-gradient-to-br from-red-50 to-amber-50 p-8 rounded-2xl shadow-lg card-hover border-2 border-red-100 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div
+                            class="bg-red-600 text-white w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold shadow-md">
+                            {{ offer.discount_percentage }}%
+                        </div>
+                        <span
+                            class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full uppercase tracking-wide font-bold">Limited
+                            Time</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ offer.title }}</h3>
+                    <p class="text-gray-600 mb-6">{{ offer.description }}</p>
+                </div>
+                <div class="border-t border-red-200 pt-4">
+                    <p class="text-sm text-gray-500 flex items-center">
+                        <i class="far fa-clock mr-2"></i> Valid until {{ offer.valid_until|date:"M d, Y" }}
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center py-12 bg-gray-50 rounded-xl">
+                <p class="text-gray-500 text-lg">No current offers. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section> {% endcomment %}
+
+<!-- Gallery Section -->
+<section id="gallery" class="md:py-24 py-4  scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gay-900 section-title mb-4">Sights and Stories</h2>
+            <p class="text-gray-900 text-lg">Glimpses of paradise</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
+            {% for image in gallery_images %}
+            <div class="relative overflow-hidden rounded-xl h-72 card-hover group cursor-pointer shadow-md">
+                <img src="{{ image.image.url }}" alt="{{ image.title }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
+                    {% comment %} <h4 class="text-white font-semibold text-lg">{{ image.title }}</h4> {% endcomment %}
+                </div>
+            </div>
+            {% empty %}
+            <!-- Placeholders -->
+            <div class="bg-gray-200 h-64 rounded-xl flex items-center justify-center text-gray-400">Image 1</div>
+            <div class="bg-gray-200 h-64 rounded-xl flex items-center justify-center text-gray-400">Image 2</div>
+            <div class="bg-gray-200 h-64 rounded-xl flex items-center justify-center text-gray-400">Image 3</div>
+            <div class="bg-gray-200 h-64 rounded-xl flex items-center justify-center text-gray-400">Image 4</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+{% comment %} 
+<!-- Review Section -->
+<section id="reviews" class="py-8 md:py-24  scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">Guest Reviews</h2>
+            <p class="text-gray-600 text-lg">What people say about us</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for testimonial in testimonials %}
+            <div class="bg-emerald-50 p-8 rounded-2xl shadow-sm border border-white  flex flex-col h-full card-hover">
+                <div class="flex items-center mb-6">
+                    {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star text-amber-400"></i>
+                        {% else %}
+                        <i class="far fa-star text-gray-300"></i>
+                        {% endif %}
+                        {% endfor %}
+                </div>
+                <div class="flex-grow">
+                    <p class="text-gray-900 italic leading-relaxed">"{{ testimonial.comment|truncatewords:40 }}"</p>
+                </div>
+                <div class="flex items-center mt-6 pt-6 border-t border-gray-200">
+                    <div
+                        class="w-10 h-10 bg-white  rounded-full flex items-center justify-center text-gray-900 font-bold mr-3">
+                        {{ testimonial.guest_name|first }}
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">{{ testimonial.guest_name }}</h4>
+                        <p class="text-xs text-gray-900">{{ testimonial.guest_location }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center text-gray-500">No reviews yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class=" py-10 md:py-20" id="location">
+  <div class=" mx-auto px-4">
+
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">
+        Scenery and Serenity
+      </h2>
+      <p class="text-gray-600 text-lg">
+        Glimpses of paradise
+      </p>
+    </div>
+
+    <!-- Map Card -->
+    <div class="h-[320px] sm:h-[400px] md:h-[500px]
+                bg-gray-200 rounded-2xl
+                overflow-hidden shadow-xl">
+
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.7666!2d73.6565!3d17.9244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDU1JzI3LjgiTiA3M8KwMzknMjMuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
+        class="w-full h-full border-0"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+
+    </div>
+
+  </div>
+</section>
+ {% endcomment %}
+
+
+<style>
+    .scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+</style>
+
+<!-- Review Section -->
+<section id="reviews" class="py-8 md:py-24 scroll-mt-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">Guest Reviews</h2>
+            <p class="text-gray-600 text-lg">What people say about us</p>
+        </div>
+
+        <!-- Slider Container -->
+        <div class="relative">
+
+            <!-- Slider Track -->
+            <div id="testimonialSlider"
+                class="flex overflow-x-auto snap-x snap-mandatory space-x-6 pb-6 scrollbar-hide">
+
+                {% for testimonial in testimonials %}
+                <div class="snap-center min-w-[350px] md:min-w-[32.33%] bg-emerald-50 p-8 rounded-2xl shadow-sm border border-white flex flex-col card-hover">
+                    <div class="flex items-center mb-6">
+                        {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= testimonial.rating %}
+                        <i class="fas fa-star text-amber-400"></i>
+                        {% else %}
+                        <i class="far fa-star text-gray-300"></i>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="text-gray-900 italic flex-grow">"{{ testimonial.comment|truncatewords:40 }}"</p>
+
+                    <div class="flex items-center mt-6 pt-6 border-t border-gray-200">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-900 font-bold mr-3">
+                            {{ testimonial.guest_name|first }}
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">{{ testimonial.guest_name }}</h4>
+                            <p class="text-xs text-gray-900">{{ testimonial.guest_location }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-gray-500">No reviews yet.</div>
+                {% endfor %}
+
+            </div>
+
+            <!-- Buttons -->
+            <button onclick="slideLeft()"
+                class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full hidden md:block">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <button onclick="slideRight()"
+                class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full hidden md:block">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+        </div>
+    </div>
+</section>
+
+
+
+
+<script>
+function slideLeft() {
+  document.getElementById('testimonialSlider').scrollBy({
+    left: -400,
+    behavior: 'smooth'
+  });
+}
+function slideRight() {
+  document.getElementById('testimonialSlider').scrollBy({
+    left: 400,
+    behavior: 'smooth'
+  });
+}
+</script>
+
+
+{% comment %} 
+<!-- Contact Section -->
+<section id="contact" class="py-24 bg-teal-900 text-white scroll-mt-20">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div>
+                <h2 class="text-4xl font-bold mb-6 section-title text-white">Get in Touch</h2>
+                <p class="text-teal-100 text-lg mb-10">Have questions? We are here to help you plan your perfect stay.
+                </p>
+
+                <div class="space-y-8">
+                    <div class="flex items-start">
+                        <i class="fas fa-map-marker-alt text-amber-400 text-2xl mt-1 mr-4"></i>
+                        <div>
+                            <h4 class="font-bold text-lg">Address</h4>
+                            <p class="text-teal-200">Vivaan Farmhouse, Mahabaleshwar<br>Maharashtra, India</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-phone text-amber-400 text-2xl mt-1 mr-4"></i>
+                        <div>
+                            <h4 class="font-bold text-lg">Phone</h4>
+                            <p class="text-teal-200">+91 9876543210</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-envelope text-amber-400 text-2xl mt-1 mr-4"></i>
+                        <div>
+                            <h4 class="font-bold text-lg">Email</h4>
+                            <p class="text-teal-200">info@vivaanfarmhouse.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-2xl text-gray-800">
+                <h3 class="text-2xl font-bold mb-6">Send Message</h3>
+                <form action="{% url 'contact' %}" method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Your Name</label>
+                        <input type="text" name="name"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Email</label>
+                        <input type="email" name="email"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Mobile</label>
+                        <input type="text" name="phone"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Message</label>
+                        <textarea name="message" rows="3"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="w-full btn-primary text-white font-bold py-4 rounded-lg text-lg">Send
+                        Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section> {% endcomment %}
+{% load static %}
+
+<section class="relative py-8 md:py-24  overflow-hidden">
+  <div class="container mx-auto px-4 relative z-10">
+
+    <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+      <!-- LEFT: IMAGE CAROUSEL -->
+      <div class="relative z-20 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="relative h-[420px]" id="carousel">
+<img src="{% static 'images/vihan-group1.webp' %}" class="carousel-img active">
+<img src="{% static 'images/vihan-group2.webp' %}" class="carousel-img">
+<img src="{% static 'images/vihan-group3.webp' %}" class="carousel-img">
+
+        </div>
+
+        <!-- Arrows -->
+        <button onclick="prevSlide()"
+          class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 p-3 rounded-full shadow">
+          ❮
+        </button>
+        <button onclick="nextSlide()"
+          class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 p-3 rounded-full shadow">
+          ❯
+        </button>
+      </div>
+
+      <!-- RIGHT: TEXT (NO BACKGROUND HERE) -->
+      <div class="relative z-20 pl-4 lg:pl-16">
+        <h2 class="text-4xl text-gray-800 font-serif mb-6">
+          Strawberry King Resort,<br>Mahabaleshwar
+        </h2>
+
+        <p class="text-gray-800 mb-4">
+          <strong>Address:</strong><br>
+          145, Sr Number 2/16 Dhangarwadi Panchgani Road,<br>
+          Mahabaleshwar, Maharashtra – 412806
+        </p>
+
+        <p class="text-gray-800 mb-2">
+          <strong>Phone:</strong><br>
+          +91 78 4108 4423 | +91 94 2048 4423
+        </p>
+
+        <p class="text-gray-800">
+          <strong>Email:</strong><br>
+          strawberrykingresort@gmail.com
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE GREEN BACKGROUND (LIKE IMAGE) -->
+  <div
+    class="absolute top-0 right-0 h-full w-full lg:w-[55%] bg-emerald-50
+ rounded-l-[60px] z-0">
+  </div>
+</section>
+{% comment %} 
+<section id="contact" class="py-10">
+  <div class="container mx-auto px-4 max-w-2xl text-center">
+
+    <h2 class="text-4xl font-bold mb-6">Reach Out to Us</h2>
+
+    <div class="rounded-2xl p-8 shadow-2xl text-gray-800 bg-emerald-50">
+      <form method="post" action="{% url 'contact' %}" class="space-y-4">
+        {% csrf_token %}
+
+        <input type="text" name="name" placeholder="Your Name" class="w-full border px-4 py-3 rounded-lg" required>
+
+        <input type="email" name="email" placeholder="Email" class="w-full border px-4 py-3 rounded-lg" required>
+
+        <input type="text" name="phone" placeholder="Mobile" class="w-full border px-4 py-3 rounded-lg" required>
+
+        <input type="text" name="subject" placeholder="Subject" class="w-full border px-4 py-3 rounded-lg" required>
+
+        <textarea name="message" rows="3" placeholder="Message" class="w-full border px-4 py-3 rounded-lg" required></textarea>
+
+        <button class="w-full bg-emerald-600 hover:bg-emerald-900 text-white font-bold py-3 rounded-lg">
+          Send Message
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section> {% endcomment %}
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+<section id="contact" class="py-10">
+  <div class="container mx-auto px-4 max-w-2xl">
+
+    <h2 class="text-4xl font-bold text-center mb-6">Reach Out to Us</h2>
+
+    <div class="rounded-2xl p-8 shadow-2xl text-gray-800 bg-emerald-50">
+
+      <form method="post" action="{% url 'contact' %}" class="space-y-5">
+        {% csrf_token %}
+
+        <div class="flex items-center">
+          <label class="w-32 font-semibold text-gray-700">Your Name</label>
+          <input type="text" name="name" placeholder="Enter your name"
+                 class="flex-1 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                 required>
+        </div>
+
+        <div class="flex items-center">
+          <label class="w-32 font-semibold text-gray-700">Email</label>
+          <input type="email" name="email" placeholder="Enter your email"
+                 class="flex-1 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                 required>
+        </div>
+
+        <div class="flex items-center">
+          <label class="w-32 font-semibold text-gray-700">Phone</label>
+          <input type="text" name="phone" placeholder="Enter your phone"
+                 class="flex-1 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                 required>
+        </div>
+
+        <div class="flex items-center">
+          <label class="w-32 font-semibold text-gray-700">Subject</label>
+          <input type="text" name="subject" placeholder="Subject"
+                 class="flex-1 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                 required>
+        </div>
+
+        <div class="flex items-start">
+          <label class="w-32 mt-2 font-semibold text-gray-700">Message</label>
+          <textarea name="message" rows="4" placeholder="Write your message..."
+                    class="flex-1 border border-gray-300 px-4 py-2 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                    required></textarea>
+        </div>
+
+        <button class="w-full bg-emerald-600 hover:bg-emerald-900 text-white font-bold py-3 rounded-lg mt-4">
+          Send Message
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+
+
+  <div class="container mx-auto px-4 ">
+
+      <!-- Card -->
+      <div class=" p-10 space-y-12">
+
+        <!-- TERMS & CONDITIONS -->
+        <section class="policy">
+          <h2 class="text-2xl md:text-3xl font-bold text-[#1F2937] mb-6">
+            Terms & Conditions
+          </h2>
+
+          <p class="text-gray-600 mb-4">
+            You are making a booking directly with <strong>Vivaan Farmhouse</strong>.
+            Please read the following terms carefully before confirming your booking.
+          </p>
+
+          <ul class="space-y-4 text-gray-600 list-disc list-inside">
+            <li>
+              All bookings are subject to availability and confirmation.
+            </li>
+            <li>
+              Please review the booking details, pricing, and cancellation policy before completing the reservation.
+            </li>
+            <li>
+              In case of cancellation or modification, applicable cancellation charges or penalties may apply.
+            </li>
+            <li>
+              Guests may be required to present a valid government-issued photo ID at the time of check-in.
+            </li>
+            <li>
+              The hotel may request verification of the payment method used for booking.
+            </li>
+            <li>
+              Any services or inclusions not explicitly mentioned in the booking confirmation may be chargeable.
+            </li>
+            <li>
+              Management reserves the right to refuse service in case of violation of property rules.
+            </li>
+          </ul>
+        </section>
+
+        <!-- Divider -->
+        <hr class="border-gray-200">
+
+        <!-- PRIVACY POLICY -->
+        <section id="terms">
+          <h2 class="text-2xl md:text-3xl font-bold text-[#1F2937] mb-6">
+            Privacy Policy
+          </h2>
+
+          <p class="text-gray-600 mb-4">
+            This privacy policy explains how <strong>Vivaan Farmhouse</strong> uses and protects
+            any information that guest(s) provide when using this website.
+          </p>
+
+          <div class="space-y-4 text-gray-600">
+            <p>
+              We are committed to ensuring that your privacy is protected. Any personal information
+              collected will only be used in accordance with this privacy policy.
+            </p>
+
+            <p>
+              We may collect personal information such as your name, contact details, booking details,
+              and other information necessary to provide our services or respond to your inquiries.
+            </p>
+
+            <p>
+              The information collected is used solely for processing bookings, providing customer
+              support, improving our services, and fulfilling legal obligations.
+            </p>
+
+            <p>
+              We do not sell, rent, or share your personal information with third parties except where
+              required by law or necessary to complete your booking.
+            </p>
+
+            <p>
+              We are committed to ensuring that your information is secure and have implemented
+              appropriate safeguards to protect it from unauthorized access.
+            </p>
+          </div>
+        </section>
+
+        <!-- Footer Note -->
+        {% comment %} <div class="pt-6 text-sm text-gray-500 text-center">
+          Vivaan Farmhouse reserves the right to update these Terms & Conditions and Privacy Policy at any time.
+        </div> {% endcomment %}
+
+      </div>
+
+    </div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.carousel-img');
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+}
+
+function nextSlide() {
+  currentSlide = (currentSlide + 1) % slides.length;
+  showSlide(currentSlide);
+}
+
+function prevSlide() {
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  showSlide(currentSlide);
+}
+</script>
+
+<!-- Footer is in base.html -->
+
+<!-- Carousel Script -->
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const items = document.querySelectorAll('.carousel-item');
+        let current = 0;
+        const total = items.length;
+        const intervalTime = 5000;
+        let slideInterval;
+
+        function showSlide(index) {
+            items.forEach(item => {
+                item.classList.remove('opacity-100');
+                item.classList.add('opacity-0');
+            });
+            items[index].classList.remove('opacity-0');
+            items[index].classList.add('opacity-100');
+        }
+
+        function nextSlide() {
+            current = (current + 1) % total;
+            showSlide(current);
+        }
+
+        function prevSlide() {
+            current = (current - 1 + total) % total;
+            showSlide(current);
+        }
+
+        // Event Listeners
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            nextSlide();
+            resetInterval();
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            prevSlide();
+            resetInterval();
+        });
+
+        // Auto Slide
+        slideInterval = setInterval(nextSlide, intervalTime);
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, intervalTime);
+        }
+    });
+</script>
+{% endblock %}

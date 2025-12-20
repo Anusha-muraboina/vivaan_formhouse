@@ -1,0 +1,149 @@
+{% extends 'resort/base.html' %}
+
+{% block title %}Our Rooms - Strawberry King Resort{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-red-700/80 z-10"></div> {% endcomment %}
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        </div>
+          <div class="absolute inset-0 bg-black/70 z-10"></div>
+    </div>
+
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">Our Luxurious Rooms</h1>
+        <p class="text-xl opacity-90">Find your perfect sanctuary</p>
+    </div>
+</section>
+
+<!-- Filters -->
+{% comment %} <section class="py-8 bg-white shadow-md sticky top-20 z-40">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'rooms' %}"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if not request.GET.view_type %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                All Rooms
+            </a>
+            <a href="?view_type=valley"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.view_type == 'valley' %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                Valley View
+            </a>
+            <a href="?view_type=garden"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.view_type == 'garden' %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                Garden View
+            </a>
+            <a href="?balcony=true"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.balcony %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                With Balcony
+            </a>
+        </div>
+    </div>
+</section> {% endcomment %}
+
+<!-- Rooms Grid -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for room in room_categories %}
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
+                <!-- Room Image -->
+                <div class="relative h-72 bg-gradient-to-br from-red-400 to-red-600 overflow-hidden group">
+                    {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.name }}"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    {% else %}
+                    <div class="absolute inset-0 flex items-center justify-center text-white text-6xl">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    {% endif %}
+
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if room.has_balcony %}
+                        <span class="bg-white text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
+                            <i class="fas fa-door-open mr-1"></i>Balcony
+                        </span>
+                        {% endif %}
+                        {% if room.has_bathtub %}
+                        <span class="bg-white text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
+                            <i class="fas fa-bath mr-1"></i>Bathtub
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% comment %} <div
+                        class="absolute top-4 right-4 bg-amber-500 text-white px-4 py-2 rounded-full font-bold text-lg">
+                        ₹{{ room.base_price }}
+                    </div> {% endcomment %}
+                </div>
+
+                <!-- Room Details -->
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">{{ room.name }}</h3>
+
+                    <div class="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
+                        <span><i class="fas fa-ruler-combined text-red-600 mr-1"></i>{{ room.size_sqft }} sq ft</span>
+                        <span><i class="fas fa-users text-red-600 mr-1"></i>{{ room.max_occupancy }} Guests</span>
+                        <span><i class="fas fa-building text-red-600 mr-1"></i>{{ room.floor }}</span>
+                    </div>
+
+                    <p class="text-gray-600 mb-6 line-clamp-3">{{ room.description|truncatewords:25 }}</p>
+
+                    <div class="flex gap-3">
+                        {% comment %} <a href="{% url 'room_detail' room.slug %}"
+                            class="flex-1 text-center btn-primary text-white py-3 rounded-lg font-semibold">
+                            Book Now
+                        </a> {% endcomment %}
+                        <a href="{% url 'room_detail' room.slug %}"
+                            class="flex-1 text-center bg-red-900 text-white py-3 rounded-lg font-semibold">
+                            Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center py-20">
+                <i class="fas fa-bed text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No rooms match your criteria. Please try different filters.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">All Rooms Include</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div class="text-center">
+                <i class="fas fa-wifi text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Free WiFi</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-tv text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Smart TV</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-snowflake text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Air Conditioning</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-concierge-bell text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Room Service</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-coffee text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Mini Bar</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-lock text-4xl text-red-600 mb-2"></i>
+                <p class="font-semibold">Safe Locker</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,1110 @@
+
+
+{% extends 'resort/base.html' %}
+
+{% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
+
+{% load static %}
+{% block content %}
+
+<div class="fixed inset-0 -z-10">
+  <div class="absolute inset-0 bg-cover bg-center"
+       style="background-image: url('{% static "images/vihan-group1.webp" %}');">
+  </div>
+  <div class="absolute inset-0 bg-white/90"></div>
+</div>
+
+<!-- Room Header -->
+{% comment %} <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40 z-10"></div>
+        {% if room_category.image %}
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('{{ room_category.image.url }}');"></div>
+        {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-red-600 to-red-800"></div>
+        {% endif %}
+    </div>
+
+    <div class="container mx-auto px-4 z-20">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ room_category.name }}</h1>
+        <div class="flex flex-wrap gap-4 text-lg">
+            <span><i class="fas fa-ruler-combined mr-2"></i>{{ room_category.size_sqft }} sq ft</span>
+            <span><i class="fas fa-users mr-2"></i>Up to {{ room_category.max_occupancy }} Guests</span>
+            <span><i class="fas fa-building mr-2"></i>{{ room_category.floor }}</span>
+        </div>
+    </div> 
+</section> {% endcomment %}
+
+<!-- Room Details & Booking -->
+
+
+<section class="py-16 ">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Booking Form -->
+            <div class="">
+                <div class="bg-white rounded-2xl shadow-xl p-8 sticky top-32">
+                    <div class="text-center mb-6">
+                        <div class="space-y-2">
+                            <div class="text-2xl font-bold text-gray-800">Entire Villa Booking</div>
+                            <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
+                                <span>Monday-Friday (Week days)</span>
+                                <span class="font-bold text-emerald-600">₹{{ pricing.weekday_price }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Saturday-Sunday (Weekends)</span>
+                                <span class="font-bold text-emerald-600">₹{{ pricing.weekend_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
+                            {{ form.guest_name }}
+                        </div>
+
+                      
+
+
+                        <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Phone</label>
+                            {{ form.guest_phone }}
+                        </div>
+
+                  
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                            {{ form.guest_email }}
+                        </div>
+
+
+                        </div>
+
+                     
+
+
+
+
+
+ <div class="grid grid-cols-2 gap-4">
+  <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests Count</label>
+                            {{ form.extra_guest_count }}
+                        </div>
+
+
+      <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
+                            {{ form.guest_count }}
+                        </div>
+
+</div>
+
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
+                                <input type="text" name="check_in"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Date" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
+                                <input type="text" name="check_in_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Time">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
+                                <input type="text" name="check_out"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Date" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
+                                <input type="text" name="check_out_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Time">
+                            </div>
+                        </div>
+
+
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
+                            {{ form.special_requests }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Coupon Code</label>
+                            {{ form.coupon_code }}
+                        </div>
+
+
+                        <!-- Date Availability Notification -->
+                        <div id="dateNotification"
+                            class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span id="dateNotificationText"></span>
+                            </div>
+                        </div>
+
+                        {% if form.errors %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+
+
+
+<!-- PAYMENT METHOD -->
+<div>
+  <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
+
+  <div class="space-y-3">
+
+      <!-- Pay at Farmhouse -->
+      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+          <input type="radio" name="payment_method" value="farmhouse" class="h-5 w-5 text-emerald-600" checked>
+          <span class="text-gray-800 font-medium">Pay at Check-in (Cash)</span>
+      </label>
+
+      <!-- Partial 30% -->
+      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+          <input type="radio" name="payment_method" value="partial_razorpay" class="h-5 w-5 text-emerald-600">
+          <span class="text-gray-800 font-medium">Pay 30% Online (Razorpay)</span>
+      </label>
+
+      <!-- Full -->
+      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+          <input type="radio" name="payment_method" value="full_razorpay" class="h-5 w-5 text-emerald-600">
+          <span class="text-gray-800 font-medium">Pay Full Online (Razorpay)</span>
+      </label>
+
+  </div>
+</div>
+
+
+<!-- PAYMENT SUMMARY SECTION -->
+<div id="paymentSummary" class="hidden mt-5 space-y-3">
+
+  <div class="border rounded-lg p-4 bg-gray-50">
+
+      <p id="depositAmount" class="hidden flex justify-between text-gray-700 text-lg">
+          <span>Pay now (30%):</span>
+          <span class="font-bold text-emerald-700">₹<span id="depositValue"></span></span>
+      </p>
+
+      <p id="fullAmount" class="hidden flex justify-between text-gray-700 text-lg">
+          <span>Pay full:</span>
+          <span class="font-bold text-emerald-700">₹<span id="fullValue"></span></span>
+      </p>
+
+      <p id="remainingAmount" class="hidden text-sm text-gray-600">
+          Remaining at check-in:
+          <span class="font-semibold text-gray-800">₹<span id="remainingValue"></span></span>
+      </p>
+
+  </div>
+
+  <!-- Razorpay Box -->
+  <div id="razorpayBox" class="hidden border p-4 rounded-xl space-y-2">
+      <p class="font-semibold text-gray-700">Select Razorpay to complete payment</p>
+      <div class="flex items-center space-x-3">
+          <input type="radio" checked class="h-5 w-5">
+          <img src="https://razorpay.com/favicon.png" class="h-6" />
+          <span class="font-medium text-gray-700">Razorpay Checkout</span>
+      </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+                        <button type="submit"
+                            class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700">
+                            <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
+                        </button>
+
+                    </form>
+
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="flex items-start text-sm text-gray-600">
+                            <i class="fas fa-info-circle text-red-600 mr-2 mt-1"></i>
+                            <p>Free cancellation up to 24 hours before check-in</p>
+                        </div>
+                        {% if booked_dates %}
+                        <div class="mt-4 bg-amber-50 border border-amber-300 rounded-lg p-3">
+                            <p class="text-xs text-amber-800">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>{{ booked_dates|length }} dates</strong> are currently booked. Please avoid
+                                selecting these dates.
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+            <!-- Room Information -->
+            <div class="">
+             
+                <!-- Amenities -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Amenities</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-wifi text-emerald-700  mr-3"></i>
+                            <span>Free WiFi</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-tv text-emerald-700 mr-3"></i>
+                            <span>Smart TV</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-snowflake text-emerald-700 mr-3"></i>
+                            <span>Air Conditioning</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-coffee text-emerald-700 mr-3"></i>
+                            <span>Mini Bar</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-concierge-bell text-emerald-700 mr-3"></i>
+                            <span>24/7 Room Service</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-lock text-emerald-700 mr-3"></i>
+                            <span>Safe Locker</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-shower text-emerald-700 mr-3"></i>
+                            <span>Hot Water</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-phone text-emerald-700 mr-3"></i>
+                            <span>Telephone</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-wind text-emerald-700 mr-3"></i>
+                            <span>Room Heater</span>
+                        </div>
+                    </div>
+                </div>
+
+
+   <!-- Description -->
+                <div class=" rounded-2xl shadow-lg p-8  bg-white">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Description</h2>
+                  <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description|safe }}</p>
+{% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
+    {{ room_category.description|safe }}
+</div> {% endcomment %}
+
+
+
+<!-- 
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-mountain text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">{{ room_category.get_view_type_display }}</h4>
+                                <p class="text-sm text-gray-500">Scenic Views</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-bed text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">King Size Bed</h4>
+                                <p class="text-sm text-gray-500">Luxury Bedding</p>
+                            </div>
+                        </div>
+
+                        {% if room_category.has_balcony %}
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-door-open text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Private Balcony</h4>
+                                <p class="text-sm text-gray-500">Outdoor Space</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if room_category.has_bathtub %}
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-bath text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Bathtub</h4>
+                                <p class="text-sm text-gray-500">Luxury Bathroom</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div> -->
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+{{ booked_dates|json_script:"booked-dates-data" }}
+
+
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Form inputs
+    let checkIn = document.querySelector("input[name='check_in']");
+    let checkOut = document.querySelector("input[name='check_out']");
+    let guestCount = document.querySelector("input[name='guest_count']");
+    let extraGuest = document.querySelector("input[name='extra_guest_count']");
+    let radios = document.querySelectorAll("input[name='payment_method']");
+
+    // Payment display elements
+    const paymentSummary = document.getElementById("paymentSummary");
+    const depositAmount = document.getElementById("depositAmount");
+    const fullAmount = document.getElementById("fullAmount");
+    const remainingAmount = document.getElementById("remainingAmount");
+    const razorpayBox = document.getElementById("razorpayBox");
+
+    // Backend pricing values
+    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
+    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
+    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
+
+    // Calculate Base Amount
+    function calculateTotal() {
+        const inDate = new Date(checkIn.value);
+        const outDate = new Date(checkOut.value);
+
+        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
+            return 0;
+        }
+
+        let total = 0;
+        let date = new Date(inDate);
+
+        // Loop through each night
+        while (date < outDate) {
+            let day = date.getDay();
+            if (day === 5 || day === 6) {
+                total += weekend;
+            } else {
+                total += weekday;
+            }
+            date.setDate(date.getDate() + 1);
+        }
+
+        // EXTRA GUEST COUNT logic (user entered)
+        let extra = parseInt(extraGuest.value || 0);
+
+        total += extra * extraGuestPrice;
+
+        // NO TAX (you set 0.00)
+        total += total * 0.00;
+
+        return Math.round(total);
+    }
+
+    // Update Payment Method Section
+    function updatePayment() {
+        let total = calculateTotal();
+
+        if (total <= 0) {
+            paymentSummary.classList.add("hidden");
+            return;
+        }
+
+        paymentSummary.classList.remove("hidden");
+
+        // Calculate 30%
+        let deposit = Math.round(total * 0.30);
+        let remaining = total - deposit;
+
+        document.getElementById("depositValue").innerText = deposit;
+        document.getElementById("fullValue").innerText = total;
+        document.getElementById("remainingValue").innerText = remaining;
+
+        let selected = document.querySelector("input[name='payment_method']:checked").value;
+
+        if (selected === "farmhouse") {
+            depositAmount.classList.add("hidden");
+            fullAmount.classList.add("hidden");
+            remainingAmount.classList.add("hidden");
+            razorpayBox.classList.add("hidden");
+        }
+
+        if (selected === "partial_razorpay") {
+            depositAmount.classList.remove("hidden");
+            remainingAmount.classList.remove("hidden");
+            fullAmount.classList.add("hidden");
+            razorpayBox.classList.remove("hidden");
+        }
+
+        if (selected === "full_razorpay") {
+            fullAmount.classList.remove("hidden");
+            depositAmount.classList.add("hidden");
+            remainingAmount.classList.add("hidden");
+            razorpayBox.classList.remove("hidden");
+        }
+    }
+
+    // Attach event listeners
+    radios.forEach(r => r.addEventListener("change", updatePayment));
+    checkIn.addEventListener("change", updatePayment);
+    checkOut.addEventListener("change", updatePayment);
+    guestCount.addEventListener("change", updatePayment);
+    extraGuest.addEventListener("change", updatePayment);
+
+});
+
+
+guestCount.addEventListener("input", function () {
+    if (parseInt(this.value) > 15) {
+        alert("Guest count cannot exceed 15.");
+        this.value = 15;
+    }
+});
+
+extraGuest.addEventListener("input", function () {
+    if (parseInt(this.value) > 5) {
+        alert("Extra guest count cannot exceed 5.");
+        this.value = 5;
+    }
+});
+
+</script>
+
+
+
+{% comment %} <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let checkIn = document.querySelector("input[name='check_in']");
+    let checkOut = document.querySelector("input[name='check_out']");
+    let guestCount = document.querySelector("input[name='guest_count']");
+    let radios = document.querySelectorAll("input[name='payment_method']");
+
+    const paymentSummary = document.getElementById("paymentSummary");
+    const depositAmount = document.getElementById("depositAmount");
+    const fullAmount = document.getElementById("fullAmount");
+    const remainingAmount = document.getElementById("remainingAmount");
+    const razorpayBox = document.getElementById("razorpayBox");
+
+    // backend values
+    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
+    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
+    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
+
+    function calculateTotal() {
+        const inDate = new Date(checkIn.value);
+        const outDate = new Date(checkOut.value);
+
+        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
+            return 0;
+        }
+
+        let total = 0;
+        let date = new Date(inDate);
+
+        while (date < outDate) {
+            let day = date.getDay();
+            if (day === 5 || day === 6) {
+                total += weekend;
+            } else {
+                total += weekday;
+            }
+            date.setDate(date.getDate() + 1);
+        }
+
+        let guests = parseInt(guestCount.value || 15);
+        let extra = Math.max(0, guests - 15);
+
+        total += extra * extraGuestPrice;
+
+        total += total * 0.00; // tax 12%
+
+        return Math.round(total);
+    }
+
+    function updatePayment() {
+        let total = calculateTotal();
+
+        if (total <= 0) {
+            paymentSummary.classList.add("hidden");
+            return;
+        }
+
+        paymentSummary.classList.remove("hidden");
+
+        let deposit = Math.round(total * 0.30);
+        let remaining = total - deposit;
+
+        document.getElementById("depositValue").innerText = deposit;
+        document.getElementById("fullValue").innerText = total;
+        document.getElementById("remainingValue").innerText = remaining;
+
+        let selected = document.querySelector("input[name='payment_method']:checked").value;
+
+        if (selected === "farmhouse") {
+            depositAmount.classList.add("hidden");
+            fullAmount.classList.add("hidden");
+            remainingAmount.classList.add("hidden");
+            razorpayBox.classList.add("hidden");
+        }
+
+        if (selected === "partial_razorpay") {
+            depositAmount.classList.remove("hidden");
+            remainingAmount.classList.remove("hidden");
+            fullAmount.classList.add("hidden");
+            razorpayBox.classList.remove("hidden");
+        }
+
+        if (selected === "full_razorpay") {
+            fullAmount.classList.remove("hidden");
+            depositAmount.classList.add("hidden");
+            remainingAmount.classList.add("hidden");
+            razorpayBox.classList.remove("hidden");
+        }
+    }
+
+    radios.forEach(r => r.addEventListener("change", updatePayment));
+    checkIn.addEventListener("change", updatePayment);
+    checkOut.addEventListener("change", updatePayment);
+    guestCount.addEventListener("change", updatePayment);
+
+});
+</script> {% endcomment %}
+
+
+
+{% comment %} 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+
+    const paymentSummary = document.getElementById("paymentSummary");
+    const depositAmount = document.getElementById("depositAmount");
+    const fullAmount = document.getElementById("fullAmount");
+    const remainingAmount = document.getElementById("remainingAmount");
+    const razorpayBox = document.getElementById("razorpayBox");
+
+    // IMPORTANT — backend must set this
+    const total = {{ calculated_total|default:0 }};
+    
+    const deposit = Math.round(total * 0.30);
+    const remaining = total - deposit;
+
+    document.getElementById("depositValue").innerText = deposit;
+    document.getElementById("fullValue").innerText = total;
+    document.getElementById("remainingValue").innerText = remaining;
+
+    radios.forEach(radio => {
+        radio.addEventListener("change", function() {
+
+            paymentSummary.classList.remove("hidden");
+
+            if (this.value === "farmhouse") {
+                depositAmount.classList.add("hidden");
+                fullAmount.classList.add("hidden");
+                remainingAmount.classList.add("hidden");
+                razorpayBox.classList.add("hidden");
+            }
+
+            if (this.value === "partial_razorpay") {
+                depositAmount.classList.remove("hidden");
+                remainingAmount.classList.remove("hidden");
+                fullAmount.classList.add("hidden");
+                razorpayBox.classList.remove("hidden");
+            }
+
+            if (this.value === "full_razorpay") {
+                fullAmount.classList.remove("hidden");
+                depositAmount.classList.add("hidden");
+                remainingAmount.classList.add("hidden");
+                razorpayBox.classList.remove("hidden");
+            }
+        });
+    });
+
+});
+</script>
+ {% endcomment %}
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Booked dates from backend
+        const bookedDatesElement = document.getElementById('booked-dates-data');
+        const bookedDates = bookedDatesElement ? JSON.parse(bookedDatesElement.textContent) : [];
+
+        const dateNotification = document.getElementById('dateNotification');
+        const dateNotificationText = document.getElementById('dateNotificationText');
+
+        function showNotification(message) {
+            if (dateNotification && dateNotificationText) {
+                dateNotificationText.textContent = message;
+                dateNotification.classList.remove('hidden');
+            }
+            // Temporarily using alert as fallback/emphasis
+            // alert(message); 
+        }
+
+        function isDateBooked(dateString) {
+            return bookedDates.includes(dateString);
+        }
+
+        // Initialize Check-in Picker
+        const checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: bookedDates,
+            onChange: function (selectedDates, dateStr, instance) {
+                // Update Check-out minDate
+                if (selectedDates[0]) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutPicker.set('minDate', nextDay);
+                }
+
+                // Clear invalid check-out
+                const checkOutInput = document.querySelector("input[name='check_out']");
+                if (checkOutInput.value && checkOutInput.value <= dateStr) {
+                    checkOutInput.value = '';
+                }
+            }
+        });
+
+        // Initialize Check-out Picker
+        const checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: bookedDates,
+            onChange: function (selectedDates, dateStr, instance) {
+                const checkInInput = document.querySelector("input[name='check_in']");
+                const checkInDateStr = checkInInput.value;
+
+                if (!checkInDateStr) {
+                    showNotification('⚠️ Please select check-in date first.');
+                    instance.clear();
+                    return;
+                }
+
+                // Range validation: ensure no booked dates in between
+                let currentDate = new Date(checkInDateStr);
+                const endDate = new Date(dateStr);
+
+                while (currentDate < endDate) {
+                    const dStr = currentDate.toISOString().split('T')[0];
+                    if (isDateBooked(dStr)) {
+                        showNotification('⚠️ RANGE INCLUDES BOOKED DATES! Please select a valid continuous range.');
+                        instance.clear();
+                        break;
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            }
+        });
+
+        // Initialize Time Pickers
+        flatpickr("input[name='check_in_time'], input[name='check_out_time']", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: false
+        });
+
+        console.log('Flatpickr initialized. Booked dates:', bookedDates.length);
+    });
+</script>
+{% endblock %}
+{% endblock %}
+
+
+{% comment %} {% extends 'resort/base.html' %}
+
+{% block title %}{{ room_category.name }} - Strawberry King Resort{% endblock %}
+
+{% block content %}
+<!-- Room Header -->
+<section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40 z-10"></div>
+        {% if room_category.image %}
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('{{ room_category.image.url }}');"></div>
+        {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-red-600 to-red-800"></div>
+        {% endif %}
+    </div>
+
+    <div class="container mx-auto px-4 z-20">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ room_category.name }}</h1>
+        <div class="flex flex-wrap gap-4 text-lg">
+            <span><i class="fas fa-ruler-combined mr-2"></i>{{ room_category.size_sqft }} sq ft</span>
+            <span><i class="fas fa-users mr-2"></i>Up to {{ room_category.max_occupancy }} Guests</span>
+            <span><i class="fas fa-building mr-2"></i>{{ room_category.floor }}</span>
+        </div>
+    </div>
+</section>
+
+<!-- Room Details & Booking -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Room Information -->
+            <div class="lg:col-span-2">
+                <!-- Description -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Description</h2>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description }}</p>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-mountain text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">{{ room_category.get_view_type_display }}</h4>
+                                <p class="text-sm text-gray-500">Scenic Views</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-bed text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">King Size Bed</h4>
+                                <p class="text-sm text-gray-500">Luxury Bedding</p>
+                            </div>
+                        </div>
+
+                        {% if room_category.has_balcony %}
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-door-open text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Private Balcony</h4>
+                                <p class="text-sm text-gray-500">Outdoor Space</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if room_category.has_bathtub %}
+                        <div class="flex items-center text-gray-700">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-bath text-red-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Bathtub</h4>
+                                <p class="text-sm text-gray-500">Luxury Bathroom</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Amenities -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Amenities</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-wifi text-red-600 mr-3"></i>
+                            <span>Free WiFi</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-tv text-red-600 mr-3"></i>
+                            <span>Smart TV</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-snowflake text-red-600 mr-3"></i>
+                            <span>Air Conditioning</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-coffee text-red-600 mr-3"></i>
+                            <span>Mini Bar</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-concierge-bell text-red-600 mr-3"></i>
+                            <span>24/7 Room Service</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-lock text-red-600 mr-3"></i>
+                            <span>Safe Locker</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-shower text-red-600 mr-3"></i>
+                            <span>Hot Water</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-phone text-red-600 mr-3"></i>
+                            <span>Telephone</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-wind text-red-600 mr-3"></i>
+                            <span>Room Heater</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-8 sticky top-32">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl font-bold text-red-600 mb-2">₹{{ room_category.base_price }}</div>
+                        <p class="text-gray-600">per night</p>
+
+                        {% if available_rooms_count > 0 %}
+                        <div class="mt-4 bg-green-100 text-green-700 px-4 py-2 rounded-full inline-block">
+                            <i class="fas fa-check-circle mr-2"></i>{{ available_rooms_count }} rooms available
+                        </div>
+                        {% else %}
+                        <div class="mt-4 bg-red-100 text-red-700 px-4 py-2 rounded-full inline-block">
+                            <i class="fas fa-times-circle mr-2"></i>Not available
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
+                            {{ form.guest_name }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                            {{ form.guest_email }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Phone</label>
+                            {{ form.guest_phone }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
+                            {{ form.guest_count }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
+                            {{ form.check_in }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
+                            {{ form.check_out }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
+                            {{ form.special_requests }}
+                        </div>
+
+                       
+                        <div id="dateNotification"
+                            class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span id="dateNotificationText"></span>
+                            </div>
+                        </div>
+
+                        {% if form.errors %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if available_rooms_count == 0 %}
+                        <button type="submit" class="w-full btn-primary text-white py-4 rounded-lg font-bold text-lg"
+                            disabled>
+                            <i class="fas fa-calendar-check mr-2"></i>Book Now
+                        </button>
+                        {% else %}
+                        <button type="submit" class="w-full btn-primary text-white py-4 rounded-lg font-bold text-lg">
+                            <i class="fas fa-calendar-check mr-2"></i>Book Now
+                        </button>
+                        {% endif %}
+                    </form>
+
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="flex items-start text-sm text-gray-600">
+                            <i class="fas fa-info-circle text-red-600 mr-2 mt-1"></i>
+                            <p>Free cancellation up to 24 hours before check-in</p>
+                        </div>
+                        {% if booked_dates %}
+                        <div class="mt-4 bg-amber-50 border border-amber-300 rounded-lg p-3">
+                            <p class="text-xs text-amber-800">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>{{ booked_dates|length }} dates</strong> are currently booked. Please avoid
+                                selecting these dates.
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+{{ booked_dates|json_script:"booked-dates-data" }}
+<script>
+    // Booked dates from backend - properly parsed from JSON
+    const bookedDatesElement = document.getElementById('booked-dates-data');
+    const bookedDates = bookedDatesElement ? JSON.parse(bookedDatesElement.textContent) : [];
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
+    // Get date input elements
+    const checkInInput = document.querySelector('input[name="check_in"]');
+    const checkOutInput = document.querySelector('input[name="check_out"]');
+    const dateNotification = document.getElementById('dateNotification');
+    const dateNotificationText = document.getElementById('dateNotificationText');
+
+    // Function to show notification
+    function showNotification(message) {
+        if (dateNotification && dateNotificationText) {
+            dateNotificationText.textContent = message;
+            dateNotification.classList.remove('hidden');
+        }
+        alert(message);
+    }
+
+    if (checkInInput && checkOutInput) {
+        // Set minimum date to today
+        checkInInput.setAttribute('min', today);
+        checkOutInput.setAttribute('min', today);
+
+        // Function to check if a date is booked
+        function isDateBooked(dateString) {
+            return bookedDates.includes(dateString);
+        }
+
+        // Add change event to check-in date
+        checkInInput.addEventListener('change', function () {
+            const selectedDate = this.value;
+
+            if (isDateBooked(selectedDate)) {
+                showNotification('⚠️ DATE ALREADY BOOKED! This date is not available. Please select a different date.');
+                this.value = '';
+                return;
+            }
+
+            // Set minimum check-out date to one day after check-in
+            const checkInDate = new Date(selectedDate);
+            checkInDate.setDate(checkInDate.getDate() + 1);
+            const minCheckOut = checkInDate.toISOString().split('T')[0];
+            checkOutInput.setAttribute('min', minCheckOut);
+
+            // Clear check-out if it's before new check-in
+            if (checkOutInput.value && checkOutInput.value <= selectedDate) {
+                checkOutInput.value = '';
+            }
+        });
+
+        // Add change event to check-out date
+        checkOutInput.addEventListener('change', function () {
+            const selectedDate = this.value;
+            const checkInDate = checkInInput.value;
+
+            if (!checkInDate) {
+                showNotification('⚠️ Please select check-in date first.');
+                this.value = '';
+                return;
+            }
+
+            // Check if any date in the range is booked
+            let currentDate = new Date(checkInDate);
+            const endDate = new Date(selectedDate);
+            let hasBookedDate = false;
+
+            while (currentDate < endDate) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                if (isDateBooked(dateStr)) {
+                    hasBookedDate = true;
+                    showNotification('⚠️ DATES BOOKED! One or more dates in your range are already booked. Please choose different dates.');
+                    this.value = '';
+                    break;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        });
+
+        // Show booking info on page load
+        console.log('Total booked dates:', bookedDates.length);
+        if (bookedDates.length > 0) {
+            console.log('Booked dates:', bookedDates);
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %} {% endcomment %}

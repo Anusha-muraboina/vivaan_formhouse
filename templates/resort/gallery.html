@@ -1,0 +1,70 @@
+{% extends 'resort/base.html' %}
+
+{% block title %}Gallery - Strawberry King Resort{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/80 z-10"></div>
+    </div>
+
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">Photo Gallery</h1>
+        <p class="text-xl opacity-90">Glimpses of paradise</p>
+    </div>
+</section>
+
+<!-- Filter -->
+{% comment %} <section class="py-8 bg-white shadow-md sticky top-20 z-40">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'gallery' %}"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if not request.GET.category %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                All Photos
+            </a>
+            {% for cat_value, cat_label in categories %}
+            <a href="?category={{ cat_value }}"
+                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.category == cat_value %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
+                {{ cat_label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section> {% endcomment %}
+
+<!-- Gallery Grid -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for image in images %}
+            <div class="group relative overflow-hidden rounded-2xl shadow-lg aspect-square card-hover">
+                <img src="{{ image.image.url }}" alt="{{ image.title }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                    <h3 class="text-white font-bold text-xl mb-1">{{ image.title }}</h3>
+                    <p class="text-white/80 text-sm">{{ image.get_category_display }}</p>
+                </div>
+                {% if image.is_featured %}
+                <div
+                    class="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <i class="fas fa-star mr-1"></i>Featured
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-images text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-2">No Images Available</h3>
+                <p class="text-gray-500">Gallery images will be added soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

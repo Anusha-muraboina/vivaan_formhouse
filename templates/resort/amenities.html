@@ -1,0 +1,177 @@
+{% extends 'resort/base.html' %}
+
+{% block title %}Amenities - Strawberry King Resort{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-black-900/90 to-black-700/80 z-10"></div> {% endcomment %}
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        </div>
+
+          <div class="absolute inset-0 bg-black/70 z-10"></div>
+    </div>
+
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">Resort Amenities</h1>
+        <p class="text-xl opacity-90">Everything you need for a perfect stay</p>
+    </div>
+</section>
+
+<!-- Amenities Grid -->
+<section class="py-10 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-swimming-pool text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Infinity Pool</h3>
+                <p class="text-gray-600">Take a refreshing dip in our stunning infinity pool overlooking the valley.
+                    Open from sunrise to sunset.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-utensils text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Multi-Cuisine Restaurant</h3>
+                <p class="text-gray-600">Savor delicious dishes from Indian, Chinese, and Italian cuisines at
+                    Sahyagirija dining experience.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-parking text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Free Parking</h3>
+                <p class="text-gray-600">Complimentary parking facility for all guests with 24/7 security surveillance.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-concierge-bell text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">24-Hour Room Service</h3>
+                <p class="text-gray-600">Round-the-clock room service to cater to all your needs at any time of the day
+                    or night.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-tshirt text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Laundry Service</h3>
+                <p class="text-gray-600">Professional laundry and dry cleaning services available. Direct booking guests
+                    get 5% discount.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-strawberry-daiquiri text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Strawberry Farm</h3>
+                <p class="text-gray-600">Experience strawberry plucking at our attached farm. A unique activity for
+                    guests of all ages.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-wifi text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">High-Speed WiFi</h3>
+                <p class="text-gray-600">Complimentary high-speed internet access throughout the resort premises.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-fire text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Bonfire Nights</h3>
+                <p class="text-gray-600">Enjoy cozy bonfire evenings under the stars with your loved ones (on request).
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-chess text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Board Games</h3>
+                <p class="text-gray-600">Collection of indoor games and board games for entertainment during your stay.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-taxi text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Cab Rental</h3>
+                <p class="text-gray-600">Car and cab rental services available for local sightseeing and excursions.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-plane text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Airport Shuttle</h3>
+                <p class="text-gray-600">Convenient airport pickup and drop-off services available on request.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-music text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Music System</h3>
+                <p class="text-gray-600">Create the perfect ambiance with our music system available for special
+                    occasions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Event Space -->
+<section class="py-10 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-6 section-title">Event Spaces</h2>
+            <p class="text-gray-600 text-lg mb-12">Perfect venues for your special celebrations</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-red-50 to-amber-50 p-10 rounded-2xl shadow-lg">
+                    <i class="fas fa-tree text-5xl text-red-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Outdoor Event Space</h3>
+                    <p class="text-gray-600 mb-4">1,000 sq. ft. outdoor venue perfect for birthdays, anniversaries, and
+                        private celebrations under the open sky.</p>
+                    <ul class="text-left text-gray-600 space-y-2">
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Scenic valley views</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Capacity: Up to 50 guests</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Audio/visual equipment</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-50 to-amber-50 p-10 rounded-2xl shadow-lg">
+                    <i class="fas fa-champagne-glasses text-5xl text-red-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Indoor Event Section</h3>
+                    <p class="text-gray-600 mb-4">Compact 50 sq. ft. indoor space ideal for intimate gatherings and
+                        wedding ceremonies.</p>
+                    <ul class="text-left text-gray-600 space-y-2">
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Climate controlled</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Premium interiors</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Full catering support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-10">
+                <a href="{% url 'contact' %}"
+                    class="inline-block  bg-red-700 text-white px-10 py-4 rounded-full font-semibold text-lg">
+                    Plan Your Event
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'resort/base.html' %}
+
+{% block title %}About Us - Strawberry King Resort{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-black-900/90 to-black-700/80 z-10"></div> {% endcomment %}
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        </div>
+
+          <div class="absolute inset-0 bg-black/70 z-10"></div>
+    </div>
+
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">About Vivaan Farmhouse</h1>
+        <p class="text-xl opacity-90">Where luxury meets nature</p>
+    </div>
+</section>
+
+<!-- About Content -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl font-bold text-center text-red-900 mb-8 section-title">Our Story</h2>
+
+            <div class="prose prose-lg max-w-none text-gray-600 space-y-6">
+                <p class="text-xl leading-relaxed">
+                    
+                   Nestled on the serene outskirts of Hyderabad, Vivaan Farmhouse offers a peaceful escape where nature, 
+                   comfort, and elegance come together. Designed for relaxation and memorable gatherings, 
+                   the farmhouse provides a perfect retreat away from the city’s bustle while still being easily accessible.
+                </p>
+
+                <p class="text-lg leading-relaxed">
+Surrounded by lush greenery and open landscapes, Vivaan Farmhouse features thoughtfully designed spaces that 
+blend modern amenities with a natural, rustic charm. Whether you’re planning a weekend getaway, a family celebration,
+ or a private event, every corner of the property is crafted to offer comfort, privacy, and tranquility.
+                </p>
+
+                <p class="text-lg leading-relaxed">
+                   At Vivaan Farmhouse, we believe in creating experiences that feel both personal and refreshing.
+                    Spend your time unwinding by the pool, enjoying outdoor activities, hosting intimate celebrations, 
+                    or simply soaking in the calm surroundings. With warm hospitality and attention to detail, 
+                   Vivaan Farmhouse is the perfect destination to relax, reconnect, and create lasting memories.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center text-gray-800 mb-12 section-title">Why Choose Us</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center card-hover">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-mountain text-red-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Breathtaking Views</h3>
+                <p class="text-gray-600">Wake up to panoramic valley views and watch the sunset paint the hills in
+                    golden hues from your private balcony.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center card-hover">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-utensils text-red-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Soulful Dining</h3>
+                <p class="text-gray-600">Savor authentic flavors from Indian, Chinese, and Italian cuisines, prepared
+                    fresh without shortcuts or preservatives.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center card-hover">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-spa text-red-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Tranquil Escape</h3>
+                <p class="text-gray-600">Unwind in our infinity pool, stroll through the strawberry farm, or simply
+                    relax in the peaceful ambiance of nature.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Location -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center text-gray-800 mb-12 section-title">Our Location</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Mahabaleshwar, Maharashtra</h3>
+                    <p class="text-gray-600 mb-6">
+                        Strategically located in the heart of Mahabaleshwar, our resort offers easy access to popular
+                        tourist attractions while providing a peaceful retreat away from the crowds.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-red-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Easy Access</h4>
+                                <p class="text-gray-600">Just minutes away from Mapro Garden and other key attractions
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <i class="fas fa-car text-red-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Well Connected</h4>
+                                <p class="text-gray-600">Easy road access from Pune and Mumbai</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <i class="fas fa-leaf text-red-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Natural Beauty</h4>
+                                <p class="text-gray-600">Surrounded by lush green hills and pristine landscapes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-96 bg-gray-200 rounded-2xl overflow-hidden shadow-xl">
+                    <!-- You can embed Google Maps here -->
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.7666!2d73.6565!3d17.9244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDU1JzI3LjgiTiA3M8KwMzknMjMuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

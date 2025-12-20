@@ -1,0 +1,243 @@
+{% extends 'resort/base.html' %}
+
+{% block title %}Booking Confirmed - {{ booking.booking_id }}{% endblock %}
+
+{% block content %}
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- Success Message -->
+            <div class="bg-white rounded-2xl shadow-xl p-2 md:p-12 text-center mb-8">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check-circle text-6xl text-green-600"></i>
+                </div>
+                <h1 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">Booking Confirmed!</h1>
+                <p class="text-xl text-gray-600 mb-6">Thank you for choosing Strawberry King Resort</p>
+                <div class="bg-amber-50 border-2 border-amber-400 rounded-xl p-6 inline-block">
+                    <p class="text-gray-600 mb-2">Your Booking ID</p>
+                    <p class="text-3xl font-bold text-red-600">{{ booking.booking_id }}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-xl p-10">
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-10">Booking Details</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+        <!-- LEFT: USER DETAILS -->
+        <div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Guest Information</h3>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Name:</span> {{ booking.guest_name }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Email:</span> {{ booking.guest_email }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Phone:</span> {{ booking.guest_phone }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Room:</span> {{ booking.room.category.name }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Check-in:</span> {{ booking.check_in|date:"F d, Y" }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Check-out:</span> {{ booking.check_out|date:"F d, Y" }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Nights:</span> {{ booking.num_nights }}</p>
+
+            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Total Guests:</span> {{ booking.guest_count }}</p>
+            <p class="text-gray-700 mb-2 ">
+                <span>Extra Guest Count</span>
+                <span class="font-semibold">{{ booking.extra_guest_count }}</span>
+            </p>
+
+            {% if booking.special_requests %}
+            <p class="text-gray-600 mt-4"><span class="font-semibold text-gray-800">Special Requests:</span></p>
+            <p class="text-gray-800">{{ booking.special_requests }}</p>
+            {% endif %}
+        </div>
+
+
+        <!-- RIGHT: PAYMENT INFO -->
+        <div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Payment Summary</h3>
+
+
+            <p class="text-gray-700 mb-2 flex justify-between">
+                <span>Subtotal</span>
+                <span class="font-semibold">₹{{ booking.sub_total }}</span>
+            </p>
+
+            <p class="text-gray-700 mb-2 flex justify-between">
+                <span>Tax Amount</span>
+                <span class="font-semibold">₹{{ booking.tax_price }}</span>
+            </p>
+
+            <p class="text-gray-700 mb-2 flex justify-between">
+                <span>Discount</span>
+                <span class="font-semibold text-green-600">₹{{ booking.disc_price }}</span>
+            </p>
+
+            <p class="text-gray-700 mb-2 flex justify-between">
+                <span>Advance Paid</span>
+                <span class="font-semibold">₹{{ booking.total_amount }}</span>
+            </p>
+
+            <p class="text-gray-700 mb-4 flex justify-between">
+                <span>Remaining Amount</span>
+                <span class="font-semibold text-red-600">₹{{ booking.remaining_amount }}</span>
+            </p>
+
+            <div class="mt-6 bg-emerald-100 p-5 rounded-xl flex justify-between items-center">
+                <span class="text-lg font-bold text-gray-800">Final Total</span>
+                <span class="text-3xl font-extrabold text-emerald-700">₹{{ booking.final_total }}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+            {% comment %} <!-- Booking Details -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Booking Details</h2>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Guest Name</span>
+                        <span class="font-semibold">{{ booking.guest_name }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Email</span>
+                        <span class="font-semibold">{{ booking.guest_email }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Phone</span>
+                        <span class="font-semibold">{{ booking.guest_phone }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Room</span>
+                        <span class="font-semibold">{{ booking.room.category.name }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Check-in</span>
+                        <span class="font-semibold">{{ booking.check_in|date:"F d, Y" }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Check-out</span>
+                        <span class="font-semibold">{{ booking.check_out|date:"F d, Y" }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Number of Nights</span>
+                        <span class="font-semibold">{{ booking.num_nights }}</span>
+                    </div>
+
+                    <div class="flex justify-between py-3 border-b border-gray-200">
+                        <span class="text-gray-600">Guests</span>
+                        <span class="font-semibold">{{ booking.guest_count }}</span>
+                    </div>
+
+                    {% if booking.special_requests %}
+                    <div class="py-3 border-b border-gray-200">
+                        <span class="text-gray-600 block mb-2">Special Requests</span>
+                        <span class="text-gray-800">{{ booking.special_requests }}</span>
+                    </div>
+                    {% endif %}
+
+
+<div class="mt-6 space-y-3 text-gray-800">
+
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Extra Guest Count</span>
+        <span class="font-semibold">{{ booking.extra_guest_count }}</span>
+    </div>
+
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Subtotal (before tax)</span>
+        <span class="font-semibold">₹{{ booking.sub_total }}</span>
+    </div>
+
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Tax Amount</span>
+        <span class="font-semibold">₹{{ booking.tax_price }}</span>
+    </div>
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Discount Applied</span>
+        <span class="font-semibold text-green-600">₹{{ booking.disc_price }}</span>
+    </div>
+
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Advance Paid</span>
+        <span class="font-semibold">₹{{ booking.total_amount }}</span>
+    </div>
+
+    <div class="flex justify-between py-3 border-b border-gray-200">
+        <span>Remaining Amount</span>
+        <span class="font-semibold text-red-600">₹{{ booking.remaining_amount }}</span>
+    </div>
+
+</div>
+
+
+<!-- FINAL TOTAL CALCULATION -->
+<div class="flex justify-between py-4 bg-emerald-50 -mx-8 px-8 mt-6">
+    <span class="text-lg font-bold text-gray-800">Final Total</span>
+    <span class="text-2xl font-bold text-emerald-700">₹{{ booking.final_total }}</span>
+</div> {% endcomment %}
+
+
+
+
+
+
+
+
+                    {% comment %} <div class="flex justify-between py-4 bg-red-50 -mx-8 px-8 mt-4">
+                        <span class="text-lg font-bold text-gray-800">Total Amount</span>
+                        <span class="text-2xl font-bold text-red-600">₹{{ booking.total_amount }}</span>
+                    </div> {% endcomment %}
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="bg-blue-50 rounded-2xl p-8 mt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>What's Next?
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        <span>A confirmation email has been sent to <strong>{{ booking.guest_email }}</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        <span>Our team will contact you within 24 hours to confirm your booking</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        <span>Check-in time: 2:00 PM | Check-out time: 11:00 AM</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        <span>Free cancellation up to 24 hours before check-in</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap gap-4 justify-center mt-8">
+                <a href="{% url 'home' %}" class="btn-primary text-white px-8 py-4 rounded-full font-semibold">
+                    <i class="fas fa-home mr-2"></i>Back to Home
+                </a>
+                <a href="{% url 'contact' %}"
+                    class="bg-gray-700 text-white px-8 py-4 rounded-full font-semibold hover:bg-gray-600 transition">
+                    <i class="fas fa-phone mr-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
