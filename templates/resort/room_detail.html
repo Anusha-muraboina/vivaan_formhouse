@@ -3,7 +3,7 @@
 {% extends 'resort/base.html' %}
 
 {% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
-
+{% csrf_token %}
 {% load static %}
 {% block content %}
 
@@ -68,17 +68,12 @@
                             <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
                             {{ form.guest_name }}
                         </div>
-
-                      
-
-
                         <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-gray-700 font-semibold mb-2">Phone</label>
                             {{ form.guest_phone }}
                         </div>
 
-                  
                         <div>
                             <label class="block text-gray-700 font-semibold mb-2">Email</label>
                             {{ form.guest_email }}

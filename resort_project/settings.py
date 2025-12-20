@@ -15,7 +15,15 @@ SECRET_KEY = 'django-insecure-strawberry-king-resort-secret-key-change-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+
+
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "ebb218b6ba40.ngrok-free.app",
+]
+
 
 
 # Application definition
@@ -136,6 +144,7 @@ ADMIN_EMAIL = 'anushamuraboina9@gmail.com'
 
 CC_EMAIL = [
     'anushamuraboina9@gmail.com',
+    'info@vivaanfarmhouse.com',
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -145,3 +154,17 @@ ACCOUNT_EMAIL_REQUIRED = True
 CKEDITOR_UPLOAD_PATH = "uploads/"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://ebb218b6ba40.ngrok-free.app",
+]
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://ebb218b6ba40.ngrok-free.app",
+    "http://ebb218b6ba40.ngrok-free.app",
+]

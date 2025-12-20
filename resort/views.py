@@ -437,6 +437,9 @@ from django.conf import settings
 
 
 def send_booking_emails(booking):
+    
+        # CC Emails
+    cc_recipients = settings.CC_EMAIL
     # User Email
     user_subject = "Booking Confirmation – Vivaan Farmhouse"
     user_html = render_to_string("emails/user_booking_email.html", {
@@ -447,7 +450,8 @@ def send_booking_emails(booking):
         user_subject,
         "",
         settings.DEFAULT_FROM_EMAIL,
-        [booking.guest_email]
+        [booking.guest_email],
+        cc=cc_recipients  
     )
     user_email.attach_alternative(user_html, "text/html")
     user_email.send()
@@ -462,7 +466,8 @@ def send_booking_emails(booking):
         admin_subject,
         "",
         settings.DEFAULT_FROM_EMAIL,
-        [settings.ADMIN_EMAIL]  # configure in settings.py
+        [settings.ADMIN_EMAIL], # configure in settings.py
+        cc=cc_recipients  
     )
     admin_email.attach_alternative(admin_html, "text/html")
     admin_email.send()
