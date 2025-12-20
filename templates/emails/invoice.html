@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Invoice</title>
+<style>
+.invoice-box {
+    width: 700px;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #ddd;
+    font-family: Arial;
+}
+button {
+    background: green;
+    padding: 10px 15px;
+    color: white;
+    border: none;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="invoice-box">
+
+    <button onclick="window.print()">Print Invoice</button>
+
+    <h2>Invoice</h2>
+
+    <p><strong>Booking ID:</strong> {{ booking.booking_id }}</p>
+    <p><strong>Name:</strong> {{ booking.guest_name }}</p>
+    <p><strong>Phone:</strong> {{ booking.phone }}</p>
+    <p><strong>Email:</strong> {{ booking.guest_email }}</p>
+    <p><strong>Room:</strong> {{ booking.room }}</p>
+    <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
+    <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
+
+    <hr>
+
+    <p><strong>Subtotal:</strong> ₹{{ booking.sub_total }}</p>
+    <p><strong>Tax:</strong> ₹{{ booking.tax_price }}</p>
+    <p><strong>Discount:</strong> ₹{{ booking.disc_price }}</p>
+    <p><strong>Total Paid:</strong> ₹{{ booking.total_amount }}</p>
+    <p><strong>Remaining:</strong> ₹{{ booking.remaining_amount }}</p>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif;">
+
+    <h2 style="color:#c0392b;">New Booking Received</h2>
+
+    <ul>
+        <li><strong>Booking ID:</strong> {{ booking.booking_id }}</li>
+        <li><strong>Name:</strong> {{ booking.guest_name }}</li>
+        <li><strong>Phone:</strong> {{ booking.phone }}</li>
+        <li><strong>Email:</strong> {{ booking.guest_email }}</li>
+        <li><strong>Room:</strong> {{ booking.room }}</li>
+        <li><strong>Check-in:</strong> {{ booking.check_in }}</li>
+        <li><strong>Check-out:</strong> {{ booking.check_out }}</li>
+        <li><strong>Total:</strong> ₹{{ booking.total_amount }}</li>
+        <li><strong>Remaining:</strong> ₹{{ booking.remaining_amount }}</li>
+        <li><strong>Payment Method:</strong> {{ booking.payment_method }}</li>
+    </ul>
+
+    <p>Invoice attached.</p>
+
+</body>
+</html>

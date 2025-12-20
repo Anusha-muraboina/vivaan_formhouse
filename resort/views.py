@@ -431,6 +431,41 @@ def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
 #     return render(request, "resort/room_detail.html", context)
 
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+
+
+def send_booking_emails(booking):
+    # User Email
+    user_subject = "Booking Confirmation – Vivaan Farmhouse"
+    user_html = render_to_string("emails/user_booking_email.html", {
+        "booking": booking
+    })
+
+    user_email = EmailMultiAlternatives(
+        user_subject,
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.guest_email]
+    )
+    user_email.attach_alternative(user_html, "text/html")
+    user_email.send()
+
+    # Admin Email
+    admin_subject = "New Booking Received"
+    admin_html = render_to_string("emails/admin_booking_email.html", {
+        "booking": booking
+    })
+
+    admin_email = EmailMultiAlternatives(
+        admin_subject,
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [settings.ADMIN_EMAIL]  # configure in settings.py
+    )
+    admin_email.attach_alternative(admin_html, "text/html")
+    admin_email.send()
 
 
 def room_detail(request, slug):
@@ -516,7 +551,7 @@ def room_detail(request, slug):
             booking.payment_method = payment_method
             booking.status = "pending"
             booking.save()
-
+            send_booking_emails(booking)
             messages.success(request, "Booking request received!")
 
             return redirect("booking_confirmation", booking_id=booking.booking_id)
@@ -538,6 +573,9 @@ def room_detail(request, slug):
 
 
 
+def view_invoice(request, booking_id):
+    booking = get_object_or_404(Booking, booking_id=booking_id)
+    return render(request, "emails/invoice.html", {"booking": booking})
 
 
 

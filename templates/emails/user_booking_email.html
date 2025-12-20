@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif;">
+
+    <h2 style="color:#2e8b57;">Booking Confirmed 🎉</h2>
+
+    <p>Hello {{ booking.guest_name }},</p>
+
+    <p>Thank you for booking with Vivaan Farmhouse.</p>
+
+    <h3>Your Booking Details:</h3>
+    
+    <ul>
+        <li><strong>Booking ID:</strong> {{ booking.booking_id }}</li>
+        <li><strong>Name:</strong> {{ booking.guest_name }}</li>
+        <li><strong>Phone:</strong> {{ booking.phone }}</li>
+        <li><strong>Email:</strong> {{ booking.guest_email }}</li>
+        <li><strong>Room:</strong> {{ booking.room }}</li>
+        <li><strong>Check-in:</strong> {{ booking.check_in }}</li>
+        <li><strong>Check-out:</strong> {{ booking.check_out }}</li>
+        <li><strong>Total:</strong> ₹{{ booking.total_amount }}</li>
+        <li><strong>Remaining:</strong> ₹{{ booking.remaining_amount }}</li>
+        <li><strong>Payment Method:</strong> {{ booking.payment_method }}</li>
+    </ul>
+
+    <p>Your invoice is attached.</p>
+
+    <p>
+        <a href="http://127.0.0.1:9000/invoice/{{ booking.booking_id }}/">
+        👉 View Invoice Online
+        </a>
+    </p>
+
+    <p>We will contact you shortly!</p>
+
+    <br>
+    <p>Regards,<br>Vivaan Farmhouse Team</p>
+
+</body>
+</html>
