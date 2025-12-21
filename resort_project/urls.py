@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('vivaan-admin/', admin.site.urls),
     path('', include('resort.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
