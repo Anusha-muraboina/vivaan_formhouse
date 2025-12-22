@@ -141,6 +141,7 @@ class Booking(models.Model):
 
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('partial','partial'),
         ('paid', 'Paid'),
         ('failed', 'Failed'),
     ]
