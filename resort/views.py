@@ -473,117 +473,9 @@ def send_booking_emails(booking):
     admin_email.send()
 
 
-# def room_detail(request, slug):
-#     room_category = get_object_or_404(RoomCategory, slug=slug)
-
-#     booked_dates = []
-#     current_bookings = Booking.objects.filter(
-#         status__in=['confirmed', 'pending'],
-#         check_out__gt=datetime.now().date()
-#     )
-
-#     for booking in current_bookings:
-#         date = booking.check_in
-#         while date < booking.check_out:
-#             booked_dates.append(date.strftime("%Y-%m-%d"))
-#             date += timedelta(days=1)
-
-#     pricing = VillaPricing.objects.first()
-#     if not pricing:
-#         pricing = VillaPricing.objects.create()
-
-#     calculated_total = 0
-
-#     if request.method == "POST":
-#         form = BookingForm(request.POST)
-
-#         if form.is_valid():
-
-#             check_in = form.cleaned_data['check_in']
-#             check_out = form.cleaned_data['check_out']
-#             guest_count = form.cleaned_data['guest_count']
-#             extra_guest_count = form.cleaned_data['extra_guest_count']
-
-#             payment_method = request.POST.get("payment_method")
-
-#             base_amount = calculate_booking_cost(
-#                 check_in, check_out, guest_count, extra_guest_count
-#             )
-
-#             # TAX
-#             tax_rate = Decimal("0.00")
-#             tax_amount = base_amount * tax_rate
-
-#             subtotal = base_amount + tax_amount
-
-#             # COUPON DISCOUNT
-#             discount = Decimal(0)
-#             coupon_code = form.cleaned_data.get("coupon_code")
-
-#             if coupon_code:
-#                 try:
-#                     coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
-#                     discount = coupon.discount_amount
-#                 except Coupon.DoesNotExist:
-#                     messages.warning(request, "Invalid coupon code.")
-
-#             # Apply discount
-#             total_after_coupon = subtotal - discount
-#             calculated_total = float(total_after_coupon)
-
-#             booking = form.save(commit=False)
-
-#             booking.extra_guest_count = extra_guest_count
-#             booking.sub_total = subtotal
-#             booking.tax_price = tax_amount
-
-#             # 👇 Store coupon discount here
-#             booking.disc_price = discount
-
-#             # PAYMENT LOGIC
-#             if payment_method == "partial_razorpay":
-#                 booking.total_amount = round(total_after_coupon * Decimal("0.30"), 2)
-#                 booking.remaining_amount = round(total_after_coupon - booking.total_amount, 2)
-#                 booking.payment_status = "partial"
-#             elif payment_method == "full_razorpay":
-#                 booking.total_amount = total_after_coupon
-#                 booking.remaining_amount = 0
-#                 booking.payment_status = "paid"
-
-#             else:
-#                 booking.total_amount = 0
-#                 booking.remaining_amount = total_after_coupon
-#                 booking.payment_status = "pending"
-
-#             booking.payment_method = payment_method
-#             booking.status = "confirmed"
-#             booking.save()
-#             send_booking_emails(booking)
-#             messages.success(request, "Booking request received!")
-
-#             return redirect("booking_confirmation", booking_id=booking.booking_id)
-
-#     else:
-#         form = BookingForm()
-
-#     context = {
-#         "room_category": room_category,
-#         "form": form,
-#         "booked_dates": booked_dates,
-#         "pricing": pricing,
-#         "calculated_total": calculated_total,
-#         "extra_price": float(pricing.extra_guest_price),
-#     }
-
-#     return render(request, "resort/room_detail.html", context)
-
-
-
 def room_detail(request, slug):
-
     room_category = get_object_or_404(RoomCategory, slug=slug)
 
-    # Collect disabled booked dates
     booked_dates = []
     current_bookings = Booking.objects.filter(
         status__in=['confirmed', 'pending'],
@@ -600,7 +492,6 @@ def room_detail(request, slug):
     if not pricing:
         pricing = VillaPricing.objects.create()
 
-    # default total (first page load)
     calculated_total = 0
 
     if request.method == "POST":
@@ -608,24 +499,24 @@ def room_detail(request, slug):
 
         if form.is_valid():
 
-            # form fields
             check_in = form.cleaned_data['check_in']
             check_out = form.cleaned_data['check_out']
             guest_count = form.cleaned_data['guest_count']
             extra_guest_count = form.cleaned_data['extra_guest_count']
 
-            # pricing
+            payment_method = request.POST.get("payment_method")
+
             base_amount = calculate_booking_cost(
                 check_in, check_out, guest_count, extra_guest_count
             )
 
-            # TAX — currently 0
+            # TAX
             tax_rate = Decimal("0.00")
             tax_amount = base_amount * tax_rate
 
             subtotal = base_amount + tax_amount
 
-            # COUPON
+            # COUPON DISCOUNT
             discount = Decimal(0)
             coupon_code = form.cleaned_data.get("coupon_code")
 
@@ -633,31 +524,48 @@ def room_detail(request, slug):
                 try:
                     coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
                     discount = coupon.discount_amount
-                    messages.success(request, f"Coupon '{coupon_code}' applied!")
                 except Coupon.DoesNotExist:
-                    messages.error(request, "Invalid coupon code")
+                    messages.warning(request, "Invalid coupon code.")
 
+            # Apply discount
             total_after_coupon = subtotal - discount
             calculated_total = float(total_after_coupon)
 
-            # ❗ DO NOT SAVE BOOKING or REDIRECT YET
-            # Instead return page with updated total
+            booking = form.save(commit=False)
 
-            context = {
-                "room_category": room_category,
-                "form": form,
-                "booked_dates": booked_dates,
-                "pricing": pricing,
-                "calculated_total": calculated_total,
-                "extra_price": float(pricing.extra_guest_price),
-            }
+            booking.extra_guest_count = extra_guest_count
+            booking.sub_total = subtotal
+            booking.tax_price = tax_amount
 
-            return render(request, "resort/room_detail.html", context)
+            # 👇 Store coupon discount here
+            booking.disc_price = discount
+
+            # PAYMENT LOGIC
+            if payment_method == "partial_razorpay":
+                booking.total_amount = round(total_after_coupon * Decimal("0.30"), 2)
+                booking.remaining_amount = round(total_after_coupon - booking.total_amount, 2)
+                booking.payment_status = "partial"
+            elif payment_method == "full_razorpay":
+                booking.total_amount = total_after_coupon
+                booking.remaining_amount = 0
+                booking.payment_status = "paid"
+
+            else:
+                booking.total_amount = 0
+                booking.remaining_amount = total_after_coupon
+                booking.payment_status = "pending"
+
+            booking.payment_method = payment_method
+            booking.status = "confirmed"
+            booking.save()
+            send_booking_emails(booking)
+            messages.success(request, "Booking request received!")
+
+            return redirect("booking_confirmation", booking_id=booking.booking_id)
 
     else:
         form = BookingForm()
 
-    # GET request (no coupon yet)
     context = {
         "room_category": room_category,
         "form": form,
@@ -668,6 +576,106 @@ def room_detail(request, slug):
     }
 
     return render(request, "resort/room_detail.html", context)
+
+from django.http import JsonResponse
+
+def validate_coupon(request):
+    code = request.GET.get("code", "")
+    try:
+        coupon = Coupon.objects.get(code__iexact=code, is_active=True)
+        return JsonResponse({"valid": True, "discount": float(coupon.discount_amount)})
+    except:
+        return JsonResponse({"valid": False, "discount": 0})
+
+# def room_detail(request, slug):
+
+#     room_category = get_object_or_404(RoomCategory, slug=slug)
+
+#     # Collect disabled booked dates
+#     booked_dates = []
+#     current_bookings = Booking.objects.filter(
+#         status__in=['confirmed', 'pending'],
+#         check_out__gt=datetime.now().date()
+#     )
+
+#     for booking in current_bookings:
+#         date = booking.check_in
+#         while date < booking.check_out:
+#             booked_dates.append(date.strftime("%Y-%m-%d"))
+#             date += timedelta(days=1)
+
+#     pricing = VillaPricing.objects.first()
+#     if not pricing:
+#         pricing = VillaPricing.objects.create()
+
+#     # default total (first page load)
+#     calculated_total = 0
+
+#     if request.method == "POST":
+#         form = BookingForm(request.POST)
+
+#         if form.is_valid():
+
+#             # form fields
+#             check_in = form.cleaned_data['check_in']
+#             check_out = form.cleaned_data['check_out']
+#             guest_count = form.cleaned_data['guest_count']
+#             extra_guest_count = form.cleaned_data['extra_guest_count']
+
+#             # pricing
+#             base_amount = calculate_booking_cost(
+#                 check_in, check_out, guest_count, extra_guest_count
+#             )
+
+#             # TAX — currently 0
+#             tax_rate = Decimal("0.00")
+#             tax_amount = base_amount * tax_rate
+
+#             subtotal = base_amount + tax_amount
+
+#             # COUPON
+#             discount = Decimal(0)
+#             coupon_code = form.cleaned_data.get("coupon_code")
+
+#             if coupon_code:
+#                 try:
+#                     coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
+#                     discount = coupon.discount_amount
+#                     messages.success(request, f"Coupon '{coupon_code}' applied!")
+#                 except Coupon.DoesNotExist:
+#                     messages.error(request, "Invalid coupon code")
+
+#             total_after_coupon = subtotal - discount
+#             calculated_total = float(total_after_coupon)
+
+#             # ❗ DO NOT SAVE BOOKING or REDIRECT YET
+#             # Instead return page with updated total
+
+#             context = {
+#                 "room_category": room_category,
+#                 "form": form,
+#                 "booked_dates": booked_dates,
+#                 "pricing": pricing,
+#                 "calculated_total": calculated_total,
+#                 "extra_price": float(pricing.extra_guest_price),
+#             }
+
+#             return render(request, "resort/room_detail.html", context)
+
+#     else:
+#         form = BookingForm()
+
+#     # GET request (no coupon yet)
+#     context = {
+#         "room_category": room_category,
+#         "form": form,
+#         "booked_dates": booked_dates,
+#         "pricing": pricing,
+#         "calculated_total": calculated_total,
+#         "extra_price": float(pricing.extra_guest_price),
+#     }
+
+#     return render(request, "resort/room_detail.html", context)
 
 
 def view_invoice(request, booking_id):

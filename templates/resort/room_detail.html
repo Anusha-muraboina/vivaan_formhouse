@@ -408,6 +408,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let extraGuest = document.querySelector("input[name='extra_guest_count']");
     let radios = document.querySelectorAll("input[name='payment_method']");
 
+    let couponInput = document.querySelector("input[name='coupon_code']");
+
+
     // Payment display elements
     const paymentSummary = document.getElementById("paymentSummary");
     const depositAmount = document.getElementById("depositAmount");
@@ -458,11 +461,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePayment() {
         let total = calculateTotal();
 
-        let discounted = parseFloat(document.getElementById("discountedTotal")?.value || 0);
 
-        if (discounted > 0) {
-            total = discounted;
+                // apply coupon discount LIVE
+        if (couponDiscount > 0) {
+            total = total - couponDiscount;
+            if (total < 0) total = 0;
         }
+
 
         if (total <= 0) {
             paymentSummary.classList.add("hidden");
@@ -503,6 +508,44 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
+
+
+
+ /**************************************
+     LIVE COUPON VALIDATION (AJAX)
+    **************************************/
+    couponInput.addEventListener("change", function () {
+
+        let code = couponInput.value.trim();
+
+        if (code === "") {
+            couponDiscount = 0;
+            updatePayment();
+            return;
+        }
+
+        fetch(`/validate-coupon/?code=${code}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.valid) {
+                    couponDiscount = parseFloat(data.discount);
+                    alert(`Coupon Applied! Discount: ₹${couponDiscount}`);
+                } else {
+                    couponDiscount = 0;
+                    alert("Invalid coupon code!");
+                }
+                updatePayment();
+            })
+            .catch(() => {
+                couponDiscount = 0;
+                updatePayment();
+            });
+    });
+
+
+
+
     // Attach event listeners
     radios.forEach(r => r.addEventListener("change", updatePayment));
     checkIn.addEventListener("change", updatePayment);
@@ -510,12 +553,28 @@ document.addEventListener("DOMContentLoaded", function () {
     guestCount.addEventListener("change", updatePayment);
     extraGuest.addEventListener("change", updatePayment);
 
+
+    // moved validation here
+    guestCount.addEventListener("input", function () {
+        if (parseInt(this.value) > 15) {
+            alert("Guest count cannot exceed 15.");
+            this.value = 15;
+        }
+    });
+
+    extraGuest.addEventListener("input", function () {
+        if (parseInt(this.value) > 5) {
+            alert("Extra guest count cannot exceed 5.");
+            this.value = 5;
+        }
+    });
+
     updatePayment();
 
 });
 
 
-guestCount.addEventListener("input", function () {
+{% comment %} guestCount.addEventListener("input", function () {
     if (parseInt(this.value) > 15) {
         alert("Guest count cannot exceed 15.");
         this.value = 15;
@@ -527,7 +586,7 @@ extraGuest.addEventListener("input", function () {
         alert("Extra guest count cannot exceed 5.");
         this.value = 5;
     }
-});
+}); {% endcomment %}
 
 </script>
 
