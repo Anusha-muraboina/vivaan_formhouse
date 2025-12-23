@@ -15,5 +15,8 @@ urlpatterns = [
     path('reviews/', views.leave_review, name='leave_review'),
     path("invoice/<booking_id>/", views.view_invoice, name="view_invoice"),
     path("validate-coupon/", views.validate_coupon, name="validate_coupon"),
-
+    
+    
+    path("create-razorpay-order/", views.create_razorpay_order, name="create_razorpay_order"),
+    path("verify-payment/", views.verify_razorpay_payment, name="verify_payment"),
 ]

@@ -1,0 +1,79 @@
+{% csrf_token %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<div class="max-w-md mx-auto bg-white shadow-lg rounded-xl p-8 text-center">
+    <h2 class="text-2xl font-bold mb-4">Complete Payment</s</h2>
+
+    <p class="text-gray-600 mb-2">
+        Booking ID: <strong>{{ booking.booking_id }}</strong>
+    </p>
+
+    <p class="text-lg font-semibold mb-6">
+        Amount to Pay: ₹{{ amount }}
+    </p>
+
+    <!-- ✅ CORRECT PAY NOW BUTTON -->
+    <button onclick="payNow()"
+        class="w-full bg-emerald-700 text-white py-3 rounded-lg font-bold hover:bg-emerald-800">
+        Pay Now
+    </button>
+</div>
+
+<script>
+function payNow() {
+    fetch("{% url 'create_razorpay_order' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "booking_id={{ booking.booking_id }}&amount={{ amount }}"
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        let options = {
+            key: data.key,
+            amount: data.amount,
+            currency: "INR",
+            name: "Vivaan Farmhouse",
+            description: "Villa Booking Payment",
+            order_id: data.order_id,
+
+            handler: function (response) {
+                // verify payment
+                fetch("{% url 'verify_payment' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body:
+                        `razorpay_payment_id=${response.razorpay_payment_id}
+                         &razorpay_order_id=${response.razorpay_order_id}
+                         &razorpay_signature=${response.razorpay_signature}`
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        window.location.href =
+                            "{% url 'booking_confirmation' booking.booking_id %}";
+                    } else {
+                        alert("Payment verification failed");
+                    }
+                });
+            },
+
+            prefill: {
+                name: data.name,
+                email: data.email,
+                contact: data.contact
+            },
+
+            theme: { color: "#047857" }
+        };
+
+        new Razorpay(options).open();
+    });
+}
+</script>

@@ -147,6 +147,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
+# settings.py
+# RAZORPAY_KEY_ID = "rzp_live_RuxBrSrr1POPha"
+# RAZORPAY_KEY_SECRET = "PFH3WSOIA47pFs9ts3fVY67Q"
+
+RAZORPAY_KEY_ID = "rzp_test_Rv2abPyaI8rKSP"
+RAZORPAY_KEY_SECRET = "cOuReUYXYcYBWeNUg3LSYkmB"
 
 
 

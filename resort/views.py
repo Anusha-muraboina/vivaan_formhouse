@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db.models import Q
 from datetime import datetime, timedelta
 from .models import (
-    RoomCategory, Room, Amenity, Offer, Booking, 
+    RoomCategory, Room, Amenity, Offer, Booking, MainBanner,
     Testimonial, Gallery, ContactMessage,Coupon, VillaPricing
 )
 from .forms import BookingForm, ContactForm,TestimonialForm
@@ -11,15 +11,26 @@ from django.core.mail import send_mail
 
 def home(request):
     """Homepage view"""
+    banners = MainBanner.objects.filter(active=True).order_by("slot_position")
     featured_rooms = RoomCategory.objects.all()[:3]
     amenities = Amenity.objects.filter(is_featured=True)
-    offers = Offer.objects.filter(is_active=True, valid_until__gte=datetime.now().date())[:4]
-    testimonials = Testimonial.objects.filter(is_featured=True)[:6]
-    gallery_images = Gallery.objects.filter(is_featured=True)[:8]
-    
+    offers = Offer.objects.filter(
+        is_active=True,
+        valid_until__gte=datetime.now().date()
+    )[:4]
+
+    testimonials = Testimonial.objects.filter(
+            is_featured=True
+        ).order_by("slot_position")[:6]
+
+    gallery_images = Gallery.objects.filter(
+            is_featured=True
+        ).order_by("slot_position")[:8]
+
     context = {
         'featured_rooms': featured_rooms,
         'amenities': amenities,
+        "banners": banners,
         'offers': offers,
         'testimonials': testimonials,
         'gallery_images': gallery_images,
@@ -435,6 +446,119 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 
+from django.views.decorators.csrf import csrf_exempt
+
+
+
+
+
+
+
+
+
+
+# utils/razorpay.py (recommended)
+import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+)
+
+
+
+# # views.py
+# def razorpay_payment(request, booking_id):
+#     booking = get_object_or_404(Booking, booking_id=booking_id)
+
+#     # Safety check
+#     if booking.payment_method == "partial_razorpay":
+#         amount = booking.total_amount
+#     elif booking.payment_method == "full_razorpay":
+#         amount = booking.total_amount
+#     else:
+#         return redirect("booking_confirmation", booking_id=booking.booking_id)
+
+#     return render(request, "resort/razorpay_payment.html", {
+#         "booking": booking,
+#         "amount": amount
+#     })
+
+
+# @csrf_exempt
+# def create_razorpay_order(request):
+
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Invalid request"}, status=400)
+
+#     booking_id = request.POST.get("booking_id")
+#     amount = request.POST.get("amount")
+
+#     if not booking_id or not amount:
+#         return JsonResponse({"error": "Missing data"}, status=400)
+
+#     booking = get_object_or_404(Booking, booking_id=booking_id)
+
+#     razorpay_amount = int(float(amount) * 100)
+
+#     order = razorpay_client.order.create({
+#         "amount": razorpay_amount,
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+
+#     booking.transaction_id = order["id"]
+#     booking.save(update_fields=["transaction_id"])
+
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": razorpay_amount,
+#         "name": booking.guest_name,
+#         "email": booking.guest_email,
+#         "contact": booking.guest_phone,
+#     })
+
+
+# @csrf_exempt
+# def verify_razorpay_payment(request):
+#     data = request.POST
+
+#     try:
+#         razorpay_client.utility.verify_payment_signature({
+#             "razorpay_order_id": data.get("razorpay_order_id"),
+#             "razorpay_payment_id": data.get("razorpay_payment_id"),
+#             "razorpay_signature": data.get("razorpay_signature")
+#         })
+
+#         booking = get_object_or_404(
+#             Booking,
+#             transaction_id=data.get("razorpay_order_id")
+#         )
+
+#         booking.payment_id = data.get("razorpay_payment_id")
+#         booking.payment_status = "paid"
+#         booking.status = "confirmed"
+#         booking.save()
+
+#         # ✅ SEND EMAIL AFTER PAYMENT SUCCESS
+#         send_booking_emails(booking)
+
+#         return JsonResponse({"status": "success"})
+
+#     except Exception as e:
+#         return JsonResponse({"status": "failed", "error": str(e)}, status=400)
+
+
+
+
+
+
+
+
+
 
 def send_booking_emails(booking):
     
@@ -473,125 +597,9 @@ def send_booking_emails(booking):
     admin_email.send()
 
 
-def room_detail(request, slug):
-    room_category = get_object_or_404(RoomCategory, slug=slug)
-
-    booked_dates = []
-    current_bookings = Booking.objects.filter(
-        status__in=['confirmed', 'pending'],
-        check_out__gt=datetime.now().date()
-    )
-
-    for booking in current_bookings:
-        date = booking.check_in
-        while date < booking.check_out:
-            booked_dates.append(date.strftime("%Y-%m-%d"))
-            date += timedelta(days=1)
-
-    pricing = VillaPricing.objects.first()
-    if not pricing:
-        pricing = VillaPricing.objects.create()
-
-    calculated_total = 0
-
-    if request.method == "POST":
-        form = BookingForm(request.POST)
-
-        if form.is_valid():
-
-            check_in = form.cleaned_data['check_in']
-            check_out = form.cleaned_data['check_out']
-            guest_count = form.cleaned_data['guest_count']
-            extra_guest_count = form.cleaned_data['extra_guest_count']
-
-            payment_method = request.POST.get("payment_method")
-
-            base_amount = calculate_booking_cost(
-                check_in, check_out, guest_count, extra_guest_count
-            )
-
-            # TAX
-            tax_rate = Decimal("0.00")
-            tax_amount = base_amount * tax_rate
-
-            subtotal = base_amount + tax_amount
-
-            # COUPON DISCOUNT
-            discount = Decimal(0)
-            coupon_code = form.cleaned_data.get("coupon_code")
-
-            if coupon_code:
-                try:
-                    coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
-                    discount = coupon.discount_amount
-                except Coupon.DoesNotExist:
-                    messages.warning(request, "Invalid coupon code.")
-
-            # Apply discount
-            total_after_coupon = subtotal - discount
-            calculated_total = float(total_after_coupon)
-
-            booking = form.save(commit=False)
-
-            booking.extra_guest_count = extra_guest_count
-            booking.sub_total = subtotal
-            booking.tax_price = tax_amount
-
-            # 👇 Store coupon discount here
-            booking.disc_price = discount
-
-            # PAYMENT LOGIC
-            if payment_method == "partial_razorpay":
-                booking.total_amount = round(total_after_coupon * Decimal("0.30"), 2)
-                booking.remaining_amount = round(total_after_coupon - booking.total_amount, 2)
-                booking.payment_status = "partial"
-            elif payment_method == "full_razorpay":
-                booking.total_amount = total_after_coupon
-                booking.remaining_amount = 0
-                booking.payment_status = "paid"
-
-            else:
-                booking.total_amount = 0
-                booking.remaining_amount = total_after_coupon
-                booking.payment_status = "pending"
-
-            booking.payment_method = payment_method
-            booking.status = "confirmed"
-            booking.save()
-            send_booking_emails(booking)
-            messages.success(request, "Booking request received!")
-
-            return redirect("booking_confirmation", booking_id=booking.booking_id)
-
-    else:
-        form = BookingForm()
-
-    context = {
-        "room_category": room_category,
-        "form": form,
-        "booked_dates": booked_dates,
-        "pricing": pricing,
-        "calculated_total": calculated_total,
-        "extra_price": float(pricing.extra_guest_price),
-    }
-
-    return render(request, "resort/room_detail.html", context)
-
-from django.http import JsonResponse
-
-def validate_coupon(request):
-    code = request.GET.get("code", "")
-    try:
-        coupon = Coupon.objects.get(code__iexact=code, is_active=True)
-        return JsonResponse({"valid": True, "discount": float(coupon.discount_amount)})
-    except:
-        return JsonResponse({"valid": False, "discount": 0})
-
 # def room_detail(request, slug):
-
 #     room_category = get_object_or_404(RoomCategory, slug=slug)
 
-#     # Collect disabled booked dates
 #     booked_dates = []
 #     current_bookings = Booking.objects.filter(
 #         status__in=['confirmed', 'pending'],
@@ -608,7 +616,6 @@ def validate_coupon(request):
 #     if not pricing:
 #         pricing = VillaPricing.objects.create()
 
-#     # default total (first page load)
 #     calculated_total = 0
 
 #     if request.method == "POST":
@@ -616,24 +623,24 @@ def validate_coupon(request):
 
 #         if form.is_valid():
 
-#             # form fields
 #             check_in = form.cleaned_data['check_in']
 #             check_out = form.cleaned_data['check_out']
 #             guest_count = form.cleaned_data['guest_count']
 #             extra_guest_count = form.cleaned_data['extra_guest_count']
 
-#             # pricing
+#             payment_method = request.POST.get("payment_method")
+
 #             base_amount = calculate_booking_cost(
 #                 check_in, check_out, guest_count, extra_guest_count
 #             )
 
-#             # TAX — currently 0
+#             # TAX
 #             tax_rate = Decimal("0.00")
 #             tax_amount = base_amount * tax_rate
 
 #             subtotal = base_amount + tax_amount
 
-#             # COUPON
+#             # COUPON DISCOUNT
 #             discount = Decimal(0)
 #             coupon_code = form.cleaned_data.get("coupon_code")
 
@@ -641,31 +648,62 @@ def validate_coupon(request):
 #                 try:
 #                     coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
 #                     discount = coupon.discount_amount
-#                     messages.success(request, f"Coupon '{coupon_code}' applied!")
 #                 except Coupon.DoesNotExist:
-#                     messages.error(request, "Invalid coupon code")
+#                     messages.warning(request, "Invalid coupon code.")
 
+#             # Apply discount
 #             total_after_coupon = subtotal - discount
 #             calculated_total = float(total_after_coupon)
 
-#             # ❗ DO NOT SAVE BOOKING or REDIRECT YET
-#             # Instead return page with updated total
+#             booking = form.save(commit=False)
 
-#             context = {
-#                 "room_category": room_category,
-#                 "form": form,
-#                 "booked_dates": booked_dates,
-#                 "pricing": pricing,
-#                 "calculated_total": calculated_total,
-#                 "extra_price": float(pricing.extra_guest_price),
-#             }
+#             booking.extra_guest_count = extra_guest_count
+#             booking.sub_total = subtotal
+#             booking.tax_price = tax_amount
 
-#             return render(request, "resort/room_detail.html", context)
+#             # 👇 Store coupon discount here
+#             booking.disc_price = discount
+
+#             # PAYMENT LOGIC
+#             if payment_method == "partial_razorpay":
+#                 booking.total_amount = round(total_after_coupon * Decimal("0.30"), 2)
+#                 booking.remaining_amount = round(total_after_coupon - booking.total_amount, 2)
+#                 booking.payment_status = "partial"
+#             elif payment_method == "full_razorpay":
+#                 booking.total_amount = total_after_coupon
+#                 booking.remaining_amount = 0
+#                 booking.payment_status = "paid"
+
+#             else:
+#                 booking.total_amount = 0
+#                 booking.remaining_amount = total_after_coupon
+#                 booking.payment_status = "pending"
+
+#             booking.payment_method = payment_method
+            
+            
+#             booking.status = "pending"
+#             booking.save()
+
+#             # 🔥 Redirect to Razorpay if online payment
+#             if payment_method in ["partial_razorpay", "full_razorpay"]:
+#                 return redirect("razorpay_payment", booking_id=booking.booking_id)
+
+#             # Pay at farmhouse
+#             send_booking_emails(booking)
+#             messages.success(request, "Booking request received!")
+#             return redirect("booking_confirmation", booking_id=booking.booking_id)
+
+#             # booking.status = "confirmed"
+#             # booking.save()
+#             # send_booking_emails(booking)
+#             # messages.success(request, "Booking request received!")
+
+#             # return redirect("booking_confirmation", booking_id=booking.booking_id)
 
 #     else:
 #         form = BookingForm()
 
-#     # GET request (no coupon yet)
 #     context = {
 #         "room_category": room_category,
 #         "form": form,
@@ -677,6 +715,408 @@ def validate_coupon(request):
 
 #     return render(request, "resort/room_detail.html", context)
 
+# from django.http import JsonResponse
+
+# def validate_coupon(request):
+#     code = request.GET.get("code", "")
+#     try:
+#         coupon = Coupon.objects.get(code__iexact=code, is_active=True)
+#         return JsonResponse({"valid": True, "discount": float(coupon.discount_amount)})
+#     except:
+#         return JsonResponse({"valid": False, "discount": 0})
+
+
+
+
+
+
+
+from decimal import Decimal
+from datetime import datetime, timedelta
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from django.contrib import messages
+
+from .models import Booking, RoomCategory, VillaPricing, Coupon
+from .forms import BookingForm
+
+
+
+def room_detail(request, slug):
+    room_category = get_object_or_404(RoomCategory, slug=slug)
+
+    # ===== BOOKED DATES =====
+    booked_dates = []
+    bookings = Booking.objects.filter(
+        status__in=["confirmed", "pending"],
+        check_out__gt=datetime.now().date()
+    )
+
+    for b in bookings:
+        d = b.check_in
+        while d < b.check_out:
+            booked_dates.append(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
+
+    pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+
+    # ===== AJAX SUBMIT =====
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        form = BookingForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({"error": "Invalid form"}, status=400)
+
+        payment_method = request.POST.get("payment_method")
+
+        base_amount = calculate_booking_cost(
+            form.cleaned_data["check_in"],
+            form.cleaned_data["check_out"],
+            form.cleaned_data["guest_count"],
+            form.cleaned_data["extra_guest_count"],
+        )
+
+        discount = Decimal("0.00")
+        if form.cleaned_data.get("coupon_code"):
+            try:
+                coupon = Coupon.objects.get(
+                    code__iexact=form.cleaned_data["coupon_code"],
+                    is_active=True
+                )
+                discount = coupon.discount_amount
+            except Coupon.DoesNotExist:
+                pass
+
+        total = base_amount - discount
+
+        # ================= CASH =================
+        if payment_method == "farmhouse":
+            booking = form.save(commit=False)
+            booking.sub_total = base_amount
+            booking.disc_price = discount
+            booking.total_amount = 0
+            booking.remaining_amount = total
+            booking.payment_status = "pending"
+            booking.status = "confirmed"
+            booking.save()
+
+            send_booking_emails(booking)
+
+            return JsonResponse({
+                "redirect": True,
+                "url": reverse("booking_confirmation", args=[booking.booking_id])
+            })
+
+        # ================= RAZORPAY =================
+        request.session["pending_booking"] = {
+            "data": request.POST.dict(),
+            "base": str(base_amount),
+            "discount": str(discount),
+            "total": str(total),
+        }
+
+        return JsonResponse({
+            "razorpay": True,
+            "amount": float(total)
+        })
+
+    # ===== NORMAL PAGE LOAD =====
+    return render(request, "resort/room_detail.html", {
+        "room_category": room_category,
+        "form": BookingForm(),
+        "booked_dates": booked_dates,
+        "pricing": pricing,
+        "extra_price": float(pricing.extra_guest_price),
+    })
+
+
+# def room_detail(request, slug):
+#     room_category = get_object_or_404(RoomCategory, slug=slug)
+
+#     # ===== BOOKED DATES =====
+#     booked_dates = []
+#     current_bookings = Booking.objects.filter(
+#         status__in=["confirmed", "pending"],
+#         check_out__gt=datetime.now().date()
+#     )
+
+#     for booking in current_bookings:
+#         d = booking.check_in
+#         while d < booking.check_out:
+#             booked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+
+#     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+#     calculated_total = 0
+
+#     # ===== AJAX SUBMIT (ONE PAGE PAYMENT) =====
+#     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+#         form = BookingForm(request.POST)
+
+#         if not form.is_valid():
+#             return JsonResponse({"error": "Invalid form"}, status=400)
+
+#         check_in = form.cleaned_data["check_in"]
+#         check_out = form.cleaned_data["check_out"]
+#         guest_count = form.cleaned_data["guest_count"]
+#         extra_guest_count = form.cleaned_data["extra_guest_count"]
+#         payment_method = request.POST.get("payment_method")
+
+#         base_amount = calculate_booking_cost(
+#             check_in, check_out, guest_count, extra_guest_count
+#         )
+
+#         # ===== COUPON =====
+#         discount = Decimal("0.00")
+#         coupon_code = form.cleaned_data.get("coupon_code")
+#         if coupon_code:
+#             try:
+#                 coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True)
+#                 discount = coupon.discount_amount
+#             except Coupon.DoesNotExist:
+#                 pass
+
+#         total = base_amount - discount
+
+#         booking = form.save(commit=False)
+#         booking.sub_total = base_amount
+#         booking.disc_price = discount
+#         booking.payment_method = payment_method
+#         booking.status = "pending"
+
+#         if payment_method == "partial_razorpay":
+#             booking.total_amount = round(total * Decimal("0.30"), 2)
+#             booking.remaining_amount = total - booking.total_amount
+#             booking.payment_status = "partial"
+
+#         elif payment_method == "full_razorpay":
+#             booking.total_amount = total
+#             booking.remaining_amount = 0
+#             booking.payment_status = "paid"
+
+#         else:  # Pay at farmhouse
+#             booking.total_amount = 0
+#             booking.remaining_amount = total
+#             booking.payment_status = "pending"
+
+#         booking.save()
+
+#         # ===== CASH FLOW =====
+#         if payment_method == "farmhouse":
+#             send_booking_emails(booking)
+#             return JsonResponse({
+#                 "redirect": True,
+#                 "url": reverse("booking_confirmation", args=[booking.booking_id])
+#             })
+
+#         # ===== ONLINE PAYMENT =====
+#         return JsonResponse({
+#             "razorpay": True,
+#             "booking_id": booking.booking_id,
+#             "amount": float(booking.total_amount)
+#         })
+
+#     # ===== NORMAL PAGE LOAD =====
+#     form = BookingForm()
+#     context = {
+#         "room_category": room_category,
+#         "form": form,
+#         "booked_dates": booked_dates,
+#         "pricing": pricing,
+#         "calculated_total": calculated_total,
+#         "extra_price": float(pricing.extra_guest_price),
+#     }
+#     return render(request, "resort/room_detail.html", context)
+
+
+# # ================== RAZORPAY ==================
+
+
+# @csrf_exempt
+# def create_razorpay_order(request):
+#     booking_id = request.POST.get("booking_id")
+#     amount = request.POST.get("amount")
+
+#     if not booking_id or not amount:
+#         return JsonResponse({"error": "Missing data"}, status=400)
+
+#     booking = get_object_or_404(Booking, booking_id=booking_id)
+
+#     razorpay_amount = int(float(amount) * 100)
+
+#     order = razorpay_client.order.create({
+#         "amount": razorpay_amount,
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+
+#     booking.transaction_id = order["id"]
+#     booking.save(update_fields=["transaction_id"])
+
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": razorpay_amount,
+#         "name": booking.guest_name,
+#         "email": booking.guest_email,
+#         "contact": booking.guest_phone,
+#     })
+    
+    
+@csrf_exempt
+def create_razorpay_order(request):
+    amount = request.POST.get("amount")
+    if not amount:
+        return JsonResponse({"error": "Amount missing"}, status=400)
+
+    order = razorpay_client.order.create({
+        "amount": int(float(amount) * 100),
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    return JsonResponse({
+        "order_id": order["id"],
+        "key": settings.RAZORPAY_KEY_ID,
+        "amount": order["amount"]
+    })
+
+# @csrf_exempt
+# def create_razorpay_order(request):
+#     booking_id = request.POST.get("booking_id")
+#     amount = request.POST.get("amount")
+
+#     if not booking_id or not amount:
+#         return JsonResponse({"error": "Missing data"}, status=400)
+
+#     booking = get_object_or_404(Booking, booking_id=booking_id)
+
+#     razorpay_amount = int(float(amount) * 100)
+
+#     order = razorpay_client.order.create({
+#         "amount": razorpay_amount,
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+
+#     booking.transaction_id = order["id"]
+#     booking.save(update_fields=["transaction_id"])
+
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": razorpay_amount,
+#         "name": booking.guest_name,
+#         "email": booking.guest_email,
+#         "contact": booking.guest_phone,
+#     })
+
+
+# @csrf_exempt
+# def verify_razorpay_payment(request):
+
+#     razorpay_order_id = request.POST.get("razorpay_order_id")
+#     razorpay_payment_id = request.POST.get("razorpay_payment_id")
+#     razorpay_signature = request.POST.get("razorpay_signature")
+
+#     # ✅ IMPORTANT: Check first
+#     if not razorpay_order_id or not razorpay_payment_id or not razorpay_signature:
+#         return JsonResponse({
+#             "status": "failed",
+#             "error": "Payment was not completed"
+#         }, status=400)
+
+#     try:
+#         razorpay_client.utility.verify_payment_signature({
+#             "razorpay_order_id": razorpay_order_id,
+#             "razorpay_payment_id": razorpay_payment_id,
+#             "razorpay_signature": razorpay_signature,
+#         })
+
+#         booking = get_object_or_404(
+#             Booking,
+#             transaction_id=razorpay_order_id
+#         )
+
+#         booking.payment_id = razorpay_payment_id
+#         booking.payment_status = "paid"
+#         booking.status = "confirmed"
+#         booking.save()
+
+#         send_booking_emails(booking)
+
+#         return JsonResponse({"status": "success"})
+
+#     except Exception as e:
+#         return JsonResponse({
+#             "status": "failed",
+#             "error": str(e)
+#         }, status=400)
+
+@csrf_exempt
+def verify_razorpay_payment(request):
+    try:
+        razorpay_client.utility.verify_payment_signature({
+            "razorpay_order_id": request.POST["razorpay_order_id"],
+            "razorpay_payment_id": request.POST["razorpay_payment_id"],
+            "razorpay_signature": request.POST["razorpay_signature"],
+        })
+
+        session = request.session.get("pending_booking")
+        if not session:
+            return JsonResponse({"status": "failed", "error": "Session expired"}, status=400)
+
+        data = session["data"]
+
+        booking = Booking.objects.create(
+            guest_name=data["guest_name"],
+            guest_email=data["guest_email"],
+            guest_phone=data["guest_phone"],
+            guest_count=data["guest_count"],
+            extra_guest_count=data.get("extra_guest_count", 0),
+            check_in=data["check_in"],
+            check_out=data["check_out"],
+            sub_total=session["base"],
+            disc_price=session["discount"],
+            total_amount=session["total"],
+            remaining_amount=0,
+            payment_method=data["payment_method"],
+            payment_status="paid",
+            status="confirmed",
+            transaction_id=request.POST["razorpay_order_id"],
+            payment_id=request.POST["razorpay_payment_id"],
+        )
+
+        send_booking_emails(booking)
+
+        del request.session["pending_booking"]
+
+        return JsonResponse({
+            "status": "success",
+            "booking_id": booking.booking_id
+        })
+
+    except Exception as e:
+        return JsonResponse({"status": "failed", "error": str(e)}, status=400)
+
+
+
+
+
+
+
+
+
+
+def validate_coupon(request):
+    code = request.GET.get("code", "")
+    try:
+        coupon = Coupon.objects.get(code__iexact=code, is_active=True)
+        return JsonResponse({"valid": True, "discount": float(coupon.discount_amount)})
+    except:
+        return JsonResponse({"valid": False, "discount": 0})
 
 def view_invoice(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
@@ -701,128 +1141,6 @@ def view_invoice(request, booking_id):
 
 
 
-
-
-
-# def room_detail(request, slug):
-#     """Room detail and booking view with GLOBAL villa availability checking"""
-#     room_category = get_object_or_404(RoomCategory, slug=slug)
-    
-#     # Get all booked dates for the ENTIRE VILLA
-#     booked_dates = []
-    
-#     # Get all confirmed/pending bookings that are active
-#     # We ignore the specific room, as any booking blocks the villa
-#     current_bookings = Booking.objects.filter(
-#         status__in=['confirmed', 'pending'],
-#         check_out__gt=datetime.now().date()
-#     )
-    
-#     # Collect all booked date ranges
-#     for booking in current_bookings:
-#         current_date = booking.check_in
-#         while current_date < booking.check_out:
-#             booked_dates.append(current_date.strftime('%Y-%m-%d'))
-#             current_date += timedelta(days=1)
-    
-#     # Pricing info for display
-#     pricing = VillaPricing.objects.first()
-#     if not pricing:
-#         pricing = VillaPricing.objects.create()
-
-#     if request.method == 'POST':
-#         form = BookingForm(request.POST)
-#         if form.is_valid():
-#             check_in = form.cleaned_data['check_in']
-#             check_out = form.cleaned_data['check_out']
-#             coupon_code = form.cleaned_data.get('coupon_code')
-            
-#             # Check ID check_out > check_in (handled in form clean but good to be safe)
-            
-#             # GLOBAL AVAILABILITY CHECK
-#             # Check if ANY booking overlaps with the requested dates
-#             overlapping_bookings = Booking.objects.filter(
-#                 status__in=['confirmed', 'pending'],
-#                 check_in__lt=check_out, 
-#                 check_out__gt=check_in
-#             )
-            
-#             if overlapping_bookings.exists():
-#                  messages.error(request, 'Sorry! The entire villa is already booked for these dates. Please choose different dates.')
-#             else:
-#                 booking = form.save(commit=False)
-#                 # booking.room is NULLABLE now, so we don't assign it (or we could assign a dummy)
-#                 booking.room = None 
-                
-#                 # Calculate total amount
-#                 base_amount = calculate_booking_cost(check_in, check_out)
-#                 discount = 0
-                
-#                 # Handle Coupon
-#                 if coupon_code:
-#                     try:
-#                         coupon = Coupon.objects.get(code__iexact=coupon_code, is_active=True, valid_until__gte=datetime.now().date())
-#                         if coupon.valid_from <= datetime.now().date():
-#                             discount = coupon.discount_amount
-#                             booking.coupon_applied = coupon
-#                             messages.success(request, f'Coupon {coupon.code} applied! Saved {discount}')
-#                         else:
-#                              messages.warning(request, 'Coupon is not yet valid.')
-#                     except Coupon.DoesNotExist:
-#                         messages.warning(request, 'Invalid coupon code.')
-
-#                 booking.total_amount = max(0, base_amount - discount)
-#                 booking.status = 'confirmed' # Or pending
-                
-#                 booking.save()
-
-#                 # Send Confirmation Email
-#                 subject = f"Booking Confirmed - {booking.booking_id}"
-#                 message = f"""
-#                 Dear {booking.guest_name},
-
-#                 Thank you for booking with Vivaan Farmhouse!
-
-#                 Your booking details:
-#                 Booking ID: {booking.booking_id}
-#                 Check-in: {booking.check_in} {f"({booking.check_in_time})" if booking.check_in_time else ""}
-#                 Check-out: {booking.check_out} {f"({booking.check_out_time})" if booking.check_out_time else ""}
-#                 Total Amount: ₹{booking.total_amount}
-
-#                 We look forward to hosting you.
-                
-#                 Regards,
-#                 Vivaan Farmhouse Team
-#                 """
-
-
-#                 recipient_list = [booking.guest_email]
-                
-#                 try:
-#                     send_mail(
-#                         subject, 
-#                         message, 
-#                         'reservations@vivaanfarmhouse.com', # From email 
-#                         recipient_list, 
-
-#                         fail_silently=True # Prevent error if email backend is not configured correctly
-#                     )
-#                 except Exception as e:
-#                     print(f"Error sending email: {e}")
-
-#                 messages.success(request, f'Booking confirmed! Your booking ID is {booking.booking_id}')
-#                 return redirect('booking_confirmation', booking_id=booking.booking_id)
-
-#     else:
-#         form = BookingForm()
-    
-#     context = {
-#         'room_category': room_category,
-#         'form': form,
-#         'booked_dates': booked_dates,
-#         'pricing': pricing,
-#     }
-#     return render(request, 'resort/room_detail.html', context)
 
 
 def booking_confirmation(request, booking_id):

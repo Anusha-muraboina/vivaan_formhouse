@@ -82,12 +82,6 @@
 
                         </div>
 
-                     
-
-
-
-
-
  <div class="grid grid-cols-2 gap-4">
   <div>
                             <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests Count</label>
@@ -320,55 +314,6 @@
 {% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
     {{ room_category.description|safe }}
 </div> {% endcomment %}
-
-
-
-<!-- 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-mountain text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">{{ room_category.get_view_type_display }}</h4>
-                                <p class="text-sm text-gray-500">Scenic Views</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-bed text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">King Size Bed</h4>
-                                <p class="text-sm text-gray-500">Luxury Bedding</p>
-                            </div>
-                        </div>
-
-                        {% if room_category.has_balcony %}
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-door-open text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Private Balcony</h4>
-                                <p class="text-sm text-gray-500">Outdoor Space</p>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if room_category.has_bathtub %}
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-bath text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Bathtub</h4>
-                                <p class="text-sm text-gray-500">Luxury Bathroom</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div> -->
                 </div>
 
 
@@ -400,7 +345,8 @@
 
 <script>    
 document.addEventListener("DOMContentLoaded", function () {
-
+    // ✅ DECLARE ONCE (FIX)
+    let couponDiscount = 0;
     // Form inputs
     let checkIn = document.querySelector("input[name='check_in']");
     let checkOut = document.querySelector("input[name='check_out']");
@@ -508,10 +454,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-
-
-
-
  /**************************************
      LIVE COUPON VALIDATION (AJAX)
     **************************************/
@@ -573,179 +515,121 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-
-{% comment %} guestCount.addEventListener("input", function () {
-    if (parseInt(this.value) > 15) {
-        alert("Guest count cannot exceed 15.");
-        this.value = 15;
-    }
-});
-
-extraGuest.addEventListener("input", function () {
-    if (parseInt(this.value) > 5) {
-        alert("Extra guest count cannot exceed 5.");
-        this.value = 5;
-    }
-}); {% endcomment %}
-
 </script>
 
 
 
-{% comment %} <script>
-document.addEventListener("DOMContentLoaded", function () {
+{% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
 
-    let checkIn = document.querySelector("input[name='check_in']");
-    let checkOut = document.querySelector("input[name='check_out']");
-    let guestCount = document.querySelector("input[name='guest_count']");
-    let radios = document.querySelectorAll("input[name='payment_method']");
+<script>
+document.querySelector("form").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
+    const formData = new FormData(this);
 
-    // backend values
-    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
-    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
-    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
+    fetch("", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
 
-    function calculateTotal() {
-        const inDate = new Date(checkIn.value);
-        const outDate = new Date(checkOut.value);
-
-        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
-            return 0;
-        }
-
-        let total = 0;
-        let date = new Date(inDate);
-
-        while (date < outDate) {
-            let day = date.getDay();
-            if (day === 5 || day === 6) {
-                total += weekend;
-            } else {
-                total += weekday;
-            }
-            date.setDate(date.getDate() + 1);
-        }
-
-        let guests = parseInt(guestCount.value || 15);
-        let extra = Math.max(0, guests - 15);
-
-        total += extra * extraGuestPrice;
-
-        total += total * 0.00; // tax 12%
-
-        return Math.round(total);
-    }
-
-    function updatePayment() {
-        let total = calculateTotal();
-
-        if (total <= 0) {
-            paymentSummary.classList.add("hidden");
+        if (data.redirect) {
+            window.location.href = data.url;
             return;
         }
 
-        paymentSummary.classList.remove("hidden");
-
-        let deposit = Math.round(total * 0.30);
-        let remaining = total - deposit;
-
-        document.getElementById("depositValue").innerText = deposit;
-        document.getElementById("fullValue").innerText = total;
-        document.getElementById("remainingValue").innerText = remaining;
-
-        let selected = document.querySelector("input[name='payment_method']:checked").value;
-
-        if (selected === "farmhouse") {
-            depositAmount.classList.add("hidden");
-            fullAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.add("hidden");
+        if (data.razorpay) {
+            openRazorpay(data.booking_id, data.amount);
         }
-
-        if (selected === "partial_razorpay") {
-            depositAmount.classList.remove("hidden");
-            remainingAmount.classList.remove("hidden");
-            fullAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-
-        if (selected === "full_razorpay") {
-            fullAmount.classList.remove("hidden");
-            depositAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-    }
-
-    radios.forEach(r => r.addEventListener("change", updatePayment));
-    checkIn.addEventListener("change", updatePayment);
-    checkOut.addEventListener("change", updatePayment);
-    guestCount.addEventListener("change", updatePayment);
-
-});
-</script> {% endcomment %}
-
-
-
-{% comment %} 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-
-    const radios = document.querySelectorAll('input[name="payment_method"]');
-
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
-
-    // IMPORTANT — backend must set this
-    const total = {{ calculated_total|default:0 }};
-    
-    const deposit = Math.round(total * 0.30);
-    const remaining = total - deposit;
-
-    document.getElementById("depositValue").innerText = deposit;
-    document.getElementById("fullValue").innerText = total;
-    document.getElementById("remainingValue").innerText = remaining;
-
-    radios.forEach(radio => {
-        radio.addEventListener("change", function() {
-
-            paymentSummary.classList.remove("hidden");
-
-            if (this.value === "farmhouse") {
-                depositAmount.classList.add("hidden");
-                fullAmount.classList.add("hidden");
-                remainingAmount.classList.add("hidden");
-                razorpayBox.classList.add("hidden");
-            }
-
-            if (this.value === "partial_razorpay") {
-                depositAmount.classList.remove("hidden");
-                remainingAmount.classList.remove("hidden");
-                fullAmount.classList.add("hidden");
-                razorpayBox.classList.remove("hidden");
-            }
-
-            if (this.value === "full_razorpay") {
-                fullAmount.classList.remove("hidden");
-                depositAmount.classList.add("hidden");
-                remainingAmount.classList.add("hidden");
-                razorpayBox.classList.remove("hidden");
-            }
-        });
     });
-
 });
+
+
+
+
+function openRazorpay(bookingId, amount) {
+
+    fetch("/create-razorpay-order/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `booking_id=${bookingId}&amount=${amount}`
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        const options = {
+            key: data.key,
+            amount: data.amount,
+            currency: "INR",
+            name: "Vivaan Farmhouse",
+            order_id: data.order_id,
+
+            handler: function (response) {
+                console.log("Razorpay response:", response);
+
+                if (!response.razorpay_payment_id) {
+                    alert("Payment cancelled or failed");
+                    return;
+                }
+
+                fetch("/verify-payment/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body:
+                        `razorpay_payment_id=${response.razorpay_payment_id}` +
+                        `&razorpay_order_id=${response.razorpay_order_id}` +
+                        `&razorpay_signature=${response.razorpay_signature}`
+                })
+                .then(res => res.json())
+                .then(result => {
+                    console.log("Verify result:", result);
+
+                    if (result.status === "success") {
+                        window.location.href = `/booking/${result.booking_id}/`;
+                    } else {
+                        alert("Payment verification failed");
+                    }
+                });
+            },
+
+            modal: {
+                ondismiss: function () {
+                    alert("Payment cancelled");
+                }
+            },
+
+            prefill: {
+                name: data.name,
+                email: data.email,
+                contact: data.contact
+            },
+
+            theme: {
+                color: "#047857"
+            }
+        }; // ✅ VERY IMPORTANT — object closed
+
+        const rzp = new Razorpay(options); // ✅ SAFE NOW
+        rzp.open();
+    })
+    .catch(err => {
+        console.error("Razorpay error:", err);
+        alert("Payment initialization failed");
+    });
+}
 </script>
- {% endcomment %}
+
 
 
 

@@ -67,7 +67,7 @@ class Amenity(models.Model):
     description = models.TextField(blank=True)
     is_featured = models.BooleanField(default=False)
     amenity_image = models.ImageField(upload_to='amenities/', null=True, blank=True)
-
+    slot_position = models.IntegerField(null=True, blank=True)
     class Meta:
         verbose_name_plural = 'Amenities'
         ordering = ['name']
@@ -203,6 +203,17 @@ class Booking(models.Model):
         return (self.sub_total or 0) - (self.disc_price or 0)
 
 
+# models.py
+class BlockedDate(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Blocked: {self.start_date} → {self.end_date}"
+
+
 class Testimonial(models.Model):
     """Guest testimonials"""
     guest_name = models.CharField(max_length=200)
@@ -212,6 +223,7 @@ class Testimonial(models.Model):
         default=5
     )
     comment = models.TextField()
+    slot_position = models.IntegerField(null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -234,6 +246,7 @@ class Gallery(models.Model):
         ('events', 'Events'),
     ], default='views')
     is_featured = models.BooleanField(default=False)
+    slot_position = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

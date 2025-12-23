@@ -1,10 +1,11 @@
 from django.contrib import admin
 from .models import (
     RoomCategory, Room, Amenity, Offer, Booking, Coupon,
-    Testimonial, Gallery, ContactMessage,VillaPricing
+    Testimonial, Gallery, ContactMessage,VillaPricing,MainBanner
 )
 
 admin.site.register(Coupon)
+admin.site.register(MainBanner)
 admin.site.register(VillaPricing)
 @admin.register(RoomCategory)
 class RoomCategoryAdmin(admin.ModelAdmin):
@@ -65,3 +66,13 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_filter = ['is_read', 'created_at']
     search_fields = ['name', 'email', 'subject']
     readonly_fields = ['created_at']
+
+
+
+# admin.py
+from .models import BlockedDate
+
+@admin.register(BlockedDate)
+class BlockedDateAdmin(admin.ModelAdmin):
+    list_display = ("start_date", "end_date", "reason")
+    list_filter = ("start_date",)
