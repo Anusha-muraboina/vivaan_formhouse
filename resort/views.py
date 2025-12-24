@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db.models import Q
 from datetime import datetime, timedelta
 from .models import (
-    RoomCategory, Room, Amenity, Offer, Booking, MainBanner,BlockedDate,
+    RoomCategory, Amenity, Offer, Booking, MainBanner,BlockedDate,
     Testimonial, Gallery, ContactMessage,Coupon, VillaPricing
 )
 from .forms import BookingForm, ContactForm,TestimonialForm

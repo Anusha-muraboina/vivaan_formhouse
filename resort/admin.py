@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    RoomCategory, Room, Amenity, Offer, Booking, Coupon,
+    RoomCategory, Amenity, Offer, Booking, Coupon,
     Testimonial, Gallery, ContactMessage,VillaPricing,MainBanner
 )
 
@@ -15,11 +15,11 @@ class RoomCategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Room)
-class RoomAdmin(admin.ModelAdmin):
-    list_display = ['room_number', 'category', 'is_available']
-    list_filter = ['category', 'is_available']
-    search_fields = ['room_number']
+# @admin.register(Room)
+# class RoomAdmin(admin.ModelAdmin):
+#     list_display = ['room_number', 'category', 'is_available']
+#     list_filter = ['category', 'is_available']
+#     search_fields = ['room_number']
 
 
 @admin.register(Amenity)
@@ -39,7 +39,7 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['booking_id', 'guest_name', 'room', 'check_in', 'check_out', 'status', 'total_amount']
+    list_display = ['booking_id', 'guest_name', 'check_in', 'check_out', 'status', 'total_amount']
     list_filter = ['status', 'check_in', 'check_out']
     search_fields = ['booking_id', 'guest_name', 'guest_email']
     readonly_fields = ['booking_id', 'created_at', 'updated_at']
