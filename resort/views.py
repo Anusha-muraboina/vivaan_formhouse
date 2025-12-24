@@ -162,7 +162,7 @@ def send_booking_emails(booking):
         "",
         settings.DEFAULT_FROM_EMAIL,
         [booking.guest_email],
-        cc=cc_recipients  
+        # cc=cc_recipients  
     )
     user_email.attach_alternative(user_html, "text/html")
     user_email.send()

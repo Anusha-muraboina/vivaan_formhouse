@@ -208,7 +208,7 @@ ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
 
 # Optional CC emails
 CC_EMAIL = [
-    'info@vivaanfarmhouse.com',
+    # 'info@vivaanfarmhouse.com',
     'anushamuraboina9@gmail.com'
 ]
 
