@@ -281,11 +281,11 @@
 
 
 
-                        {% comment %} <button type="submit"
+                        <button type="submit"
                             class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700">
                             <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
-                        </button> {% endcomment %}
-<button type="submit"
+                        </button> 
+{% comment %} <button type="submit"
         id="bookBtn"
         class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700 flex items-center justify-center gap-2">
     <span id="btnText">
@@ -306,7 +306,7 @@
               fill="currentColor"
               d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
-</button>
+</button> {% endcomment %}
 
                     </form>
 
@@ -425,6 +425,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     // ✅ DECLARE ONCE (FIX)
     let couponDiscount = 0;
+    let couponTimer = null;
     // Form inputs
     let checkIn = document.querySelector("input[name='check_in']");
     let checkOut = document.querySelector("input[name='check_out']");
@@ -565,14 +566,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+    // ===============================
+    // DEBOUNCED COUPON CHECK
+    // ===============================
 
+
+
+
+
+
+
+
+    
+     // ===============================
+    // DEBOUNCED COUPON CHECK
+    // ===============================
+    
     // Attach event listeners
     radios.forEach(r => r.addEventListener("change", updatePayment));
     checkIn.addEventListener("change", updatePayment);
     checkOut.addEventListener("change", updatePayment);
-    guestCount.addEventListener("change", updatePayment);
-    extraGuest.addEventListener("change", updatePayment);
-
+    guestCount.addEventListener("input", updatePayment);
+    extraGuest.addEventListener("input", updatePayment);
 
     // moved validation here
     guestCount.addEventListener("input", function () {
@@ -598,6 +613,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 {% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+</script>
 
 <script>
 document.querySelector("form").addEventListener("submit", function (e) {
@@ -608,7 +628,7 @@ document.querySelector("form").addEventListener("submit", function (e) {
     fetch("", {
         method: "POST",
         headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
+            "X-CSRFToken": getCSRFToken(),
             "X-Requested-With": "XMLHttpRequest"
         },
         body: formData
@@ -622,20 +642,20 @@ document.querySelector("form").addEventListener("submit", function (e) {
         }
 
         if (data.razorpay) {
-            openRazorpay(data.booking_id, data.amount);
+            openRazorpay( data.amount);
         }
     });
 });
 
 
 
-
+{% comment %} 
 function openRazorpay(bookingId, amount) {
 
     fetch("/create-razorpay-order/", {
         method: "POST",
         headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
+            "X-CSRFToken": getCSRFToken(),
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `booking_id=${bookingId}&amount=${amount}`
@@ -661,7 +681,7 @@ function openRazorpay(bookingId, amount) {
                 fetch("/verify-payment/", {
                     method: "POST",
                     headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-CSRFToken": getCSRFToken(),
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
                     body:
@@ -705,7 +725,81 @@ function openRazorpay(bookingId, amount) {
         console.error("Razorpay error:", err);
         alert("Payment initialization failed");
     });
+} {% endcomment %}
+
+
+function openRazorpay(amount) {
+
+    fetch("/create-razorpay-order/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `amount=${amount}`
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        const options = {
+            key: data.key,
+            amount: data.amount,
+            currency: "INR",
+            name: "Vivaan Farmhouse",
+            order_id: data.order_id,
+
+            handler: function (response) {
+
+                // ❌ If payment cancelled
+                if (!response.razorpay_payment_id) {
+                    alert("Payment cancelled or failed");
+                    return;
+                }
+
+                // ✅ STORE ORDER ID FOR POLLING
+                localStorage.setItem(
+                    "rzp_order_id",
+                    response.razorpay_order_id
+                );
+
+                // 🚀 REDIRECT IMMEDIATELY (FAST UX)
+                window.location.href = "/payment-processing/";
+
+                // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
+                fetch("/verify-payment/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCSRFToken(),
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body:
+                        `razorpay_payment_id=${response.razorpay_payment_id}` +
+                        `&razorpay_order_id=${response.razorpay_order_id}` +
+                        `&razorpay_signature=${response.razorpay_signature}`
+                });
+            },
+
+            modal: {
+                ondismiss: function () {
+                    alert("Payment cancelled");
+                }
+            },
+
+            theme: {
+                color: "#047857"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    })
+    .catch(err => {
+        console.error("Razorpay error:", err);
+        alert("Payment initialization failed");
+    });
 }
+
+
 </script>
 
 

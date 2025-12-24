@@ -34,7 +34,7 @@
 
             <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Phone:</span> {{ booking.guest_phone }}</p>
 
-            <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Room:</span> {{ booking.room.category.name }}</p>
+            {% comment %} <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Room:</span> {{ booking.room.category.name }}</p> {% endcomment %}
 
             <p class="text-gray-600 mb-2"><span class="font-semibold text-gray-800">Check-in:</span> {{ booking.check_in|date:"F d, Y" }}</p>
 

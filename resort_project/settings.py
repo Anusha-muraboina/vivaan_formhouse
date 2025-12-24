@@ -15,14 +15,14 @@ SECRET_KEY = 'django-insecure-strawberry-king-resort-secret-key-change-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 
-ALLOWED_HOSTS = [
-  "13.60.82.1",
-    "localhost",
-    "127.0.0.1",
-]
+# ALLOWED_HOSTS = [
+#   "https://e23d39b29fc8.ngrok-free.app",
+#     "localhost",
+#     "127.0.0.1",
+# ]
 
 
 
@@ -154,7 +154,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 RAZORPAY_KEY_ID = "rzp_test_Rv2abPyaI8rKSP"
 RAZORPAY_KEY_SECRET = "cOuReUYXYcYBWeNUg3LSYkmB"
-
+RAZORPAY_WEBHOOK_SECRET = "kdfwfbsdhfwberfdlnsrojofdiwer4y59ujdnf94yu5u#28nf"
 
 
 
@@ -171,24 +171,50 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'anushamuraboina9@gmail.com'
+# EMAIL_HOST_PASSWORD = 'mpywwnwfrubgkxoe'
+# DEFAULT_FROM_EMAIL = 'anushamuraboina9@gmail.com'
+# ADMIN_EMAIL = 'anushamuraboina9@gmail.com' 
+
+# # FRONTEND_URL = 'http://127.0.0.1:9000'  
+
+# CC_EMAIL = [
+#     'anushamuraboina9@gmail.com',
+#     'info@vivaanfarmhouse.com',
+# ]
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+# ACCOUNT_EMAIL_REQUIRED = True
+
+
+
+# EMAIL CONFIGURATION (HOSTINGER)
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'anushamuraboina9@gmail.com'
-EMAIL_HOST_PASSWORD = 'mpywwnwfrubgkxoe'
-DEFAULT_FROM_EMAIL = 'anushamuraboina9@gmail.com'
-ADMIN_EMAIL = 'anushamuraboina9@gmail.com' 
 
-# FRONTEND_URL = 'http://127.0.0.1:9000'  
+EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True        # IMPORTANT for port 465
+EMAIL_USE_TLS = False       # Must be False when using SSL
 
+EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
+EMAIL_HOST_PASSWORD = 'Shrikant@1234$' 
+
+DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
+ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
+
+# Optional CC emails
 CC_EMAIL = [
-    'anushamuraboina9@gmail.com',
     'info@vivaanfarmhouse.com',
+    'anushamuraboina9@gmail.com'
 ]
+
+# Django allauth (if you are using it)
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
-
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
@@ -199,12 +225,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://ebb218b6ba40.ngrok-free.app",
+    "https://e23d39b29fc8.ngrok-free.app",
 ]
 
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://ebb218b6ba40.ngrok-free.app",
-    "http://ebb218b6ba40.ngrok-free.app",
+    "https://e23d39b29fc8.ngrok-free.app",
+    # "https://e23d39b29fc8.ngrok-free.app/",
 ]
