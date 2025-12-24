@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from ckeditor.fields import RichTextField
 from decimal import Decimal
+from django.core.exceptions import ValidationError
 
 class MainBanner(models.Model):
     """Main banner for the resort"""
@@ -182,9 +183,16 @@ class Booking(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
 
+    # class Meta:
+    #     ordering = ['-created_at']
     class Meta:
         ordering = ['-created_at']
-
+        constraints = [
+            models.UniqueConstraint(
+                fields=["guest_email", "check_in", "check_out", "payment_method"],
+                name="unique_booking_guest_dates"
+            )
+        ]
     def save(self, *args, **kwargs):
         if not self.booking_id:
             import random
@@ -209,6 +217,17 @@ class BlockedDate(models.Model):
     end_date = models.DateField()
     reason = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    def clean(self):
+        if self.start_date > self.end_date:
+            raise ValidationError("End date must be after start date.")
+
+        overlaps = BlockedDate.objects.filter(
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exclude(pk=self.pk)
+
+        if overlaps.exists():
+            raise ValidationError("These dates overlap with an existing blocked range.")
 
     def __str__(self):
         return f"Blocked: {self.start_date} → {self.end_date}"

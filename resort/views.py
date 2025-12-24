@@ -3,11 +3,12 @@ from django.contrib import messages
 from django.db.models import Q
 from datetime import datetime, timedelta
 from .models import (
-    RoomCategory, Room, Amenity, Offer, Booking, MainBanner,
+    RoomCategory, Room, Amenity, Offer, Booking, MainBanner,BlockedDate,
     Testimonial, Gallery, ContactMessage,Coupon, VillaPricing
 )
 from .forms import BookingForm, ContactForm,TestimonialForm
 from django.core.mail import send_mail
+from django.db import IntegrityError, transaction
 
 def home(request):
     """Homepage view"""
@@ -759,7 +760,15 @@ def room_detail(request, slug):
         while d < b.check_out:
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
+    # ===== BLOCKED DATES (ADMIN) =====
+    blocked_dates = []
+    blocks = BlockedDate.objects.all()
 
+    for block in blocks:
+        d = block.start_date
+        while d <= block.end_date:
+            blocked_dates.append(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
     # ===== AJAX SUBMIT =====
@@ -791,22 +800,54 @@ def room_detail(request, slug):
         total = base_amount - discount
 
         # ================= CASH =================
+        # if payment_method == "farmhouse":
+        #     booking = form.save(commit=False)
+        #     booking.sub_total = base_amount
+        #     booking.disc_price = discount
+        #     booking.total_amount = 0
+        #     booking.remaining_amount = total
+        #     booking.payment_status = "pending"
+        #     booking.status = "confirmed"
+        #     booking.save()
+
+        #     send_booking_emails(booking)
+
+        #     return JsonResponse({
+        #         "redirect": True,
+        #         "url": reverse("booking_confirmation", args=[booking.booking_id])
+        #     })
         if payment_method == "farmhouse":
-            booking = form.save(commit=False)
-            booking.sub_total = base_amount
-            booking.disc_price = discount
-            booking.total_amount = 0
-            booking.remaining_amount = total
-            booking.payment_status = "pending"
-            booking.status = "confirmed"
-            booking.save()
+            try:
+                with transaction.atomic():
+                    booking = form.save(commit=False)
+                    booking.sub_total = base_amount
+                    booking.disc_price = discount
+                    booking.total_amount = 0
+                    booking.remaining_amount = total
+                    booking.payment_status = "pending"
+                    booking.status = "confirmed"
+                    booking.save()
 
-            send_booking_emails(booking)
+                send_booking_emails(booking)
 
-            return JsonResponse({
-                "redirect": True,
-                "url": reverse("booking_confirmation", args=[booking.booking_id])
-            })
+                return JsonResponse({
+                    "redirect": True,
+                    "url": reverse("booking_confirmation", args=[booking.booking_id])
+                })
+
+            except IntegrityError:
+                # booking already exists, fetch it
+                booking = Booking.objects.get(
+                    guest_email=form.cleaned_data["guest_email"],
+                    check_in=form.cleaned_data["check_in"],
+                    check_out=form.cleaned_data["check_out"],
+                    payment_method="farmhouse"
+                )
+
+                return JsonResponse({
+                    "redirect": True,
+                    "url": reverse("booking_confirmation", args=[booking.booking_id])
+                })
 
         # ================= RAZORPAY =================
         request.session["pending_booking"] = {
@@ -826,6 +867,7 @@ def room_detail(request, slug):
         "room_category": room_category,
         "form": BookingForm(),
         "booked_dates": booked_dates,
+        "blocked_dates": blocked_dates, 
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
     })

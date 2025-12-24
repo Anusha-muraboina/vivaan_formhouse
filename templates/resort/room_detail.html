@@ -6,6 +6,42 @@
 {% csrf_token %}
 {% load static %}
 {% block content %}
+<style>
+/* 🔴 Booked dates */
+.flatpickr-day.booked-date {
+    background: white !important; /* red-500 */
+    color: #510303ff !important;
+    border: 1px solid #460404ff !important;
+    cursor: not-allowed;
+}
+
+/* 🟠 Admin blocked dates */
+.flatpickr-day.blocked-date {
+    background: white !important; /* orange-500 */
+    color:  #ff6a00ff !important ;
+     border: 1px solid #ff6f08ff !important;
+    cursor: not-allowed;
+}
+
+/* 🟢 Selected range */
+.flatpickr-day.inRange,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: white !important; /* green-500 */
+    color: #012c11ff !important;
+     border: 1px solid #022f12ff !important;
+}
+
+/* 🔵 Today */
+.flatpickr-day.today {
+    border-color: #011637ff !important; /* blue-500 */
+}
+
+/* Disabled look */
+.flatpickr-day.disabled {
+    opacity: 0.6;
+}
+</style>
 
 <div class="fixed inset-0 -z-10">
   <div class="absolute inset-0 bg-cover bg-center"
@@ -97,6 +133,18 @@
 </div>
 
 
+   <div class="flex flex-wrap gap-4 text-sm mt-3">
+    <div class="flex items-center gap-2">
+        <span class="w-4 h-4 bg-green-900 rounded"></span> Selected
+    </div>
+    <div class="flex items-center gap-2">
+        <span class="w-4 h-4 bg-red-600 rounded"></span> Booked
+    </div>
+    <div class="flex items-center gap-2">
+        <span class="w-4 h-4 bg-orange-900 rounded"></span> Blocked by Admin
+    </div>
+</div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
@@ -112,7 +160,10 @@
                             </div>
                         </div>
 
+                        
                         <div class="grid grid-cols-2 gap-4">
+                         
+
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
                                 <input type="text" name="check_out"
@@ -230,10 +281,32 @@
 
 
 
-                        <button type="submit"
+                        {% comment %} <button type="submit"
                             class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700">
                             <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
-                        </button>
+                        </button> {% endcomment %}
+<button type="submit"
+        id="bookBtn"
+        class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700 flex items-center justify-center gap-2">
+    <span id="btnText">
+        <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
+    </span>
+
+    <!-- Loader (hidden initially) -->
+    <svg id="btnLoader"
+         class="hidden animate-spin h-5 w-5 text-white"
+         xmlns="http://www.w3.org/2000/svg"
+         fill="none"
+         viewBox="0 0 24 24">
+        <circle class="opacity-25"
+                cx="12" cy="12" r="10"
+                stroke="currentColor"
+                stroke-width="4"></circle>
+        <path class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+</button>
 
                     </form>
 
@@ -332,8 +405,13 @@
 </section>
 
 {% block extra_js %}
+{% comment %} {{ booked_dates|json_script:"booked-dates-data" }} {% endcomment %}
 {{ booked_dates|json_script:"booked-dates-data" }}
+{{ blocked_dates|json_script:"blocked-dates-data" }}
 
+{% comment %} <script id="blocked-dates-data" type="application/json">
+    {{ blocked_dates|json_script:"blocked-dates-data" }}
+</script> {% endcomment %}
 
 
 
@@ -632,93 +710,266 @@ function openRazorpay(bookingId, amount) {
 
 
 
-
-
+{% comment %} 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Booked dates from backend
-        const bookedDatesElement = document.getElementById('booked-dates-data');
-        const bookedDates = bookedDatesElement ? JSON.parse(bookedDatesElement.textContent) : [];
+document.addEventListener('DOMContentLoaded', function () {
 
-        const dateNotification = document.getElementById('dateNotification');
-        const dateNotificationText = document.getElementById('dateNotificationText');
+    if (typeof flatpickr === "undefined") {
+        console.error("❌ Flatpickr not loaded");
+        return;
+    }
 
-        function showNotification(message) {
-            if (dateNotification && dateNotificationText) {
-                dateNotificationText.textContent = message;
-                dateNotification.classList.remove('hidden');
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates-data")?.textContent || "[]"
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates-data")?.textContent || "[]"
+    );
+
+    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+    function formatDate(date) {
+        return date.toISOString().split("T")[0];
+    }
+
+    // CHECK-IN
+    const checkInPicker = flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+        onChange: function (selectedDates) {
+            if (selectedDates.length) {
+                const nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOutPicker.set("minDate", nextDay);
             }
-            // Temporarily using alert as fallback/emphasis
-            // alert(message); 
         }
+    });
 
-        function isDateBooked(dateString) {
-            return bookedDates.includes(dateString);
-        }
-
-        // Initialize Check-in Picker
-        const checkInPicker = flatpickr("input[name='check_in']", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            disable: bookedDates,
-            onChange: function (selectedDates, dateStr, instance) {
-                // Update Check-out minDate
-                if (selectedDates[0]) {
-                    const nextDay = new Date(selectedDates[0]);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    checkOutPicker.set('minDate', nextDay);
-                }
-
-                // Clear invalid check-out
-                const checkOutInput = document.querySelector("input[name='check_out']");
-                if (checkOutInput.value && checkOutInput.value <= dateStr) {
-                    checkOutInput.value = '';
-                }
+    // CHECK-OUT
+    const checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+        onChange: function (selectedDates) {
+            const checkInVal = document.querySelector("input[name='check_in']").value;
+            if (!checkInVal) {
+                alert("⚠️ Please select check-in date first");
+                checkOutPicker.clear();
+                return;
             }
-        });
 
-        // Initialize Check-out Picker
-        const checkOutPicker = flatpickr("input[name='check_out']", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            disable: bookedDates,
-            onChange: function (selectedDates, dateStr, instance) {
-                const checkInInput = document.querySelector("input[name='check_in']");
-                const checkInDateStr = checkInInput.value;
+            let current = new Date(checkInVal);
+            const end = new Date(selectedDates[0]);
 
-                if (!checkInDateStr) {
-                    showNotification('⚠️ Please select check-in date first.');
-                    instance.clear();
+            while (current < end) {
+                const dStr = formatDate(current);
+                if (disabledDates.includes(dStr)) {
+                    alert("⚠️ Selected range includes blocked/booked dates");
+                    checkOutPicker.clear();
                     return;
                 }
-
-                // Range validation: ensure no booked dates in between
-                let currentDate = new Date(checkInDateStr);
-                const endDate = new Date(dateStr);
-
-                while (currentDate < endDate) {
-                    const dStr = currentDate.toISOString().split('T')[0];
-                    if (isDateBooked(dStr)) {
-                        showNotification('⚠️ RANGE INCLUDES BOOKED DATES! Please select a valid continuous range.');
-                        instance.clear();
-                        break;
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
+                current.setDate(current.getDate() + 1);
             }
-        });
-
-        // Initialize Time Pickers
-        flatpickr("input[name='check_in_time'], input[name='check_out_time']", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: false
-        });
-
-        console.log('Flatpickr initialized. Booked dates:', bookedDates.length);
+        }
     });
+
+    console.log("✅ Flatpickr initialized successfully");
+});
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates-data")?.textContent || "[]"
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates-data")?.textContent || "[]"
+    );
+
+    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+    function formatDate(date) {
+        return date.toISOString().split("T")[0];
+    }
+
+    function decorateDay(dayElem) {
+        const dateStr = formatDate(dayElem.dateObj);
+
+        if (bookedDates.includes(dateStr)) {
+            dayElem.classList.add("booked-date");
+            dayElem.title = "Already booked";
+        }
+
+        if (blockedDates.includes(dateStr)) {
+            dayElem.classList.add("blocked-date");
+            dayElem.title = "Blocked by admin";
+        }
+    }
+
+    // CHECK-IN
+    const checkInPicker = flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorateDay(dayElem);
+        },
+
+        onChange(selectedDates) {
+            if (selectedDates.length) {
+                const nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOutPicker.set("minDate", nextDay);
+            }
+        }
+    });
+
+    // CHECK-OUT
+    const checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorateDay(dayElem);
+        },
+
+        onChange(selectedDates) {
+            const checkInVal = document.querySelector("input[name='check_in']").value;
+            if (!checkInVal) {
+                alert("⚠️ Select check-in date first");
+                checkOutPicker.clear();
+                return;
+            }
+
+            let current = new Date(checkInVal);
+            const end = new Date(selectedDates[0]);
+
+            while (current < end) {
+                const dStr = formatDate(current);
+                if (disabledDates.includes(dStr)) {
+                    alert("⚠️ Selected range includes unavailable dates");
+                    checkOutPicker.clear();
+                    return;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+        }
+    });
+
+});
+</script> {% endcomment %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    if (typeof flatpickr === "undefined") {
+        console.error("❌ Flatpickr not loaded");
+        return;
+    }
+
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates-data")?.textContent || "[]"
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates-data")?.textContent || "[]"
+    );
+
+    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+    function formatDate(date) {
+        return date.toISOString().split("T")[0];
+    }
+
+    function decorateDay(dayElem) {
+        const dateStr = formatDate(dayElem.dateObj);
+
+        if (bookedDates.includes(dateStr)) {
+            dayElem.classList.add("booked-date");
+            dayElem.title = "Already booked";
+        }
+
+        if (blockedDates.includes(dateStr)) {
+            dayElem.classList.add("blocked-date");
+            dayElem.title = "Blocked by admin";
+        }
+    }
+
+    let checkInPicker;
+    let checkOutPicker;
+
+    // ✅ CHECK-IN
+    checkInPicker = flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorateDay(dayElem);
+        },
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            checkOutPicker.set("minDate", nextDay);
+        }
+    });
+
+    // ✅ CHECK-OUT
+    checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: true,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorateDay(dayElem);
+        },
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const checkInDate = checkInPicker.selectedDates[0];
+
+            if (!checkInDate) {
+                alert("⚠️ Please select check-in date first");
+                checkOutPicker.clear();
+                return;
+            }
+
+            let current = new Date(checkInDate);
+            const end = new Date(selectedDates[0]);
+
+            while (current < end) {
+                const dStr = formatDate(current);
+                if (disabledDates.includes(dStr)) {
+                    alert("⚠️ Selected range includes unavailable dates");
+                    checkOutPicker.clear();
+                    return;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+        }
+    });
+
+    console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
+});
+</script>
+
 {% endblock %}
 {% endblock %}
 

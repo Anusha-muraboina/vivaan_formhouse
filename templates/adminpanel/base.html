@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKR Resort - Admin Dashboard</title>
+    <meta name="description" content="Admin dashboard for SKR Resort - Manage bookings, rooms, guests, and more.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        resort: {
+                            forest: '#2d5a47',
+                            'forest-light': '#3d7a5f',
+                            gold: '#d4a853',
+                            terracotta: '#cd6b4e',
+                            sage: '#a8c5a8',
+                            cream: '#f7f4ef',
+                        },
+                        sidebar: {
+                            DEFAULT: '#1a2e26',
+                            foreground: '#e8e4df',
+                            accent: '#243d33',
+                            border: '#2d4a3d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9f7;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #243d33;
+        }
+        
+        .sidebar-item.active {
+            background-color: #243d33;
+            color: #3d9970;
+        }
+        
+        /* Card hover effects */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Table row hover */
+        .table-row:hover {
+            background-color: rgba(45, 90, 71, 0.05);
+        }
+        
+        /* Badge styles */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-pending { background-color: #fef3c7; color: #b45309; }
+        .badge-confirmed { background-color: #d1fae5; color: #047857; }
+        .badge-cancelled { background-color: #fee2e2; color: #dc2626; }
+        .badge-completed { background-color: #dbeafe; color: #2563eb; }
+        .badge-paid { background-color: #d1fae5; color: #047857; }
+        .badge-partial { background-color: #dbeafe; color: #2563eb; }
+        .badge-failed { background-color: #fee2e2; color: #dc2626; }
+        
+        /* Gradient backgrounds */
+        .gradient-primary {
+            background: linear-gradient(135deg, #2d5a47, #1a3d30);
+        }
+        
+        .gradient-accent {
+            background: linear-gradient(135deg, #cd6b4e, #b85a40);
+        }
+        
+        .gradient-gold {
+            background: linear-gradient(135deg, #d4a853, #c49a45);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .animate-pulse-soft {
+            animation: pulse-soft 2s ease-in-out infinite;
+        }
+        
+        /* Mobile menu overlay */
+        .mobile-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Room card hover */
+        .room-card:hover .room-image {
+            transform: scale(1.05);
+        }
+        
+        .room-image {
+            transition: transform 0.5s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex min-h-screen w-full">
+        
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-sidebar text-sidebar-foreground shadow-lg">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="mobile-overlay fixed inset-0 z-40 lg:hidden hidden"></div>
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed lg:sticky top-0 left-0 h-screen z-40 w-64 bg-sidebar border-r border-sidebar-border -translate-x-full lg:translate-x-0">
+            
+         
+            <div class="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
+                        <i data-lucide="home" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-lg font-semibold text-sidebar-foreground">SKR Resort</h1>
+                        <p class="text-xs text-sidebar-foreground/60">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="p-3 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-item   {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %} active flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'admin_booking_list' %}" class="sidebar-item {% if 'booking' in request.resolver_match.url_name %}active{% endif %} flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                    <span>Bookings</span>
+                </a>
+                <a href="{% url 'admin_rooms' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="bed" class="w-5 h-5"></i>
+                    <span>Rooms</span>
+                </a>
+                <a href="{% url 'admin_amenities' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span>Amenities</span>
+                </a>
+                <a href="{% url 'admin_gallery' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <span>Gallery</span>
+                </a>
+                <a href="{% url 'admin_testimonials' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="star" class="w-5 h-5"></i>
+                    <span>Testimonials</span>
+                </a>
+                <a href="{% url 'admin_offers' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="tag" class="w-5 h-5"></i>
+                    <span>Offers & Coupons</span>
+                </a>
+                <a href="{% url 'admin_pricing' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    <span>Villa Pricing</span>
+                </a>
+                <a href="{% url 'admin_blocked_dates' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="ban" class="w-5 h-5"></i>
+                    <span>Blocked Dates</span>
+                </a>
+                <a href="{% url 'admin_messages' %}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <span>Banners</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Guests</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-screen">
+            
+            <!-- Header -->
+            <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="lg:ml-0 ml-12">
+                        <h1 class="font-display text-2xl font-bold text-gray-900">Dashboard</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">Welcome back! Here's your resort overview.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- Search -->
+                        <div class="hidden md:flex relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                            <input type="text" placeholder="Search bookings, guests..." 
+                                   class="w-64 pl-10 pr-4 py-2 text-sm rounded-lg bg-gray-100/50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-resort-forest/20 focus:border-resort-forest">
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-resort-terracotta animate-pulse-soft"></span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <div class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
+                                <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                            </div>
+                            <span class="hidden md:inline text-sm font-medium text-gray-700">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+           
+
+
+
+
+        <main class="flex-1 p-6 overflow-auto">
+            {% block content %}{% endblock %}
+        </main>
+
+
+
+
+
+
+        </div>
+    </div>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            mobileOverlay.classList.toggle('hidden');
+        });
+        
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            mobileOverlay.classList.add('hidden');
+        });
+        
+        // Sidebar navigation
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Close mobile menu
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.add('-translate-x-full');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
