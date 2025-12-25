@@ -1,0 +1,175 @@
+{% extends 'adminpanel/base.html' %}
+{% block header %}Add Room Category{% endblock %}
+
+{% block content %}
+
+<style>
+.form-wrapper {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-card {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.form-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #065f46;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+}
+
+.form-group {
+    margin-bottom: 0.9rem;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+</style>
+
+<div class="form-wrapper">
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="form-grid">
+
+    <!-- BASIC DETAILS -->
+    <div class="form-card">
+        <div class="form-title">Basic Information</div>
+
+        <div class="form-group">
+            <label>Category Name</label>
+            <input type="text" name="name" placeholder="Deluxe Suite" required>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="5"
+                placeholder="Short description about this room category..."></textarea>
+        </div>
+    </div>
+
+    <!-- PRICING & CAPACITY -->
+    <div class="form-card">
+        <div class="form-title">Pricing & Capacity</div>
+
+        <div class="form-group">
+            <label>Base Price (₹)</label>
+            <input type="number" name="base_price" step="0.01" placeholder="8500" required>
+        </div>
+
+        <div class="form-group">
+            <label>Size (Sqft)</label>
+            <input type="number" name="size_sqft" placeholder="450" required>
+        </div>
+
+        <div class="form-group">
+            <label>Max Occupancy</label>
+            <input type="number" name="max_occupancy" placeholder="4" required>
+        </div>
+    </div>
+
+    <!-- LOCATION & VIEW -->
+    <div class="form-card">
+        <div class="form-title">Location & View</div>
+
+        <div class="form-group">
+            <label>Floor</label>
+            <input type="text" name="floor" placeholder="Ground / 1st / 2nd">
+        </div>
+
+        <div class="form-group">
+            <label>View Type</label>
+            <select name="view_type">
+                <option value="standard">Standard</option>
+                <option value="garden">Garden View</option>
+                <option value="valley">Valley View</option>
+                <option value="pool">Pool View</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Room Image</label>
+            <input type="file" name="image">
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="form-card">
+        <div class="form-title">Room Features</div>
+
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" name="has_balcony"> Balcony
+            </label>
+            <label>
+                <input type="checkbox" name="has_bathtub"> Bathtub
+            </label>
+        </div>
+    </div>
+
+</div>
+
+<div class="form-actions">
+    <a href="{% url 'vivaan_admin:room_list' %}" class="btn-action btn-view">
+        Cancel
+    </a>
+    <button class="btn-action btn-add">
+        Save Room Category
+    </button>
+</div>
+
+</form>
+</div>
+
+{% endblock %}

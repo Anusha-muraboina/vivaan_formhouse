@@ -1,0 +1,34 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Amenities | Vivaan Admin{% endblock %}
+{% block header %}Amenities{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Amenity List</h2>
+        <a href="{% url 'vivaan_admin:amenity_create' %}" class="btn-action btn-view"><i class="fa-solid fa-plus"></i>
+            Add Amenity</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for amenity in amenities %}
+            <tr>
+                <td>{{ amenity.name }}</td>
+                <td>
+                    <a href="{% url 'vivaan_admin:amenity_edit' amenity.id %}" class="btn-action btn-view">Edit</a>
+                    <a href="{% url 'vivaan_admin:amenity_delete' amenity.id %}" class="btn-action btn-delete"
+                        onclick="return confirm('Delete?');">Delete</a>
+                </td>
+            </tr>
+            {% empty %}<tr>
+                <td colspan="2">No amenities found.</td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

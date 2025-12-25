@@ -1,0 +1,59 @@
+{% extends 'adminpanel/base.html' %}
+{% block header %}Banners{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header flex-between">
+        <h2>Homepage Banners</h2>
+        <a href="{% url 'vivaan_admin:banner_create' %}" class="btn-action btn-add">
+            + Add Banner
+        </a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th style="text-align:center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for banner in banners %}
+            <tr>
+                <td>
+                    <img src="{{ banner.image.url }}" class="h-12 rounded-md">
+                </td>
+                <td>
+                    <strong>{{ banner.title }}</strong><br>
+                    <small>{{ banner.subtitle }}</small>
+                </td>
+                <td>{{ banner.slot_position }}</td>
+                <td>
+                    {% if banner.active %}
+                        <span class="badge badge-confirmed">Active</span>
+                    {% else %}
+                        <span class="badge badge-cancelled">Inactive</span>
+                    {% endif %}
+                </td>
+                <td style="text-align:center;">
+                    <a href="{% url 'vivaan_admin:banner_edit' banner.id %}"
+                       class="btn-action btn-view btn-sm">Edit</a>
+                    <a href="{% url 'vivaan_admin:banner_delete' banner.id %}"
+                       class="btn-action btn-delete btn-sm"
+                       onclick="return confirm('Delete this banner?')">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;">No banners found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

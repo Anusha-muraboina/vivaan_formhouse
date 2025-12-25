@@ -1,0 +1,18 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Amenities | Vivaan Admin{% endblock %}
+{% block header %}Amenity Form{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 500px">
+    <div class="card-header">
+        <h2>{% if amenity %}Edit{% else %}Add{% endif %} Amenity</h2>
+    </div>
+    <form method="POST" style="padding: 2rem;">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+            <label>Name</label>
+            <input type="text" name="name" value="{{ amenity.name }}" required style="width:100%; padding:.8rem;">
+        </div>
+        <button type="submit" class="btn-action btn-view">Save</button>
+    </form>
+</div>
+{% endblock %}

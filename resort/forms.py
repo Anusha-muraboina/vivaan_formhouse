@@ -46,7 +46,8 @@ class BookingForm(forms.ModelForm):
             }),
             'guest_count': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent',
-                'min': '1'
+                'min': '1',
+                'readonly': 'readonly'
             }),
             'extra_guest_count': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-600 focus:border-transparent',

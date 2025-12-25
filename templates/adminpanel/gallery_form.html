@@ -1,0 +1,26 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Gallery | Vivaan Admin{% endblock %}
+{% block header %}Gallery Form{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 500px">
+    <div class="card-header">
+        <h2>{% if gallery %}Edit{% else %}Add{% endif %} Photo</h2>
+    </div>
+    <form method="POST" enctype="multipart/form-data" style="padding: 2rem;">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;"><label>Title</label><input type="text" name="title" required
+                style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>Category</label>
+            <select name="category" style="width:100%; padding:.8rem;">
+                <option value="rooms">Rooms</option>
+                <option value="dining">Dining</option>
+                <option value="facilities">Facilities</option>
+                <option value="views">Views</option>
+                <option value="events">Events</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 1rem;"><label>Image</label><input type="file" name="image" required></div>
+        <button type="submit" class="btn-action btn-view">Save</button>
+    </form>
+</div>
+{% endblock %}

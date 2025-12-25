@@ -1,4 +1,627 @@
+
 <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vivaan Admin{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            /* Deep Red */
+            --primary-dark: #600000;
+            --secondary-color: #1f2937;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #374151;
+            --text-light: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --sidebar-width: 260px;
+            --sidebar-width-collapsed: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+
+        /* Collapsed Sidebar State (Desktop) */
+        body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-width-collapsed);
+        }
+
+        body.sidebar-collapsed .sidebar-brand-text,
+        body.sidebar-collapsed .menu-text {
+            visibility: hidden;
+            opacity: 0;
+            width: 0;
+            display: none;
+            /* simple hide */
+        }
+
+        body.sidebar-collapsed .sidebar-header {
+            padding: 2rem 0;
+            justify-content: center;
+        }
+
+        body.sidebar-collapsed .sidebar-brand {
+            justify-content: center;
+        }
+
+        body.sidebar-collapsed .sidebar-brand i {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        body.sidebar-collapsed .menu-item {
+            text-align: center;
+            padding: 1rem 0;
+            justify-content: center;
+            display: flex;
+        }
+
+        body.sidebar-collapsed .menu-item i {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+            transition: all 0.3s ease;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-width-collapsed);
+            width: calc(100% - var(--sidebar-width-collapsed));
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            padding: 1.5rem 1rem;
+            flex: 1;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .menu-item i {
+            width: 25px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Header Components */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-toggle-btn:hover {
+            transform: scale(1.1);
+            color: var(--primary-color);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        /* Common Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: #fefce8;
+            color: #ca8a04;
+        }
+
+        .status-confirmed {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .status-cancelled {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .status-completed {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .btn-action {
+            text-decoration: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .btn-view {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Mobile Responsiveness */
+        .sidebar-overlay {
+            display: none;
+            /* hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px !important;
+                /* Always full width on mobile */
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            body.sidebar-open .sidebar {
+                transform: translateX(0);
+            }
+
+            body.sidebar-open .sidebar-overlay {
+                display: block;
+            }
+
+            /* On mobile, collapsed logic from desktop doesn't apply the same way, we rely on sidebar-open class */
+            body.sidebar-collapsed .sidebar {
+                width: 260px;
+            }
+
+            /* Text should be visible on mobile when open */
+            body.sidebar-collapsed .sidebar-brand-text,
+            body.sidebar-collapsed .menu-text {
+                display: inline-block;
+                visibility: visible;
+                opacity: 1;
+                width: auto;
+            }
+
+            body.sidebar-collapsed .menu-item {
+                justify-content: flex-start;
+                padding: 1rem 1.5rem;
+            }
+
+            body.sidebar-collapsed .menu-item i {
+                margin-right: 10px;
+            }
+
+            body.sidebar-collapsed .sidebar-header {
+                justify-content: flex-start;
+                padding: 2rem 1.5rem;
+            }
+
+            body.sidebar-collapsed .sidebar-brand {
+                justify-content: flex-start;
+            }
+
+            body.sidebar-collapsed .sidebar-brand i {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Overlay for mobile closing -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'vivaan_admin:dashboard' %}" class="sidebar-brand">
+                <i class="fa-solid fa-house-chimney-window"></i>
+                <span class="sidebar-brand-text">Vivaan Admin</span>
+            </a>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'vivaan_admin:dashboard' %}"
+                class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-gauge-high"></i> <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'vivaan_admin:booking_list' %}"
+                class="menu-item {% if request.resolver_match.url_name == 'booking_list' %}active{% endif %}">
+                <i class="fa-solid fa-calendar-check"></i> <span class="menu-text">Bookings</span>
+            </a>
+            <a href="{% url 'vivaan_admin:room_list' %}"
+                class="menu-item {% if request.resolver_match.url_name == 'room_list' %}active{% endif %}">
+                <i class="fa-solid fa-bed"></i> <span class="menu-text">Rooms & Villa</span>
+            </a>
+            <a href="{% url 'vivaan_admin:banner_list' %}" class="menu-item"><i class="fa-solid fa-images"></i> <span
+                    class="menu-text">Banners</span></a>
+            <a href="{% url 'vivaan_admin:amenity_list' %}" class="menu-item"><i class="fa-solid fa-spa"></i> <span
+                    class="menu-text">Amenities</span></a>
+            <a href="{% url 'vivaan_admin:blocked_date_list' %}" class="menu-item"><i class="fa-solid fa-ban"></i> <span
+                    class="menu-text">Blocked Dates</span></a>
+            <a href="{% url 'vivaan_admin:coupon_list' %}" class="menu-item"><i class="fa-solid fa-ticket"></i> <span
+                    class="menu-text">Coupons</span></a>
+            <a href="{% url 'vivaan_admin:gallery_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
+                <span class="menu-text">Gallery</span></a>
+            <a href="{% url 'vivaan_admin:testimonial_list' %}" class="menu-item"><i class="fa-solid fa-star"></i> <span
+                    class="menu-text">Testimonials</span></a>
+            <a href="{% url 'vivaan_admin:user_list' %}" class="menu-item"><i class="fa-solid fa-users-gear"></i> <span
+                    class="menu-text">Users</span></a>
+            <a href="{% url 'vivaan_admin:message_list' %}" class="menu-item"><i class="fa-solid fa-envelope"></i> <span
+                    class="menu-text">Messages</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'vivaan_admin:logout' %}" class="menu-item" style="color: rgba(255,255,255,0.7);">
+                <i class="fa-solid fa-right-from-bracket"></i> <span class="menu-text">Logout</span>
+            </a>
+            <a href="/" class="menu-item" style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="menu-text">Visit Site</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="sidebar-toggle-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>{% block header %}Overview{% endblock %}</h1>
+            </div>
+            <div class="user-profile">
+                <div class="user-info" style="text-align: right;">
+                    <p style="font-weight: 600; font-size: 0.9rem;">Administrator</p>
+                </div>
+                <div class="user-avatar">A</div>
+            </div>
+        </header>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const body = document.body;
+
+        function toggleSidebar() {
+            if (window.innerWidth <= 991) {
+                // Mobile: Toggle open/close
+                body.classList.toggle('sidebar-open');
+            } else {
+                // Desktop: Toggle collapsed mode
+                body.classList.toggle('sidebar-collapsed');
+                // Save preference
+                if (body.classList.contains('sidebar-collapsed')) {
+                    localStorage.setItem('sidebarState', 'collapsed');
+                } else {
+                    localStorage.setItem('sidebarState', 'expanded');
+                }
+            }
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', () => {
+            body.classList.remove('sidebar-open');
+        });
+
+        // Restore state on load (Desktop only)
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth > 991) {
+                const state = localStorage.getItem('sidebarState');
+                if (state === 'collapsed') {
+                    body.classList.add('sidebar-collapsed');
+                }
+            }
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 991) {
+                body.classList.remove('sidebar-open');
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -345,4 +968,4 @@
         });
     </script>
 </body>
-</html>
+</html> {% endcomment %}

@@ -4,21 +4,77 @@
 {% csrf_token %}
 {% load static %}
 {% block content %}
+
+
+<style>
+.time-dropdown {
+    position: relative;
+}
+
+.time-btn {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0 10px;
+    background: white;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.time-list {
+    position: absolute;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    margin-top: 4px;
+    z-index: 50;
+}
+
+/* 🔥 EXACT 30px OPTION HEIGHT */
+.time-option {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.time-option:hover {
+    background-color: #047857;
+    color: white;
+}
+
+/* Scrollbar */
+.time-list::-webkit-scrollbar {
+    width: 6px;
+}
+.time-list::-webkit-scrollbar-thumb {
+    background: #047857;
+    border-radius: 4px;
+}
+</style>
+
+
 <style>
     /* 🔴 Booked dates */
     .flatpickr-day.booked-date {
-        background: white !important;
-        /* red-500 */
-        color: #510303ff !important;
+        background: #510303ff !important;
+        /* red-500 */   
+        color: white !important;
         border: 1px solid #460404ff !important;
         cursor: not-allowed;
     }
 
     /* 🟠 Admin blocked dates */
     .flatpickr-day.blocked-date {
-        background: white !important;
+        background: rgb(224, 97, 5) !important;
         /* orange-500 */
-        color: #ff6a00ff !important;
+        color: white !important;
         border: 1px solid #ff6f08ff !important;
         cursor: not-allowed;
     }
@@ -27,9 +83,9 @@
     .flatpickr-day.inRange,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange {
-        background: white !important;
+        background: #012c11ff !important;
         /* green-500 */
-        color: #012c11ff !important;
+        color: white !important;
         border: 1px solid #022f12ff !important;
     }
 
@@ -55,6 +111,11 @@
     font-weight: 600;
     border-radius: 12px;
     border: 2px solid #012a1d;
+}
+</style>
+<style>
+.collapse-header {
+    pointer-events: none;
 }
 </style>
 
@@ -139,22 +200,7 @@
     </div>
 
          <div  id="step1" class="collapse-body  p-6 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" >
 
-                                   <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
-                                {{ form.guest_count }}
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests
-                                    Count</label>
-                                {{ form.extra_guest_count }}
-                            </div>
-
-
-                     
-                        </div>
 
 
                         <div class="flex flex-wrap gap-4 text-sm mt-3">
@@ -195,16 +241,38 @@
 
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-
-                            <!-- <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
-                                <input type="text" name="check_out"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Date" required>
-                            </div> -->
-
+<!-- Check-in Time -->
 <div>
+    <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
+
+    <input type="hidden" name="check_in_time" id="checkInTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('in')">
+            Select Check-In Time
+        </button>
+
+        <div id="timeListIn" class="time-list hidden"></div>
+    </div>
+</div>
+
+<!-- Check-out Time -->
+<div>
+    <label class="block text-gray-700 font-semibold mb-2">Check-Out Time</label>
+
+    <input type="hidden" name="check_out_time" id="checkOutTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('out')">
+            Select Check-Out Time
+        </button>
+
+        <div id="timeListOut" class="time-list hidden"></div>
+    </div>
+</div>
+
+
+<!-- <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
                                 <input type="text" name="check_in_time"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -218,10 +286,23 @@
                                 <input type="text" name="check_out_time"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Check Out Time">
-                            </div>
+                            </div> -->
                         </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" >
 
+                                   <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
+                                {{ form.guest_count }}
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests
+                                    Count</label>
+                                {{ form.extra_guest_count }}
+                            </div>
+
+                        </div>
 
                         <div>
                             <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
@@ -242,19 +323,26 @@
                                 <span id="dateNotificationText"></span>
                             </div>
                         </div>
-<!-- 
-                        {% if form.errors %}
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                            {% for field, errors in form.errors.items %}
-                            {% for error in errors %}
-                            <p>{{ error }}</p>
-                            {% endfor %}
-                            {% endfor %}
-                        </div>
-                        {% endif %} -->
+
+
+
+
+
+
+                         <div class="flex justify-end pt-4">
+    <button type="button"
+        onclick="validateStep1()"
+        class="bg-emerald-900 text-white px-6 py-2 rounded-lg font-semibold">
+        Next →
+    </button>
+</div>
+
 
 
  </div>
+
+
+
  </div>
 <!-- ======================================== -->
 
@@ -286,7 +374,29 @@
                             </div>
                         <!-- </div> -->
 
+
+
+
+
+                        <div class="flex justify-between pt-4">
+    <button type="button"
+        onclick="toggleCollapse('step1')"
+        class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+        ← Previous
+    </button>
+
+    <button type="button"
+        onclick="validateStep2()"
+        class="bg-emerald-900 text-white px-6 py-2 rounded-lg font-semibold">
+        Next →
+    </button>
 </div>
+</div>
+
+
+
+
+
 </div>
 <!-- ========================================= -->
 
@@ -366,11 +476,20 @@
                             </div>
 
                         </div>
-
+                 
+<div class="flex justify-start pt-2">
+    <button type="button"
+        onclick="toggleCollapse('step2')"
+        class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+        ← Previous
+    </button>
+</div>
 
 
 
 </div>
+
+
 </div>
 
                         <button type="submit"
@@ -502,6 +621,145 @@ function toggleCollapse(id) {
 }
 </script>
 
+<script>
+const startHour = 7;
+const endHour = 22;
+
+function generateSlots() {
+    const slots = [];
+    for (let h = startHour; h < endHour; h++) {
+        const from = formatHour(h);
+        const to = formatHour(h + 1);
+        slots.push(`${from} - ${to}`);
+    }
+    return slots;
+}
+
+function formatHour(h) {
+    const suffix = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:00 ${suffix}`;
+}
+
+function buildDropdown(listId, inputId, button) {
+    const list = document.getElementById(listId);
+    list.innerHTML = "";
+
+    generateSlots().forEach(slot => {
+        const div = document.createElement("div");
+        div.className = "time-option";
+        div.innerText = slot;
+
+        div.onclick = () => {
+            document.getElementById(inputId).value = slot;
+            button.innerText = slot;
+            list.classList.add("hidden");
+        };
+
+        list.appendChild(div);
+    });
+}
+
+function toggleTime(type) {
+    const list = document.getElementById(
+        type === "in" ? "timeListIn" : "timeListOut"
+    );
+    const btn = list.previousElementSibling;
+    const inputId = type === "in" ? "checkInTime" : "checkOutTime";
+
+    buildDropdown(list.id, inputId, btn);
+    list.classList.toggle("hidden");
+}
+
+/* Close when clicking outside */
+document.addEventListener("click", e => {
+    if (!e.target.closest(".time-dropdown")) {
+        document.querySelectorAll(".time-list").forEach(l => l.classList.add("hidden"));
+    }
+});
+</script>
+
+
+
+<script>
+/* =========================
+   STEP-1 VALIDATION
+   ========================= */
+function validateStep1() {
+    const checkInDate = document.querySelector("input[name='check_in']").value;
+    const checkOutDate = document.querySelector("input[name='check_out']").value;
+    const checkInTime = document.querySelector("#checkInTime").value;
+    const checkOutTime = document.querySelector("#checkOutTime").value;
+
+    if (!checkInDate) {
+        alert("Please select check-in date");
+        return;
+    }
+
+    if (!checkOutDate) {
+        alert("Please select check-out date");
+        return;
+    }
+
+    if (!checkInTime) {
+        alert("Please select check-in time");
+        return;
+    }
+
+    if (!checkOutTime) {
+        alert("Please select check-out time");
+        return;
+    }
+
+    // ✅ SAME-DAY TIME VALIDATION
+    if (checkInDate === checkOutDate) {
+        const inHour = parseInt(checkInTime.split(":")[0]);
+        const outHour = parseInt(checkOutTime.split(":")[0]);
+
+        if (outHour <= inHour) {
+            alert("Check-out time must be after check-in time");
+            return;
+        }
+    }
+
+    // ✅ MOVE TO STEP-2
+    toggleCollapse("step2");
+}
+
+/* =========================
+   STEP-2 VALIDATION
+   ========================= */
+function validateStep2() {
+    const name = document.querySelector("input[name='guest_name']").value.trim();
+    const phone = document.querySelector("input[name='guest_phone']").value.trim();
+    const email = document.querySelector("input[name='guest_email']").value.trim();
+
+    if (!name) {
+        alert("Please enter full name");
+        return;
+    }
+
+    if (!phone || phone.length < 10) {
+        alert("Please enter valid phone number");
+        return;
+    }
+
+    if (!email || !email.includes("@")) {
+        alert("Please enter valid email address");
+        return;
+    }
+
+    // ✅ STEP-2 COMPLETED → OPEN STEP-3
+    toggleCollapse("step3");
+}
+
+/* =========================
+   INITIAL STATE
+   ========================= */
+document.addEventListener("DOMContentLoaded", function () {
+    toggleCollapse("step1"); // open only step-1 on load
+});
+</script>
 
 
 <script>
@@ -1150,6 +1408,12 @@ function toggleCollapse(id) {
 
 {% endblock %}
 {% endblock %}
+
+
+
+
+
+
 
 
 {% comment %} {% extends 'resort/base.html' %}

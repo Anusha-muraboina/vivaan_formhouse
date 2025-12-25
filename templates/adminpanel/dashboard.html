@@ -1,8 +1,550 @@
-{% extends "adminpanel/base.html" %}
+
+
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Dashboard | Vivaan Admin{% endblock %}
+{% block header %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-info h3 {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-info p {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+    }
+
+    .stat-subtext {
+        font-size: 0.8rem;
+        color: #10b981;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .bg-blue-light {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .bg-green-light {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .bg-yellow-light {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .bg-purple-light {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .charts-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        height: 400px;
+    }
+
+    @media (max-width: 1024px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Stats Cards -->
+{% comment %} <div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Monthly Revenue</h3>
+            <p>₹{{ monthly_revenue }}</p>
+            <div class="stat-subtext"><i class="fa-solid fa-arrow-trend-up"></i> This Month</div>
+        </div>
+        <div class="stat-icon bg-green-light"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Bookings</h3>
+            <p>{{ weekly_bookings }}</p>
+            <div class="stat-subtext">Last 7 Days</div>
+        </div>
+        <div class="stat-icon bg-blue-light"><i class="fa-solid fa-calendar-week"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Actions</h3>
+            <p>{{ pending_bookings }}</p>
+            <div class="stat-subtext" style="color: #f59e0b;">Requires Attention</div>
+        </div>
+        <div class="stat-icon bg-yellow-light"><i class="fa-solid fa-bell"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Guests</h3>
+            <p>{{ total_guests }}</p>
+            <div class="stat-subtext">All Time</div>
+        </div>
+        <div class="stat-icon bg-purple-light"><i class="fa-solid fa-users"></i></div>
+    </div>
+</div> {% endcomment %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Overall Revenue</h3>
+            <p>₹{{ overall_revenue }}</p>
+            <div class="stat-subtext">Overall Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Monthly Revenue</h3>
+            <p>₹{{ monthly_revenue }}</p>
+            <div class="stat-subtext">Monthly Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Revenue</h3>
+            <p>₹{{ weekly_revenue }}</p>
+            <div class="stat-subtext">Weekly Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+
+
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Bookings</h3>
+            <p>{{ weekly_bookings }}</p>
+            <div class="stat-subtext">Last 7 Days</div>
+        </div>
+        <div class="stat-icon bg-blue-light">📅</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Bookings</h3>
+            <p>{{ pending_bookings }}</p>
+            <div class="stat-subtext">Needs Attention</div>
+        </div>
+        <div class="stat-icon bg-yellow-light">⏳</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Guests</h3>
+            <p>{{ total_guests }}</p>
+            <div class="stat-subtext">All Time</div>
+        </div>
+        <div class="stat-icon bg-purple-light">👥</div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+{% comment %} <div class="charts-row">
+    <div class="chart-container">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Booking Trends (Last 6 Months)</h2>
+        <canvas id="bookingsChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Booking Status Distribution</h2>
+        <canvas id="statusChart"></canvas>
+    </div>
+</div> {% endcomment %}
+
+
+<div class="charts-row">
+    <div class="chart-container">
+        <h2>Booking Trends (Last 6 Months)</h2>
+        <canvas id="bookingsChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>Booking Status</h2>
+        <canvas id="statusChart"></canvas>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Bookings</h2>
+        <a href="{% url 'vivaan_admin:booking_list' %}" class="btn-action btn-view">Maange Bookings</a>
+    </div>
+    <div class="table-container">
+      <table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Guest</th>
+            <th>Check-in</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in recent_bookings %}
+        <tr>
+            <td>#{{ booking.booking_id }}</td>
+            <td>{{ booking.guest_name }}</td>
+            <td>{{ booking.check_in|date:"M d, Y" }}</td>
+            <td>{{ booking.status }}</td>
+            <td>
+                <a href="{% url 'vivaan_admin:booking_edit' booking.id %}">
+                    Edit
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No bookings yet</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    </div>
+</div>
+
+<script>
+const bookingsCtx = document.getElementById("bookingsChart").getContext("2d");
+new Chart(bookingsCtx, {
+    type: "line",
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: "Bookings",
+            data: {{ chart_data|safe }},
+            borderColor: "#8B0000",
+            backgroundColor: "rgba(139,0,0,0.1)",
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+const statusCtx = document.getElementById("statusChart").getContext("2d");
+new Chart(statusCtx, {
+    type: "doughnut",
+    data: {
+        labels: ["Confirmed", "Pending", "Cancelled", "Completed"],
+        datasets: [{
+            data: {{ status_data|safe }},
+            backgroundColor: ["#10b981", "#f59e0b", "#ef4444", "#3b82f6"]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "adminpanel/base.html" %}
 {% block content %}
 
 <!-- Main Content Area -->
-            {% comment %} <main class="flex-1 p-6 overflow-auto"> {% endcomment %}
+          
                 <div class="space-y-6 animate-fade-in">
                     
                     <!-- Stats Grid -->
@@ -538,6 +1080,6 @@
                     </div>
                     
                 </div>
-            {% comment %} </main> {% endcomment %}
+          
 
-            {% endblock %}
+            {% endblock %} {% endcomment %}

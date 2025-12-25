@@ -1,0 +1,22 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Coupon | Vivaan Admin{% endblock %}
+{% block header %}Coupon Form{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 500px">
+    <div class="card-header">
+        <h2>Create Coupon</h2>
+    </div>
+    <form method="POST" style="padding: 2rem;">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;"><label>Code</label><input type="text" name="code" required
+                style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>Discount Amount</label><input type="number" name="discount_amount"
+                required style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>Valid From</label><input type="date" name="valid_from" required
+                style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>Valid Until</label><input type="date" name="valid_until" required
+                style="width:100%; padding:.8rem;"></div>
+        <button type="submit" class="btn-action btn-view">Save</button>
+    </form>
+</div>
+{% endblock %}

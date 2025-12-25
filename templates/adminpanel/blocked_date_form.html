@@ -1,0 +1,20 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Block Date | Vivaan Admin{% endblock %}
+{% block header %}Block Dates{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 500px">
+    <div class="card-header">
+        <h2>Block Period</h2>
+    </div>
+    <form method="POST" style="padding: 2rem;">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;"><label>Start Date</label><input type="date" name="start_date" required
+                style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>End Date</label><input type="date" name="end_date" required
+                style="width:100%; padding:.8rem;"></div>
+        <div style="margin-bottom: 1rem;"><label>Reason</label><input type="text" name="reason"
+                placeholder="e.g. Maintenance" style="width:100%; padding:.8rem;"></div>
+        <button type="submit" class="btn-action btn-view">Block</button>
+    </form>
+</div>
+{% endblock %}

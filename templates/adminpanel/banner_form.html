@@ -1,0 +1,119 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block header %}
+    {% if banner %}Edit Banner{% else %}Add Banner{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+.form-wrapper {
+    max-width: 900px;
+    margin: auto;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+.form-group label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 4px;
+}
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+</style>
+
+<div class="form-wrapper card">
+    <div class="card-header">
+        <h2>
+            {% if banner %}Edit Banner{% else %}Add Banner{% endif %}
+        </h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="padding:2rem;">
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" name="title" value="{{ banner.title|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Subtitle</label>
+                <input type="text" name="subtitle" value="{{ banner.subtitle|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Page Title (SEO)</label>
+                <input type="text" name="page_title" value="{{ banner.page_title|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Meta Keyword</label>
+                <input type="text" name="meta_keyword" value="{{ banner.meta_keyword|default:'' }}">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Meta Description</label>
+                <textarea name="meta_description" rows="3">{{ banner.meta_description|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Display Order</label>
+                <input type="number" name="slot_position" value="{{ banner.slot_position|default:0 }}">
+            </div>
+
+            <div class="form-group">
+                <label>Status</label><br>
+                <label>
+                    <input type="checkbox" name="active"
+                        {% if banner %}
+                            {% if banner.active %}checked{% endif %}
+                        {% else %}
+                            checked
+                        {% endif %}
+                    >
+                    Active
+                </label>
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Banner Image</label>
+
+                {% if banner %}
+                    <input type="file" name="image">
+                {% else %}
+                    <input type="file" name="image" required>
+                {% endif %}
+
+                {% if banner and banner.image %}
+                    <img src="{{ banner.image.url }}"
+                         style="margin-top:10px; height:120px; border-radius:8px;">
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="form-actions" style="margin-top:2rem; text-align:right;">
+            <a href="{% url 'vivaan_admin:banner_list' %}" class="btn-action btn-view">
+                Cancel
+            </a>
+            <button type="submit" class="btn-action btn-add ">
+                {% if banner %}Update{% else %}Create{% endif %} Banner
+            </button>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

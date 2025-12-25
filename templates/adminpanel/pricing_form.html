@@ -1,0 +1,19 @@
+{% extends 'adminpanel/base.html' %}
+{% block header %}Edit Villa Pricing{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    <label>Weekday Price</label>
+    <input type="number" name="weekday_price" value="{{ pricing.weekday_price }}" required>
+
+    <label>Weekend Price</label>
+    <input type="number" name="weekend_price" value="{{ pricing.weekend_price }}" required>
+
+    <label>Extra Guest Price</label>
+    <input type="number" name="extra_guest_price" value="{{ pricing.extra_guest_price }}" required>
+
+    <button type="submit">Update Pricing</button>
+</form>
+{% endblock %}

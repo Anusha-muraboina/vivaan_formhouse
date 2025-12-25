@@ -1,5 +1,58 @@
-{% extends "adminpanel/base.html" %}
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Bookings | Vivaan Admin{% endblock %}
+{% block header %}All Bookings{% endblock %}
+
 {% block content %}
-<h2 class="text-2xl font-bold mb-4">Bookings</h2>
-<div class="bg-white p-6 rounded shadow">Booking list will appear here</div>
+<div class="card">
+    <div class="card-header">
+        <h2>Booking Management</h2>
+        <a href="{% url 'vivaan_admin:booking_create' %}" class="btn-action btn-view"><i class="fa-solid fa-plus"></i>
+            New Booking</a>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Guest</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>#{{ booking.booking_id }}</td>
+                    <td>
+                        <div style="font-weight: 500;">{{ booking.guest_name }}</div>
+                        <div style="font-size: 0.8rem; color: #9ca3af;">{{ booking.guest_email }}</div>
+                    </td>
+                    <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                    <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                    <td style="font-weight: 600;">₹{{ booking.total_amount }}</td>
+                    <td><span class="status-badge status-{{ booking.status }}">{{ booking.status|title }}</span></td>
+                    <td>
+                        <a href="{% url 'vivaan_admin:booking_detail' booking.id %}" class="btn-action btn-view"
+                            style="font-size: 0.75rem; margin-right: 5px;">View</a>
+                        <a href="{% url 'vivaan_admin:booking_edit' booking.id %}" class="btn-action btn-view"
+                            style="font-size: 0.75rem; margin-right: 5px; background-color: #f59e0b;">Edit</a>
+                        <a href="{% url 'vivaan_admin:booking_delete' booking.id %}" class="btn-action btn-delete"
+                            style="font-size: 0.75rem;"
+                            onclick="return confirm('Delete booking #{{ booking.booking_id }}?');">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-light); padding: 2rem;">No bookings
+                        found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

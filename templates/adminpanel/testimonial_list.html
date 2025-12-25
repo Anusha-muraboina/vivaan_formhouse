@@ -1,0 +1,41 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Testimonials | Vivaan Admin{% endblock %}
+{% block header %}Testimonials{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Guest Reviews</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Guest</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in testimonials %}
+            <tr>
+                <td>{{ review.guest_name }}<br><small style="color:#999">{{ review.guest_location }}</small></td>
+                <td>
+                    {% for i in "12345" %}
+                    {% if forloop.counter <= review.rating %} <i class="fa-solid fa-star"
+                        style="color:#f59e0b; font-size:0.75rem;"></i>
+                        {% else %}
+                        <i class="fa-regular fa-star" style="color:#ccc; font-size:0.75rem;"></i>
+                        {% endif %}
+                        {% endfor %}
+                </td>
+                <td style="max-width:300px;">{{ review.comment|truncatechars:50 }}</td>
+                <td><a href="{% url 'vivaan_admin:testimonial_delete' review.id %}" class="btn-action btn-delete"
+                        onclick="return confirm('Delete?');">Delete</a></td>
+            </tr>
+            {% empty %}<tr>
+                <td colspan="4">No reviews found.</td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
