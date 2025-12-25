@@ -83,6 +83,7 @@ WSGI_APPLICATION = 'resort_project.wsgi.application'
 # }
 
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -225,12 +226,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://e23d39b29fc8.ngrok-free.app",
+    "https://330b00032bcf.ngrok-free.app",
 ]
 
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://e23d39b29fc8.ngrok-free.app",
+    "https://330b00032bcf.ngrok-free.app",
     # "https://e23d39b29fc8.ngrok-free.app/",
 ]

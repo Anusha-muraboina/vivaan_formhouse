@@ -1,5 +1,3 @@
-
-
 {% extends 'resort/base.html' %}
 
 {% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
@@ -7,47 +5,64 @@
 {% load static %}
 {% block content %}
 <style>
-/* 🔴 Booked dates */
-.flatpickr-day.booked-date {
-    background: white !important; /* red-500 */
-    color: #510303ff !important;
-    border: 1px solid #460404ff !important;
-    cursor: not-allowed;
-}
+    /* 🔴 Booked dates */
+    .flatpickr-day.booked-date {
+        background: white !important;
+        /* red-500 */
+        color: #510303ff !important;
+        border: 1px solid #460404ff !important;
+        cursor: not-allowed;
+    }
 
-/* 🟠 Admin blocked dates */
-.flatpickr-day.blocked-date {
-    background: white !important; /* orange-500 */
-    color:  #ff6a00ff !important ;
-     border: 1px solid #ff6f08ff !important;
-    cursor: not-allowed;
-}
+    /* 🟠 Admin blocked dates */
+    .flatpickr-day.blocked-date {
+        background: white !important;
+        /* orange-500 */
+        color: #ff6a00ff !important;
+        border: 1px solid #ff6f08ff !important;
+        cursor: not-allowed;
+    }
 
-/* 🟢 Selected range */
-.flatpickr-day.inRange,
-.flatpickr-day.startRange,
-.flatpickr-day.endRange {
-    background: white !important; /* green-500 */
-    color: #012c11ff !important;
-     border: 1px solid #022f12ff !important;
-}
+    /* 🟢 Selected range */
+    .flatpickr-day.inRange,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background: white !important;
+        /* green-500 */
+        color: #012c11ff !important;
+        border: 1px solid #022f12ff !important;
+    }
 
-/* 🔵 Today */
-.flatpickr-day.today {
-    border-color: #011637ff !important; /* blue-500 */
-}
+    /* 🔵 Today */
+    .flatpickr-day.today {
+        border-color: #011637ff !important;
+        /* blue-500 */
+    }
 
-/* Disabled look */
-.flatpickr-day.disabled {
-    opacity: 0.6;
+    /* Disabled look */
+    .flatpickr-day.disabled {
+        opacity: 0.6;
+    }
+</style>
+
+
+<style>
+.collapse-header {
+    cursor: pointer;
+    padding: 16px;
+    background: white; /* emerald-900 */
+    color: #043c2a;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 2px solid #012a1d;
 }
 </style>
 
 <div class="fixed inset-0 -z-10">
-  <div class="absolute inset-0 bg-cover bg-center"
-       style="background-image: url('{% static "images/vihan-group1.webp" %}');">
-  </div>
-  <div class="absolute inset-0 bg-white/90"></div>
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static " images/vihan-group1.webp"
+        %}');">
+    </div>
+    <div class="absolute inset-0 bg-white/90"></div>
 </div>
 
 <!-- Room Header -->
@@ -69,7 +84,7 @@
             <span><i class="fas fa-users mr-2"></i>Up to {{ room_category.max_occupancy }} Guests</span>
             <span><i class="fas fa-building mr-2"></i>{{ room_category.floor }}</span>
         </div>
-    </div> 
+    </div>
 </section> {% endcomment %}
 
 <!-- Room Details & Booking -->
@@ -99,82 +114,110 @@
 
                     <form method="post" class="space-y-4">
                         {% csrf_token %}
- <input type="hidden" id="discountedTotal" value="{{ calculated_total }}">
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
-                            {{ form.guest_name }}
+                        <input type="hidden" id="discountedTotal" value="{{ calculated_total }}">
+
+
+
+
+
+
+                        {% if form.errors %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                            {% endfor %}
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Phone</label>
-                            {{ form.guest_phone }}
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Email</label>
-                            {{ form.guest_email }}
-                        </div>
+                        {% endif %}
 
 
-                        </div>
-
- <div class="grid grid-cols-2 gap-4">
-  <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests Count</label>
-                            {{ form.extra_guest_count }}
-                        </div>
-
-
-      <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
-                            {{ form.guest_count }}
-                        </div>
-
-</div>
-
-
-   <div class="flex flex-wrap gap-4 text-sm mt-3">
-    <div class="flex items-center gap-2">
-        <span class="w-4 h-4 bg-green-900 rounded"></span> Selected
+<!-- =========================== -->
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step1')">
+        1. Stay Details & Dates
     </div>
-    <div class="flex items-center gap-2">
-        <span class="w-4 h-4 bg-red-600 rounded"></span> Booked
-    </div>
-    <div class="flex items-center gap-2">
-        <span class="w-4 h-4 bg-orange-900 rounded"></span> Blocked by Admin
-    </div>
-</div>
 
-                        <div class="grid grid-cols-2 gap-4">
+         <div  id="step1" class="collapse-body  p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" >
+
+                                   <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
+                                {{ form.guest_count }}
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests
+                                    Count</label>
+                                {{ form.extra_guest_count }}
+                            </div>
+
+
+                     
+                        </div>
+
+
+                        <div class="flex flex-wrap gap-4 text-sm mt-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-green-900 rounded"></span> Selected
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-red-600 rounded"></span> Booked
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-orange-900 rounded"></span> Blocked by Admin
+                            </div>
+                        </div>
+
+                        <div class="grid  grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
                                 <input type="text" name="check_in"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Date" required>
                             </div>
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
-                                <input type="text" name="check_in_time"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Time">
-                            </div>
-                        </div>
 
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                         
-
-                            <div>
+   <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
                                 <input type="text" name="check_out"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Date" required>
                             </div>
-                            <div>
+
+
+                            <!-- <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Time</label>
-                                <input type="text" name="check_out_time"
+                                <input type="text" name="check_in_time"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Time">
+                            </div> -->
+                        </div>
+
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                            <!-- <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
+                                <input type="text" name="check_out"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Date" required>
+                            </div> -->
+
+<div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
+                                <input type="text" name="check_in_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Check In Time">
+                            </div>
+
+
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-Out Time</label>
+                                <input type="text" name="check_out_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Check Out Time">
                             </div>
                         </div>
 
@@ -191,7 +234,7 @@
                         </div>
 
 
-                        <!-- Date Availability Notification -->
+
                         <div id="dateNotification"
                             class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                             <div class="flex items-center">
@@ -199,7 +242,7 @@
                                 <span id="dateNotificationText"></span>
                             </div>
                         </div>
-
+<!-- 
                         {% if form.errors %}
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                             {% for field, errors in form.errors.items %}
@@ -208,105 +251,133 @@
                             {% endfor %}
                             {% endfor %}
                         </div>
-                        {% endif %}
+                        {% endif %} -->
+
+
+ </div>
+ </div>
+<!-- ======================================== -->
 
 
 
+                        <!-- ============================= -->
 
-<!-- PAYMENT METHOD -->
-<div>
-  <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
-
-  <div class="space-y-3">
-
-      <!-- Pay at Farmhouse -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="farmhouse" class="h-5 w-5 text-emerald-600" checked>
-          <span class="text-gray-800 font-medium">Pay at Check-in (Cash)</span>
-      </label>
-
-      <!-- Partial 30% -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="partial_razorpay" class="h-5 w-5 text-emerald-600">
-          <span class="text-gray-800 font-medium">Pay 30% Online (Razorpay)</span>
-      </label>
-
-      <!-- Full -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="full_razorpay" class="h-5 w-5 text-emerald-600">
-          <span class="text-gray-800 font-medium">Pay Full Online (Razorpay)</span>
-      </label>
-
-  </div>
-</div>
+                        
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step2')">
+        2. Guest Information
+    </div>
 
 
-<!-- PAYMENT SUMMARY SECTION -->
-<div id="paymentSummary" class="hidden mt-5 space-y-3">
+    <div id="step2" class="collapse-body hidden p-6 space-y-4">
+                        <div  >
+                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
+                            {{ form.guest_name }}
+                        </div>
+                        <!-- <div class="grid grid-cols-2 gap-4"> -->
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Phone</label>
+                                {{ form.guest_phone }}
+                            </div>
 
-  <div class="border rounded-lg p-4 bg-gray-50">
-
-      <p id="depositAmount" class="hidden flex justify-between text-gray-700 text-lg">
-          <span>Pay now (30%):</span>
-          <span class="font-bold text-emerald-700">₹<span id="depositValue"></span></span>
-      </p>
-
-      <p id="fullAmount" class="hidden flex justify-between text-gray-700 text-lg">
-          <span>Pay full:</span>
-          <span class="font-bold text-emerald-700">₹<span id="fullValue"></span></span>
-      </p>
-
-      <p id="remainingAmount" class="hidden text-sm text-gray-600">
-          Remaining at check-in:
-          <span class="font-semibold text-gray-800">₹<span id="remainingValue"></span></span>
-      </p>
-
-  </div>
-
-  <!-- Razorpay Box -->
-  <div id="razorpayBox" class="hidden border p-4 rounded-xl space-y-2">
-      <p class="font-semibold text-gray-700">Select Razorpay to complete payment</p>
-      <div class="flex items-center space-x-3">
-          <input type="radio" checked class="h-5 w-5">
-          <img src="https://razorpay.com/favicon.png" class="h-6" />
-          <span class="font-medium text-gray-700">Razorpay Checkout</span>
-      </div>
-  </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                                {{ form.guest_email }}
+                            </div>
+                        <!-- </div> -->
 
 </div>
+</div>
+<!-- ========================================= -->
+
+
+<!-- ========================== -->
+
+
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step3')">
+        3️. Payment Method & Summary
+    </div>
+
+  <div  id="step3" class="collapse-body hidden p-6 space-y-4">
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
+
+                            <div class="space-y-3">
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="farmhouse"
+                                        class="h-5 w-5 text-emerald-600" checked>
+                                    <span class="text-gray-800 font-medium">Pay at Check-in (Cash)</span>
+                                </label>
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="partial_razorpay"
+                                        class="h-5 w-5 text-emerald-600">
+                                    <span class="text-gray-800 font-medium">Pay 30% Online (Razorpay)</span>
+                                </label>
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="full_razorpay"
+                                        class="h-5 w-5 text-emerald-600">
+                                    <span class="text-gray-800 font-medium">Pay Full Online (Razorpay)</span>
+                                </label>
+
+                            </div>
+                        </div>
+
+
+                        <div id="paymentSummary" class="hidden mt-5 space-y-3">
+
+                            <div class="border rounded-lg p-4 bg-gray-50">
+
+                                <p id="depositAmount" class="hidden flex justify-between text-gray-700 text-lg">
+                                    <span>Pay now (30%):</span>
+                                    <span class="font-bold text-emerald-700">₹<span id="depositValue"></span></span>
+                                </p>
+
+                                <p id="fullAmount" class="hidden flex justify-between text-gray-700 text-lg">
+                                    <span>Pay full:</span>
+                                    <span class="font-bold text-emerald-700">₹<span id="fullValue"></span></span>
+                                </p>
+
+                                <p id="remainingAmount" class="hidden text-sm text-gray-600">
+                                    Remaining at check-in:
+                                    <span class="font-semibold text-gray-800">₹<span id="remainingValue"></span></span>
+                                </p>
+
+                            </div>
+
+
+                            <div id="razorpayBox" class="hidden border p-4 rounded-xl space-y-2">
+                                <p class="font-semibold text-gray-700">Select Razorpay to complete payment</p>
+                                <div class="flex items-center space-x-3">
+                                    <input type="radio" checked class="h-5 w-5">
+                                    <img src="https://razorpay.com/favicon.png" class="h-6" />
+                                    <span class="font-medium text-gray-700">Razorpay Checkout</span>
+                                </div>
+                            </div>
+
+                        </div>
 
 
 
 
-
-
+</div>
+</div>
 
                         <button type="submit"
                             class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700">
                             <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
-                        </button> 
-{% comment %} <button type="submit"
-        id="bookBtn"
-        class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700 flex items-center justify-center gap-2">
-    <span id="btnText">
-        <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
-    </span>
+                        </button>
 
-    <!-- Loader (hidden initially) -->
-    <svg id="btnLoader"
-         class="hidden animate-spin h-5 w-5 text-white"
-         xmlns="http://www.w3.org/2000/svg"
-         fill="none"
-         viewBox="0 0 24 24">
-        <circle class="opacity-25"
-                cx="12" cy="12" r="10"
-                stroke="currentColor"
-                stroke-width="4"></circle>
-        <path class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-    </svg>
-</button> {% endcomment %}
 
                     </form>
 
@@ -335,7 +406,7 @@
 
             <!-- Room Information -->
             <div class="">
-             
+
                 <!-- Amenities -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Amenities</h2>
@@ -380,13 +451,13 @@
                 </div>
 
 
-   <!-- Description -->
+                <!-- Description -->
                 <div class=" rounded-2xl shadow-lg p-8  bg-white">
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Description</h2>
-                  <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description|safe }}</p>
-{% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
-    {{ room_category.description|safe }}
-</div> {% endcomment %}
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description|safe }}</p>
+                    {% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
+                        {{ room_category.description|safe }}
+                    </div> {% endcomment %}
                 </div>
 
 
@@ -409,7 +480,8 @@
 {{ booked_dates|json_script:"booked-dates-data" }}
 {{ blocked_dates|json_script:"blocked-dates-data" }}
 
-{% comment %} <script id="blocked-dates-data" type="application/json">
+{% comment %}
+<script id="blocked-dates-data" type="application/json">
     {{ blocked_dates|json_script:"blocked-dates-data" }}
 </script> {% endcomment %}
 
@@ -418,650 +490,662 @@
 
 
 
-
-
-
-<script>    
-document.addEventListener("DOMContentLoaded", function () {
-    // ✅ DECLARE ONCE (FIX)
-    let couponDiscount = 0;
-    let couponTimer = null;
-    // Form inputs
-    let checkIn = document.querySelector("input[name='check_in']");
-    let checkOut = document.querySelector("input[name='check_out']");
-    let guestCount = document.querySelector("input[name='guest_count']");
-    let extraGuest = document.querySelector("input[name='extra_guest_count']");
-    let radios = document.querySelectorAll("input[name='payment_method']");
-
-    let couponInput = document.querySelector("input[name='coupon_code']");
-
-
-    // Payment display elements
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
-
-    // Backend pricing values
-    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
-    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
-    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
-
-    // Calculate Base Amount
-    function calculateTotal() {
-        const inDate = new Date(checkIn.value);
-        const outDate = new Date(checkOut.value);
-
-        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
-            return 0;
+<script>
+function toggleCollapse(id) {
+    document.querySelectorAll('.collapse-body').forEach(el => {
+        if (el.id === id) {
+            el.classList.toggle('hidden');
+        } else {
+            el.classList.add('hidden');
         }
+    });
+}
+</script>
 
-        let total = 0;
-        let date = new Date(inDate);
 
-        // Loop through each night
-        while (date < outDate) {
-            let day = date.getDay();
-            if (day === 5 || day === 6) {
-                total += weekend;
-            } else {
-                total += weekday;
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ✅ DECLARE ONCE (FIX)
+        let couponDiscount = 0;
+        let couponTimer = null;
+        // Form inputs
+        let checkIn = document.querySelector("input[name='check_in']");
+        let checkOut = document.querySelector("input[name='check_out']");
+        let guestCount = document.querySelector("input[name='guest_count']");
+        let extraGuest = document.querySelector("input[name='extra_guest_count']");
+        let radios = document.querySelectorAll("input[name='payment_method']");
+
+        let couponInput = document.querySelector("input[name='coupon_code']");
+
+
+        // Payment display elements
+        const paymentSummary = document.getElementById("paymentSummary");
+        const depositAmount = document.getElementById("depositAmount");
+        const fullAmount = document.getElementById("fullAmount");
+        const remainingAmount = document.getElementById("remainingAmount");
+        const razorpayBox = document.getElementById("razorpayBox");
+
+        // Backend pricing values
+        const weekday = parseFloat(`{{ pricing.weekday_price }}`);
+        const weekend = parseFloat(`{{ pricing.weekend_price }}`);
+        const extraGuestPrice = parseFloat(`{{ extra_price }}`);
+
+        // Calculate Base Amount
+        function calculateTotal() {
+            const inDate = new Date(checkIn.value);
+            const outDate = new Date(checkOut.value);
+
+            if (!checkIn.value || !checkOut.value || outDate <= inDate) {
+                return 0;
             }
-            date.setDate(date.getDate() + 1);
-        }
 
-        // EXTRA GUEST COUNT logic (user entered)
-        let extra = parseInt(extraGuest.value || 0);
+            let total = 0;
+            let date = new Date(inDate);
 
-        total += extra * extraGuestPrice;
-
-        // NO TAX (you set 0.00)
-        total += total * 0.00;
-
-        return Math.round(total);
-    }
-
-    // Update Payment Method Section
-    function updatePayment() {
-        let total = calculateTotal();
-
-
-                // apply coupon discount LIVE
-        if (couponDiscount > 0) {
-            total = total - couponDiscount;
-            if (total < 0) total = 0;
-        }
-
-
-        if (total <= 0) {
-            paymentSummary.classList.add("hidden");
-            return;
-        }
-
-        paymentSummary.classList.remove("hidden");
-
-        // Calculate 30%
-        let deposit = Math.round(total * 0.30);
-        let remaining = total - deposit;
-
-        document.getElementById("depositValue").innerText = deposit;
-        document.getElementById("fullValue").innerText = total;
-        document.getElementById("remainingValue").innerText = remaining;
-
-        let selected = document.querySelector("input[name='payment_method']:checked").value;
-
-        if (selected === "farmhouse") {
-            depositAmount.classList.add("hidden");
-            fullAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.add("hidden");
-        }
-
-        if (selected === "partial_razorpay") {
-            depositAmount.classList.remove("hidden");
-            remainingAmount.classList.remove("hidden");
-            fullAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-
-        if (selected === "full_razorpay") {
-            fullAmount.classList.remove("hidden");
-            depositAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-    }
-
- /**************************************
-     LIVE COUPON VALIDATION (AJAX)
-    **************************************/
-    couponInput.addEventListener("change", function () {
-
-        let code = couponInput.value.trim();
-
-        if (code === "") {
-            couponDiscount = 0;
-            updatePayment();
-            return;
-        }
-
-        fetch(`/validate-coupon/?code=${code}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.valid) {
-                    couponDiscount = parseFloat(data.discount);
-                    alert(`Coupon Applied! Discount: ₹${couponDiscount}`);
+            // Loop through each night
+            while (date < outDate) {
+                let day = date.getDay();
+                if (day === 5 || day === 6) {
+                    total += weekend;
                 } else {
-                    couponDiscount = 0;
-                    alert("Invalid coupon code!");
+                    total += weekday;
                 }
-                updatePayment();
-            })
-            .catch(() => {
+                date.setDate(date.getDate() + 1);
+            }
+
+            // EXTRA GUEST COUNT logic (user entered)
+            let extra = parseInt(extraGuest.value || 0);
+
+            total += extra * extraGuestPrice;
+
+            // NO TAX (you set 0.00)
+            total += total * 0.00;
+
+            return Math.round(total);
+        }
+
+        // Update Payment Method Section
+        function updatePayment() {
+            let total = calculateTotal();
+
+
+            // apply coupon discount LIVE
+            if (couponDiscount > 0) {
+                total = total - couponDiscount;
+                if (total < 0) total = 0;
+            }
+
+
+            if (total <= 0) {
+                paymentSummary.classList.add("hidden");
+                return;
+            }
+
+            paymentSummary.classList.remove("hidden");
+
+            // Calculate 30%
+            let deposit = Math.round(total * 0.30);
+            let remaining = total - deposit;
+
+            document.getElementById("depositValue").innerText = deposit;
+            document.getElementById("fullValue").innerText = total;
+            document.getElementById("remainingValue").innerText = remaining;
+
+            let selected = document.querySelector("input[name='payment_method']:checked").value;
+
+            if (selected === "farmhouse") {
+                depositAmount.classList.add("hidden");
+                fullAmount.classList.add("hidden");
+                remainingAmount.classList.add("hidden");
+                razorpayBox.classList.add("hidden");
+            }
+
+            if (selected === "partial_razorpay") {
+                depositAmount.classList.remove("hidden");
+                remainingAmount.classList.remove("hidden");
+                fullAmount.classList.add("hidden");
+                razorpayBox.classList.remove("hidden");
+            }
+
+            if (selected === "full_razorpay") {
+                fullAmount.classList.remove("hidden");
+                depositAmount.classList.add("hidden");
+                remainingAmount.classList.add("hidden");
+                razorpayBox.classList.remove("hidden");
+            }
+        }
+
+        /**************************************
+            LIVE COUPON VALIDATION (AJAX)
+           **************************************/
+        couponInput.addEventListener("change", function () {
+
+            let code = couponInput.value.trim();
+
+            if (code === "") {
                 couponDiscount = 0;
                 updatePayment();
+                return;
+            }
+
+            fetch(`/validate-coupon/?code=${code}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        couponDiscount = parseFloat(data.discount);
+                        alert(`Coupon Applied! Discount: ₹${couponDiscount}`);
+                    } else {
+                        couponDiscount = 0;
+                        alert("Invalid coupon code!");
+                    }
+                    updatePayment();
+                })
+                .catch(() => {
+                    couponDiscount = 0;
+                    updatePayment();
+                });
+        });
+
+
+
+        // ===============================
+        // DEBOUNCED COUPON CHECK
+        // ===============================
+
+
+
+
+
+
+
+
+
+        // ===============================
+        // DEBOUNCED COUPON CHECK
+        // ===============================
+
+        // Attach event listeners
+        radios.forEach(r => r.addEventListener("change", updatePayment));
+        checkIn.addEventListener("change", updatePayment);
+        checkOut.addEventListener("change", updatePayment);
+        guestCount.addEventListener("input", updatePayment);
+        extraGuest.addEventListener("input", updatePayment);
+
+        // moved validation here
+        guestCount.addEventListener("input", function () {
+            if (parseInt(this.value) > 15) {
+                alert("Guest count cannot exceed 15.");
+                this.value = 15;
+            }
+        });
+
+        extraGuest.addEventListener("input", function () {
+            if (parseInt(this.value) > 5) {
+                alert("Extra guest count cannot exceed 5.");
+                this.value = 5;
+            }
+        });
+
+        updatePayment();
+
+    });
+
+</script>
+
+
+
+{% comment %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+</script>
+
+<script>
+    document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.redirect) {
+                    window.location.href = data.url;
+                    return;
+                }
+
+                if (data.razorpay) {
+                    openRazorpay(data.amount);
+                }
             });
     });
 
 
 
-    // ===============================
-    // DEBOUNCED COUPON CHECK
-    // ===============================
+    {% comment %}
+    function openRazorpay(bookingId, amount) {
+
+        fetch("/create-razorpay-order/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `booking_id=${bookingId}&amount=${amount}`
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Vivaan Farmhouse",
+                    order_id: data.order_id,
+
+                    handler: function (response) {
+                        console.log("Razorpay response:", response);
+
+                        if (!response.razorpay_payment_id) {
+                            alert("Payment cancelled or failed");
+                            return;
+                        }
+
+                        fetch("/verify-payment/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body:
+                                `razorpay_payment_id=${response.razorpay_payment_id}` +
+                                `&razorpay_order_id=${response.razorpay_order_id}` +
+                                `&razorpay_signature=${response.razorpay_signature}`
+                        })
+                            .then(res => res.json())
+                            .then(result => {
+                                console.log("Verify result:", result);
+
+                                if (result.status === "success") {
+                                    window.location.href = `/booking/${result.booking_id}/`;
+                                } else {
+                                    alert("Payment verification failed");
+                                }
+                            });
+                    },
+
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled");
+                        }
+                    },
+
+                    prefill: {
+                        name: data.name,
+                        email: data.email,
+                        contact: data.contact
+                    },
+
+                    theme: {
+                        color: "#047857"
+                    }
+                }; // ✅ VERY IMPORTANT — object closed
+
+                const rzp = new Razorpay(options); // ✅ SAFE NOW
+                rzp.open();
+            })
+            .catch(err => {
+                console.error("Razorpay error:", err);
+                alert("Payment initialization failed");
+            });
+    } {% endcomment %}
 
 
+    function openRazorpay(amount) {
 
+        fetch("/create-razorpay-order/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `amount=${amount}`
+        })
+            .then(res => res.json())
+            .then(data => {
 
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Vivaan Farmhouse",
+                    order_id: data.order_id,
 
+                    handler: function (response) {
 
+                        // ❌ If payment cancelled
+                        if (!response.razorpay_payment_id) {
+                            alert("Payment cancelled or failed");
+                            return;
+                        }
 
+                        // ✅ STORE ORDER ID FOR POLLING
+                        localStorage.setItem(
+                            "rzp_order_id",
+                            response.razorpay_order_id
+                        );
 
-    
-     // ===============================
-    // DEBOUNCED COUPON CHECK
-    // ===============================
-    
-    // Attach event listeners
-    radios.forEach(r => r.addEventListener("change", updatePayment));
-    checkIn.addEventListener("change", updatePayment);
-    checkOut.addEventListener("change", updatePayment);
-    guestCount.addEventListener("input", updatePayment);
-    extraGuest.addEventListener("input", updatePayment);
+                        // 🚀 REDIRECT IMMEDIATELY (FAST UX)
+                        window.location.href = "/payment-processing/";
 
-    // moved validation here
-    guestCount.addEventListener("input", function () {
-        if (parseInt(this.value) > 15) {
-            alert("Guest count cannot exceed 15.");
-            this.value = 15;
-        }
-    });
+                        // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
+                        fetch("/verify-payment/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body:
+                                `razorpay_payment_id=${response.razorpay_payment_id}` +
+                                `&razorpay_order_id=${response.razorpay_order_id}` +
+                                `&razorpay_signature=${response.razorpay_signature}`
+                        });
+                    },
 
-    extraGuest.addEventListener("input", function () {
-        if (parseInt(this.value) > 5) {
-            alert("Extra guest count cannot exceed 5.");
-            this.value = 5;
-        }
-    });
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled");
+                        }
+                    },
 
-    updatePayment();
+                    theme: {
+                        color: "#047857"
+                    }
+                };
 
-});
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(err => {
+                console.error("Razorpay error:", err);
+                alert("Payment initialization failed");
+            });
+    }
+
 
 </script>
 
 
 
-{% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+{% comment %}
 <script>
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-</script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-<script>
-document.querySelector("form").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    fetch("", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken(),
-            "X-Requested-With": "XMLHttpRequest"
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        if (data.redirect) {
-            window.location.href = data.url;
+        if (typeof flatpickr === "undefined") {
+            console.error("❌ Flatpickr not loaded");
             return;
         }
 
-        if (data.razorpay) {
-            openRazorpay( data.amount);
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            return date.toISOString().split("T")[0];
         }
-    });
-});
 
+        // CHECK-IN
+        const checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+            onChange: function (selectedDates) {
+                if (selectedDates.length) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutPicker.set("minDate", nextDay);
+                }
+            }
+        });
 
-
-{% comment %} 
-function openRazorpay(bookingId, amount) {
-
-    fetch("/create-razorpay-order/", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken(),
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: `booking_id=${bookingId}&amount=${amount}`
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        const options = {
-            key: data.key,
-            amount: data.amount,
-            currency: "INR",
-            name: "Vivaan Farmhouse",
-            order_id: data.order_id,
-
-            handler: function (response) {
-                console.log("Razorpay response:", response);
-
-                if (!response.razorpay_payment_id) {
-                    alert("Payment cancelled or failed");
+        // CHECK-OUT
+        const checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+            onChange: function (selectedDates) {
+                const checkInVal = document.querySelector("input[name='check_in']").value;
+                if (!checkInVal) {
+                    alert("⚠️ Please select check-in date first");
+                    checkOutPicker.clear();
                     return;
                 }
 
-                fetch("/verify-payment/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body:
-                        `razorpay_payment_id=${response.razorpay_payment_id}` +
-                        `&razorpay_order_id=${response.razorpay_order_id}` +
-                        `&razorpay_signature=${response.razorpay_signature}`
-                })
-                .then(res => res.json())
-                .then(result => {
-                    console.log("Verify result:", result);
+                let current = new Date(checkInVal);
+                const end = new Date(selectedDates[0]);
 
-                    if (result.status === "success") {
-                        window.location.href = `/booking/${result.booking_id}/`;
-                    } else {
-                        alert("Payment verification failed");
+                while (current < end) {
+                    const dStr = formatDate(current);
+                    if (disabledDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes blocked/booked dates");
+                        checkOutPicker.clear();
+                        return;
                     }
-                });
-            },
-
-            modal: {
-                ondismiss: function () {
-                    alert("Payment cancelled");
+                    current.setDate(current.getDate() + 1);
                 }
-            },
-
-            prefill: {
-                name: data.name,
-                email: data.email,
-                contact: data.contact
-            },
-
-            theme: {
-                color: "#047857"
             }
-        }; // ✅ VERY IMPORTANT — object closed
+        });
 
-        const rzp = new Razorpay(options); // ✅ SAFE NOW
-        rzp.open();
-    })
-    .catch(err => {
-        console.error("Razorpay error:", err);
-        alert("Payment initialization failed");
+        console.log("✅ Flatpickr initialized successfully");
     });
-} {% endcomment %}
-
-
-function openRazorpay(amount) {
-
-    fetch("/create-razorpay-order/", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken(),
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: `amount=${amount}`
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        const options = {
-            key: data.key,
-            amount: data.amount,
-            currency: "INR",
-            name: "Vivaan Farmhouse",
-            order_id: data.order_id,
-
-            handler: function (response) {
-
-                // ❌ If payment cancelled
-                if (!response.razorpay_payment_id) {
-                    alert("Payment cancelled or failed");
-                    return;
-                }
-
-                // ✅ STORE ORDER ID FOR POLLING
-                localStorage.setItem(
-                    "rzp_order_id",
-                    response.razorpay_order_id
-                );
-
-                // 🚀 REDIRECT IMMEDIATELY (FAST UX)
-                window.location.href = "/payment-processing/";
-
-                // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
-                fetch("/verify-payment/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body:
-                        `razorpay_payment_id=${response.razorpay_payment_id}` +
-                        `&razorpay_order_id=${response.razorpay_order_id}` +
-                        `&razorpay_signature=${response.razorpay_signature}`
-                });
-            },
-
-            modal: {
-                ondismiss: function () {
-                    alert("Payment cancelled");
-                }
-            },
-
-            theme: {
-                color: "#047857"
-            }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-    })
-    .catch(err => {
-        console.error("Razorpay error:", err);
-        alert("Payment initialization failed");
-    });
-}
-
-
-</script>
-
-
-
-{% comment %} 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    if (typeof flatpickr === "undefined") {
-        console.error("❌ Flatpickr not loaded");
-        return;
-    }
-
-    const bookedDates = JSON.parse(
-        document.getElementById("booked-dates-data")?.textContent || "[]"
-    );
-
-    const blockedDates = JSON.parse(
-        document.getElementById("blocked-dates-data")?.textContent || "[]"
-    );
-
-    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
-
-    function formatDate(date) {
-        return date.toISOString().split("T")[0];
-    }
-
-    // CHECK-IN
-    const checkInPicker = flatpickr("input[name='check_in']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-        onChange: function (selectedDates) {
-            if (selectedDates.length) {
-                const nextDay = new Date(selectedDates[0]);
-                nextDay.setDate(nextDay.getDate() + 1);
-                checkOutPicker.set("minDate", nextDay);
-            }
-        }
-    });
-
-    // CHECK-OUT
-    const checkOutPicker = flatpickr("input[name='check_out']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-        onChange: function (selectedDates) {
-            const checkInVal = document.querySelector("input[name='check_in']").value;
-            if (!checkInVal) {
-                alert("⚠️ Please select check-in date first");
-                checkOutPicker.clear();
-                return;
-            }
-
-            let current = new Date(checkInVal);
-            const end = new Date(selectedDates[0]);
-
-            while (current < end) {
-                const dStr = formatDate(current);
-                if (disabledDates.includes(dStr)) {
-                    alert("⚠️ Selected range includes blocked/booked dates");
-                    checkOutPicker.clear();
-                    return;
-                }
-                current.setDate(current.getDate() + 1);
-            }
-        }
-    });
-
-    console.log("✅ Flatpickr initialized successfully");
-});
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const bookedDates = JSON.parse(
-        document.getElementById("booked-dates-data")?.textContent || "[]"
-    );
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
 
-    const blockedDates = JSON.parse(
-        document.getElementById("blocked-dates-data")?.textContent || "[]"
-    );
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
 
-    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
 
-    function formatDate(date) {
-        return date.toISOString().split("T")[0];
-    }
-
-    function decorateDay(dayElem) {
-        const dateStr = formatDate(dayElem.dateObj);
-
-        if (bookedDates.includes(dateStr)) {
-            dayElem.classList.add("booked-date");
-            dayElem.title = "Already booked";
+        function formatDate(date) {
+            return date.toISOString().split("T")[0];
         }
 
-        if (blockedDates.includes(dateStr)) {
-            dayElem.classList.add("blocked-date");
-            dayElem.title = "Blocked by admin";
-        }
-    }
+        function decorateDay(dayElem) {
+            const dateStr = formatDate(dayElem.dateObj);
 
-    // CHECK-IN
-    const checkInPicker = flatpickr("input[name='check_in']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
-        },
-
-        onChange(selectedDates) {
-            if (selectedDates.length) {
-                const nextDay = new Date(selectedDates[0]);
-                nextDay.setDate(nextDay.getDate() + 1);
-                checkOutPicker.set("minDate", nextDay);
-            }
-        }
-    });
-
-    // CHECK-OUT
-    const checkOutPicker = flatpickr("input[name='check_out']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
-        },
-
-        onChange(selectedDates) {
-            const checkInVal = document.querySelector("input[name='check_in']").value;
-            if (!checkInVal) {
-                alert("⚠️ Select check-in date first");
-                checkOutPicker.clear();
-                return;
+            if (bookedDates.includes(dateStr)) {
+                dayElem.classList.add("booked-date");
+                dayElem.title = "Already booked";
             }
 
-            let current = new Date(checkInVal);
-            const end = new Date(selectedDates[0]);
+            if (blockedDates.includes(dateStr)) {
+                dayElem.classList.add("blocked-date");
+                dayElem.title = "Blocked by admin";
+            }
+        }
 
-            while (current < end) {
-                const dStr = formatDate(current);
-                if (disabledDates.includes(dStr)) {
-                    alert("⚠️ Selected range includes unavailable dates");
+        // CHECK-IN
+        const checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (selectedDates.length) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutPicker.set("minDate", nextDay);
+                }
+            }
+        });
+
+        // CHECK-OUT
+        const checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                const checkInVal = document.querySelector("input[name='check_in']").value;
+                if (!checkInVal) {
+                    alert("⚠️ Select check-in date first");
                     checkOutPicker.clear();
                     return;
                 }
-                current.setDate(current.getDate() + 1);
-            }
-        }
-    });
 
-});
+                let current = new Date(checkInVal);
+                const end = new Date(selectedDates[0]);
+
+                while (current < end) {
+                    const dStr = formatDate(current);
+                    if (disabledDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes unavailable dates");
+                        checkOutPicker.clear();
+                        return;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+        });
+
+    });
 </script> {% endcomment %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    if (typeof flatpickr === "undefined") {
-        console.error("❌ Flatpickr not loaded");
-        return;
-    }
-
-    const bookedDates = JSON.parse(
-        document.getElementById("booked-dates-data")?.textContent || "[]"
-    );
-
-    const blockedDates = JSON.parse(
-        document.getElementById("blocked-dates-data")?.textContent || "[]"
-    );
-
-    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
-
-    function formatDate(date) {
-        return date.toISOString().split("T")[0];
-    }
-
-    function decorateDay(dayElem) {
-        const dateStr = formatDate(dayElem.dateObj);
-
-        if (bookedDates.includes(dateStr)) {
-            dayElem.classList.add("booked-date");
-            dayElem.title = "Already booked";
+        if (typeof flatpickr === "undefined") {
+            console.error("❌ Flatpickr not loaded");
+            return;
         }
 
-        if (blockedDates.includes(dateStr)) {
-            dayElem.classList.add("blocked-date");
-            dayElem.title = "Blocked by admin";
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            return date.toISOString().split("T")[0];
         }
-    }
 
-    let checkInPicker;
-    let checkOutPicker;
+        function decorateDay(dayElem) {
+            const dateStr = formatDate(dayElem.dateObj);
 
-    // ✅ CHECK-IN
-    checkInPicker = flatpickr("input[name='check_in']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
-        },
-
-        onChange(selectedDates) {
-            if (!selectedDates.length) return;
-
-            const nextDay = new Date(selectedDates[0]);
-            nextDay.setDate(nextDay.getDate() + 1);
-
-            checkOutPicker.set("minDate", nextDay);
-        }
-    });
-
-    // ✅ CHECK-OUT
-    checkOutPicker = flatpickr("input[name='check_out']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
-        },
-
-        onChange(selectedDates) {
-            if (!selectedDates.length) return;
-
-            const checkInDate = checkInPicker.selectedDates[0];
-
-            if (!checkInDate) {
-                alert("⚠️ Please select check-in date first");
-                checkOutPicker.clear();
-                return;
+            if (bookedDates.includes(dateStr)) {
+                dayElem.classList.add("booked-date");
+                dayElem.title = "Already booked";
             }
 
-            let current = new Date(checkInDate);
-            const end = new Date(selectedDates[0]);
+            if (blockedDates.includes(dateStr)) {
+                dayElem.classList.add("blocked-date");
+                dayElem.title = "Blocked by admin";
+            }
+        }
 
-            while (current < end) {
-                const dStr = formatDate(current);
-                if (disabledDates.includes(dStr)) {
-                    alert("⚠️ Selected range includes unavailable dates");
+        let checkInPicker;
+        let checkOutPicker;
+
+        // ✅ CHECK-IN
+        checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+
+                checkOutPicker.set("minDate", nextDay);
+            }
+        });
+
+        // ✅ CHECK-OUT
+        checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const checkInDate = checkInPicker.selectedDates[0];
+
+                if (!checkInDate) {
+                    alert("⚠️ Please select check-in date first");
                     checkOutPicker.clear();
                     return;
                 }
-                current.setDate(current.getDate() + 1);
-            }
-        }
-    });
 
-    console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
-});
+                let current = new Date(checkInDate);
+                const end = new Date(selectedDates[0]);
+
+                while (current < end) {
+                    const dStr = formatDate(current);
+                    if (disabledDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes unavailable dates");
+                        checkOutPicker.clear();
+                        return;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+        });
+
+        console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
+    });
 </script>
 
 {% endblock %}
@@ -1253,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             {{ form.special_requests }}
                         </div>
 
-                       
+
                         <div id="dateNotification"
                             class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                             <div class="flex items-center">
