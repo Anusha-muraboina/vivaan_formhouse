@@ -63,19 +63,19 @@
 <style>
     /* 🔴 Booked dates */
     .flatpickr-day.booked-date {
-        background: #510303ff !important;
+        background: #f57e7eff !important;
         /* red-500 */   
         color: white !important;
-        border: 1px solid #460404ff !important;
+        border: 1px solid #fb8282ff !important;
         cursor: not-allowed;
     }
 
     /* 🟠 Admin blocked dates */
     .flatpickr-day.blocked-date {
-        background: rgb(224, 97, 5) !important;
+        background: rgba(233, 146, 84, 1) !important;
         /* orange-500 */
         color: white !important;
-        border: 1px solid #ff6f08ff !important;
+        border: 1px solid #f8a970ff !important;
         cursor: not-allowed;
     }
 
@@ -83,10 +83,10 @@
     .flatpickr-day.inRange,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange {
-        background: #012c11ff !important;
+        background: #c9f5d9ff !important;
         /* green-500 */
         color: white !important;
-        border: 1px solid #022f12ff !important;
+        border: 1px solid #b7fbcfff !important;
     }
 
     /* 🔵 Today */
@@ -205,13 +205,13 @@
 
                         <div class="flex flex-wrap gap-4 text-sm mt-3">
                             <div class="flex items-center gap-2">
-                                <span class="w-4 h-4 bg-green-900 rounded"></span> Selected
+                                <span class="w-4 h-4 bg-green-300 rounded"></span> Selected
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="w-4 h-4 bg-red-600 rounded"></span> Booked
+                                <span class="w-4 h-4 bg-[#f57e7eff] rounded"></span> Booked
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="w-4 h-4 bg-orange-900 rounded"></span> Blocked by Admin
+                                <span class="w-4 h-4 bg-[#f8a970ff] rounded"></span> Blocked by Admin
                             </div>
                         </div>
 
@@ -597,6 +597,7 @@
 {% block extra_js %}
 {% comment %} {{ booked_dates|json_script:"booked-dates-data" }} {% endcomment %}
 {{ booked_dates|json_script:"booked-dates-data" }}
+{{ booked_info|json_script:"booked-info-data" }}
 {{ blocked_dates|json_script:"blocked-dates-data" }}
 
 {% comment %}
@@ -990,6 +991,204 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    function openRazorpay(amount) {
+
+        fetch("/create-razorpay-order/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `amount=${amount}`
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Vivaan Farmhouse",
+                    order_id: data.order_id,
+
+                    handler: function (response) {
+
+                        // ❌ If payment cancelled
+                        if (!response.razorpay_payment_id) {
+                            alert("Payment cancelled or failed");
+                            return;
+                        }
+
+                        // ✅ STORE ORDER ID FOR POLLING
+                        localStorage.setItem(
+                            "rzp_order_id",
+                            response.razorpay_order_id
+                        );
+
+                        // 🚀 REDIRECT IMMEDIATELY (FAST UX)
+                        window.location.href = "/payment-processing/";
+
+                        // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
+                        fetch("/verify-payment/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body:
+                                `razorpay_payment_id=${response.razorpay_payment_id}` +
+                                `&razorpay_order_id=${response.razorpay_order_id}` +
+                                `&razorpay_signature=${response.razorpay_signature}`
+                        });
+                    },
+
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled");
+                        }
+                    },
+
+                    theme: {
+                        color: "#047857"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(err => {
+                console.error("Razorpay error:", err);
+                alert("Payment initialization failed");
+            });
+    }
+
+
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        if (typeof flatpickr === "undefined") {
+            console.error("❌ Flatpickr not loaded");
+            return;
+        }
+
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function decorateDay(dayElem) {
+            const dateStr = formatDate(dayElem.dateObj);
+
+            if (bookedDates.includes(dateStr)) {
+                dayElem.classList.add("booked-date");
+                dayElem.title = "Already booked";
+            }
+
+            if (blockedDates.includes(dateStr)) {
+                dayElem.classList.add("blocked-date");
+                dayElem.title = "Blocked by admin";
+            }
+
+            
+        }
+
+        let checkInPicker;
+        let checkOutPicker;
+
+        // ✅ CHECK-IN
+        checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+
+                checkOutPicker.set("minDate", nextDay);
+            }
+        });
+
+        // ✅ CHECK-OUT
+        checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const checkInDate = checkInPicker.selectedDates[0];
+
+                if (!checkInDate) {
+                    alert("⚠️ Please select check-in date first");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                let current = new Date(checkInDate);
+                const end = new Date(selectedDates[0]);
+
+                while (current <= end) {
+                    const dStr = formatDate(current);
+
+                    if (blockedDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes dates blocked by admin");
+                        checkOutPicker.clear();
+                        return;
+                    }
+
+                    current.setDate(current.getDate() + 1);
+                }
+
+            }
+        });
+
+        console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     {% comment %}
     function openRazorpay(bookingId, amount) {
@@ -1068,81 +1267,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Payment initialization failed");
             });
     } {% endcomment %}
-
-
-    function openRazorpay(amount) {
-
-        fetch("/create-razorpay-order/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCSRFToken(),
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: `amount=${amount}`
-        })
-            .then(res => res.json())
-            .then(data => {
-
-                const options = {
-                    key: data.key,
-                    amount: data.amount,
-                    currency: "INR",
-                    name: "Vivaan Farmhouse",
-                    order_id: data.order_id,
-
-                    handler: function (response) {
-
-                        // ❌ If payment cancelled
-                        if (!response.razorpay_payment_id) {
-                            alert("Payment cancelled or failed");
-                            return;
-                        }
-
-                        // ✅ STORE ORDER ID FOR POLLING
-                        localStorage.setItem(
-                            "rzp_order_id",
-                            response.razorpay_order_id
-                        );
-
-                        // 🚀 REDIRECT IMMEDIATELY (FAST UX)
-                        window.location.href = "/payment-processing/";
-
-                        // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
-                        fetch("/verify-payment/", {
-                            method: "POST",
-                            headers: {
-                                "X-CSRFToken": getCSRFToken(),
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            },
-                            body:
-                                `razorpay_payment_id=${response.razorpay_payment_id}` +
-                                `&razorpay_order_id=${response.razorpay_order_id}` +
-                                `&razorpay_signature=${response.razorpay_signature}`
-                        });
-                    },
-
-                    modal: {
-                        ondismiss: function () {
-                            alert("Payment cancelled");
-                        }
-                    },
-
-                    theme: {
-                        color: "#047857"
-                    }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-            })
-            .catch(err => {
-                console.error("Razorpay error:", err);
-                alert("Payment initialization failed");
-            });
-    }
-
-
-</script>
 
 
 
@@ -1304,108 +1428,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 </script> {% endcomment %}
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        if (typeof flatpickr === "undefined") {
-            console.error("❌ Flatpickr not loaded");
-            return;
-        }
-
-        const bookedDates = JSON.parse(
-            document.getElementById("booked-dates-data")?.textContent || "[]"
-        );
-
-        const blockedDates = JSON.parse(
-            document.getElementById("blocked-dates-data")?.textContent || "[]"
-        );
-
-        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
-
-        function formatDate(date) {
-            return date.toISOString().split("T")[0];
-        }
-
-        function decorateDay(dayElem) {
-            const dateStr = formatDate(dayElem.dateObj);
-
-            if (bookedDates.includes(dateStr)) {
-                dayElem.classList.add("booked-date");
-                dayElem.title = "Already booked";
-            }
-
-            if (blockedDates.includes(dateStr)) {
-                dayElem.classList.add("blocked-date");
-                dayElem.title = "Blocked by admin";
-            }
-        }
-
-        let checkInPicker;
-        let checkOutPicker;
-
-        // ✅ CHECK-IN
-        checkInPicker = flatpickr("input[name='check_in']", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            disable: disabledDates,
-            allowInput: true,
-
-            onDayCreate(_, __, ___, dayElem) {
-                decorateDay(dayElem);
-            },
-
-            onChange(selectedDates) {
-                if (!selectedDates.length) return;
-
-                const nextDay = new Date(selectedDates[0]);
-                nextDay.setDate(nextDay.getDate() + 1);
-
-                checkOutPicker.set("minDate", nextDay);
-            }
-        });
-
-        // ✅ CHECK-OUT
-        checkOutPicker = flatpickr("input[name='check_out']", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            disable: disabledDates,
-            allowInput: true,
-
-            onDayCreate(_, __, ___, dayElem) {
-                decorateDay(dayElem);
-            },
-
-            onChange(selectedDates) {
-                if (!selectedDates.length) return;
-
-                const checkInDate = checkInPicker.selectedDates[0];
-
-                if (!checkInDate) {
-                    alert("⚠️ Please select check-in date first");
-                    checkOutPicker.clear();
-                    return;
-                }
-
-                let current = new Date(checkInDate);
-                const end = new Date(selectedDates[0]);
-
-                while (current < end) {
-                    const dStr = formatDate(current);
-                    if (disabledDates.includes(dStr)) {
-                        alert("⚠️ Selected range includes unavailable dates");
-                        checkOutPicker.clear();
-                        return;
-                    }
-                    current.setDate(current.getDate() + 1);
-                }
-            }
-        });
-
-        console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
-    });
-</script>
-
 {% endblock %}
 {% endblock %}
 

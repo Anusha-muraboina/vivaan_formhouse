@@ -216,14 +216,28 @@ def room_detail(request, slug):
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
     # ===== BLOCKED DATES (ADMIN) =====
+    # blocked_dates = []
+    # blocks = BlockedDate.objects.all()
+
+    # for block in blocks:
+    #     d = block.start_date
+    #     while d <= block.end_date:
+    #         blocked_dates.append(d.strftime("%Y-%m-%d"))
+    #         d += timedelta(days=1)
+    # pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+
+
+# ===== BLOCKED DATES (ADMIN) — FIXED =====
+# ===== BLOCKED DATES (ADMIN) — FINAL FIX =====
     blocked_dates = []
     blocks = BlockedDate.objects.all()
 
     for block in blocks:
-        d = block.start_date
-        while d <= block.end_date:
-            blocked_dates.append(d.strftime("%Y-%m-%d"))
-            d += timedelta(days=1)
+        current = block.start_date
+        while current <= block.end_date:   # ✅ MUST BE <=
+            blocked_dates.append(current.strftime("%Y-%m-%d"))
+            current += timedelta(days=1)
+
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
     # ===== AJAX SUBMIT =====

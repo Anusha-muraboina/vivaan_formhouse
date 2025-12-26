@@ -128,10 +128,45 @@ class ContactForm(forms.ModelForm):
 
 
 
+
+
+from .models import Amenity
+
+class AmenityForm(forms.ModelForm):
+    class Meta:
+        model = Amenity
+        fields = [
+            'name',
+            'icon',
+            'description',
+            'is_featured',
+            'amenity_image',
+            'slot_position',
+        ]
+
+
+
+
+
+from .models import BlockedDate
+
+class BlockedDateForm(forms.ModelForm):
+    class Meta:
+        model = BlockedDate
+        fields = ['start_date', 'end_date', 'reason']
+
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'reason': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Maintenance'}),
+        }
+
+
+
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
-        fields = ['guest_name', 'guest_location', 'rating', 'comment']
+        fields = ['guest_name', 'guest_location', 'rating', 'comment',  "slot_position", "is_featured"]
         widgets = {
             'guest_name': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent',
@@ -151,5 +186,12 @@ class TestimonialForm(forms.ModelForm):
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent',
                 'rows': '4',
                 'placeholder': 'Share your experience...'
+            }),
+             "slot_position": forms.NumberInput(attrs={
+                "class": "form-input",
+                "placeholder": "Display order (optional)"
+            }),
+            "is_featured": forms.CheckboxInput(attrs={
+                "class": "form-checkbox"
             }),
         }

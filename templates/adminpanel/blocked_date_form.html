@@ -1,20 +1,268 @@
 {% extends 'adminpanel/base.html' %}
-{% block title %}Block Date | Vivaan Admin{% endblock %}
+{% block title %}Block Dates{% endblock %}
 {% block header %}Block Dates{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width: 500px">
-    <div class="card-header">
-        <h2>Block Period</h2>
+<div class="blocked-wrapper">
+
+    <div class="blocked-card">
+
+        <!-- HEADER -->
+        <div class="blocked-header">
+            <h2>{% if blocked_date %}Edit{% else %}Block{% endif %} Date Period</h2>
+            <p>Booked and blocked dates are shown for reference</p>
+        </div>
+
+        <!-- FORM -->
+        <form method="POST" class="blocked-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Start Date</label>
+                {{ form.start_date }}
+            </div>
+
+            <div class="form-group">
+                <label>End Date</label>
+                {{ form.end_date }}
+            </div>
+
+            <div class="form-group">
+                <label>Reason</label>
+                {{ form.reason }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    {% if blocked_date %}Update{% else %}Block{% endif %}
+                </button>
+                <a href="{% url 'vivaan_admin:blocked_date_list' %}" class="btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <span><span class="dot booked"></span> Booked</span>
+            <span><span class="dot blocked"></span> Blocked</span>
+        </div>
+
     </div>
-    <form method="POST" style="padding: 2rem;">
-        {% csrf_token %}
-        <div style="margin-bottom: 1rem;"><label>Start Date</label><input type="date" name="start_date" required
-                style="width:100%; padding:.8rem;"></div>
-        <div style="margin-bottom: 1rem;"><label>End Date</label><input type="date" name="end_date" required
-                style="width:100%; padding:.8rem;"></div>
-        <div style="margin-bottom: 1rem;"><label>Reason</label><input type="text" name="reason"
-                placeholder="e.g. Maintenance" style="width:100%; padding:.8rem;"></div>
-        <button type="submit" class="btn-action btn-view">Block</button>
-    </form>
 </div>
+
+
+<!-- ================= FLATPICKR ================= -->
+<script>
+    const bookedDates = {{ booked_dates|safe }};
+    const blockedDates = {{ blocked_dates|safe }};
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const disabledDates = bookedDates.concat(blockedDates);
+
+    flatpickr("#admin-calendar", {
+        inline: true,
+        dateFormat: "Y-m-d",
+        disable: disabledDates,
+
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            const date = dayElem.dateObj.toISOString().split("T")[0];
+
+            if (bookedDates.includes(date)) {
+                dayElem.classList.add("booked-day");
+                dayElem.innerHTML += "<span class='dot booked'></span>";
+            }
+
+            if (blockedDates.includes(date)) {
+                dayElem.classList.add("blocked-day");
+                dayElem.innerHTML += "<span class='dot blocked'></span>";
+            }
+        }
+    });
+
+});
+</script>
+
+
+<!-- ================= STYLES ================= -->
+ <style>
+/* BOOKED DATES - GREEN */
+.flatpickr-day.admin-booked-date {
+    background: #22c55e !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+}
+
+/* BLOCKED DATES - RED */
+.flatpickr-day.admin-blocked-date {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+}
+
+/* KEEP DISABLED LOOK BUT COLORED */
+.flatpickr-day.flatpickr-disabled {
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
+
+/* HOVER FIX */
+.flatpickr-day.admin-booked-date:hover,
+.flatpickr-day.admin-blocked-date:hover {
+    background: inherit !important;
+}
+</style>
+
+<style>
+.flatpickr-day.booked-day {
+    background: #22c55e !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.blocked-day {
+    background: #ef4444 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.flatpickr-disabled {
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
+
+/* small dot indicator */
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: block;
+    margin: 2px auto 0;
+}
+
+.dot.booked { background: #16a34a; }
+.dot.blocked { background: #b91c1c; }
+</style>
+
+
+<style>
+/* WRAPPER */
+.blocked-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* CARD */
+.blocked-card {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+
+/* HEADER */
+.blocked-header {
+    padding: 1.6rem;
+    border-bottom: 1px solid #eee;
+}
+
+.blocked-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.blocked-header p {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* FORM */
+.blocked-form {
+    padding: 1.6rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+/* ACTIONS */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 1.5rem;
+}
+
+/* BUTTONS */
+.btn-primary {
+    background: #ef4444;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #dc2626;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+}
+
+/* CALENDAR COLORS */
+.booked-date {
+    background: #22c55e !important;
+    color: #fff !important;
+    border-radius: 50%;
+    cursor: not-allowed;
+}
+
+.blocked-date {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-radius: 50%;
+    cursor: not-allowed;
+}
+
+/* LEGEND */
+.legend {
+    display: flex;
+    gap: 20px;
+    padding: 1rem 1.6rem 1.6rem;
+    font-size: 14px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dot.booked { background: #22c55e; }
+.dot.blocked { background: #ef4444; }
+</style>
 {% endblock %}

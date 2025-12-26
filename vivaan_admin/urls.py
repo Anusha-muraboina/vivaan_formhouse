@@ -50,28 +50,40 @@ urlpatterns = [
     # Blocked Dates
     path('blocked-dates/', views.blocked_date_list, name='blocked_date_list'),
     path('blocked-dates/create/', views.blocked_date_create, name='blocked_date_create'),
+    path('blocked-dates/edit/<int:pk>/', views.blocked_date_edit, name='blocked_date_edit'),
     path('blocked-dates/delete/<int:pk>/', views.blocked_date_delete, name='blocked_date_delete'),
-    
+
     # Coupons
-    path('coupons/', views.coupon_list, name='coupon_list'),
-    path('coupons/create/', views.coupon_create, name='coupon_create'),
-    path('coupons/delete/<int:pk>/', views.coupon_delete, name='coupon_delete'),
-    
+    path("coupons/", views.coupon_list, name="coupon_list"),
+    path("coupons/create/", views.coupon_create, name="coupon_create"),
+    path("coupons/edit/<int:pk>/", views.coupon_edit, name="coupon_edit"),
+    path("coupons/delete/<int:pk>/", views.coupon_delete, name="coupon_delete"),
+
     # Testimonials
-    path('testimonials/', views.testimonial_list, name='testimonial_list'),
-    path('testimonials/delete/<int:pk>/', views.testimonial_delete, name='testimonial_delete'),
-    
+    path("testimonials/", views.testimonial_list, name="testimonial_list"),
+    path("testimonials/create/", views.testimonial_create, name="testimonial_create"),
+    path("testimonials/edit/<int:pk>/", views.testimonial_edit, name="testimonial_edit"),
+    path("testimonials/delete/<int:pk>/", views.testimonial_delete, name="testimonial_delete"),
+
     # Gallery
     path('gallery/', views.gallery_list, name='gallery_list'),
     path('gallery/create/', views.gallery_create, name='gallery_create'),
+    path('gallery/edit/<int:pk>/', views.gallery_edit, name='gallery_edit'),
     path('gallery/delete/<int:pk>/', views.gallery_delete, name='gallery_delete'),
-    
+
     # Messages
     path('messages/', views.message_list, name='message_list'),
-    
+    path("messages/add/", views.message_create, name="message_create"),
+
+    path('messages/<int:pk>/', views.message_detail, name='message_detail'),
+    path('messages/delete/<int:pk>/', views.message_delete, name='message_delete'),
+
     # Users
     path('users/', views.user_list, name='user_list'),
     path('users/create/', views.user_create, name='user_create'),
+    path('users/edit/<int:pk>/', views.user_edit, name='user_edit'),
+    path('users/delete/<int:pk>/', views.user_delete, name='user_delete'),
+
 ]
 
 

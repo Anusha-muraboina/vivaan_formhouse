@@ -178,7 +178,7 @@ class Booking(models.Model):
     )
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
     payment_id = models.CharField(max_length=100, blank=True, null=True)    
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)

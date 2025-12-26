@@ -226,12 +226,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://740ab8cc8762.ngrok-free.app",
+    "https://a23ea9bca657.ngrok-free.app",
 ]
 
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://740ab8cc8762.ngrok-free.app",
+    "https://a23ea9bca657.ngrok-free.app",
     # "https://e23d39b29fc8.ngrok-free.app/",
 ]

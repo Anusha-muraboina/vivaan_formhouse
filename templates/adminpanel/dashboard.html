@@ -172,7 +172,14 @@
         <div class="stat-icon bg-green-light">₹</div>
     </div>
 
-
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Today Revenue</h3>
+            <p>₹{{ today_revenue }}</p>
+            <div class="stat-subtext">Today Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
 
 
     <div class="stat-card">
@@ -268,7 +275,7 @@
 
     </div>
 </div>
-
+{% comment %} 
 <script>
 const bookingsCtx = document.getElementById("bookingsChart").getContext("2d");
 new Chart(bookingsCtx, {
@@ -307,6 +314,65 @@ new Chart(statusCtx, {
         responsive: true,
         maintainAspectRatio: false
     }
+});
+</script> {% endcomment %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ---------- BOOKINGS LINE CHART ----------
+    const bookingsCanvas = document.getElementById("bookingsChart");
+    if (bookingsCanvas) {
+        const bookingsCtx = bookingsCanvas.getContext("2d");
+
+        new Chart(bookingsCtx, {
+            type: "line",
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: "Bookings",
+                    data: {{ chart_data|safe }},
+                    borderColor: "#8B0000",
+                    backgroundColor: "rgba(139,0,0,0.15)",
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // ---------- STATUS DOUGHNUT CHART ----------
+    const statusCanvas = document.getElementById("statusChart");
+    if (statusCanvas) {
+        const statusCtx = statusCanvas.getContext("2d");
+
+        new Chart(statusCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["Confirmed", "Pending", "Cancelled", "Completed"],
+                datasets: [{
+                    data: {{ status_data|safe }},
+                    backgroundColor: [
+                        "#10b981",
+                        "#f59e0b",
+                        "#ef4444",
+                        "#3b82f6"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
 });
 </script>
 

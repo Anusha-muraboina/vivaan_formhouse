@@ -1,22 +1,166 @@
-{% extends 'adminpanel/base.html' %}
-{% block title %}Coupon | Vivaan Admin{% endblock %}
-{% block header %}Coupon Form{% endblock %}
+{% extends "adminpanel/base.html" %}
+{% block title %}Coupon{% endblock %}
+{% block header %}Coupon{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width: 500px">
+<style>
+/* ===== CARD ===== */
+.form-card {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+/* ===== HEADER ===== */
+.form-card .card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.form-card .card-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* ===== FORM ===== */
+.admin-form {
+    padding: 2rem;
+}
+
+/* GRID */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+/* FORM GROUP */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #374151;
+}
+
+/* INPUT */
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.form-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(79,70,229,.15);
+}
+
+/* CHECKBOX */
+.form-group.checkbox {
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-group.checkbox input {
+    transform: scale(1.2);
+}
+
+/* ACTIONS */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 2.2rem;
+}
+
+/* BUTTONS */
+.btn-primary {
+    background: #4f46e5;
+    color: #fff;
+    padding: 12px 26px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #4338ca;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    padding: 12px 26px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="card form-card">
     <div class="card-header">
-        <h2>Create Coupon</h2>
+        <h2>{% if coupon %}Edit{% else %}Create{% endif %} Coupon</h2>
     </div>
-    <form method="POST" style="padding: 2rem;">
+
+    <form method="POST" class="admin-form">
         {% csrf_token %}
-        <div style="margin-bottom: 1rem;"><label>Code</label><input type="text" name="code" required
-                style="width:100%; padding:.8rem;"></div>
-        <div style="margin-bottom: 1rem;"><label>Discount Amount</label><input type="number" name="discount_amount"
-                required style="width:100%; padding:.8rem;"></div>
-        <div style="margin-bottom: 1rem;"><label>Valid From</label><input type="date" name="valid_from" required
-                style="width:100%; padding:.8rem;"></div>
-        <div style="margin-bottom: 1rem;"><label>Valid Until</label><input type="date" name="valid_until" required
-                style="width:100%; padding:.8rem;"></div>
-        <button type="submit" class="btn-action btn-view">Save</button>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Coupon Code</label>
+                {{ form.code }}
+            </div>
+
+            <div class="form-group">
+                <label>Discount Amount (₹)</label>
+                {{ form.discount_amount }}
+            </div>
+
+            <div class="form-group">
+                <label>Valid From</label>
+                {{ form.valid_from }}
+            </div>
+
+            <div class="form-group">
+                <label>Valid Until</label>
+                {{ form.valid_until }}
+            </div>
+
+            <div class="form-group checkbox">
+                {{ form.is_active }}
+                <label>Active</label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Coupon</button>
+            <a href="{% url 'vivaan_admin:coupon_list' %}" class="btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}

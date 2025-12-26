@@ -17,7 +17,7 @@ from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import timedelta, date
 import json
-
+from resort.forms import AmenityForm
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
@@ -114,38 +114,175 @@ from decimal import Decimal
 #     return user.is_authenticated and user.is_superuser
 
 
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+# def dashboard(request):
+#     today = timezone.now().date()
+#     seven_days_ago = today - timedelta(days=7)
+#     first_day_of_month = today.replace(day=1)
+
+#     # =======================
+#     # REVENUE CALCULATIONS
+#     # =======================
+
+#     overall_revenue = (
+#         Booking.objects.filter(
+#             payment_status__in=['paid', 'partial']
+#         ).aggregate(total=Sum('total_amount'))['total']
+#         or Decimal('0.00')
+#     )
+
+
+#     today = timezone.now().date()
+
+#     weekly_start = today - timedelta(days=6)
+#     monthly_start = today - timedelta(days=29)
+
+#     today_revenue = Booking.objects.filter(
+#         payment_status__in=['paid', 'partial'],
+#         created_at__date=today
+#     ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+#     weekly_revenue = Booking.objects.filter(
+#         payment_status__in=['paid', 'partial'],
+#         created_at__date__gte=weekly_start,
+#         created_at__date__lte=today
+#     ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+#     monthly_revenue = Booking.objects.filter(
+#         payment_status__in=['paid', 'partial'],
+#         created_at__date__gte=monthly_start,
+#         created_at__date__lte=today
+#     ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+#     # monthly_revenue = (
+#     #     Booking.objects.filter(
+#     #         payment_status__in=['paid', 'partial'],
+#     #         # created_at__date__gte=first_day_of_month
+#     #     ).aggregate(total=Sum('total_amount'))['total']
+#     #     or Decimal('0.00')
+#     # )
+
+#     # weekly_revenue = (
+#     #     Booking.objects.filter(
+#     #         payment_status__in=['paid', 'partial'],
+#     #         # created_at__date__gte=seven_days_ago
+#     #     ).aggregate(total=Sum('total_amount'))['total']
+#     #     or Decimal('0.00')
+#     # )
+
+#     # =======================
+#     # OTHER STATS
+#     # =======================
+
+#     weekly_bookings = Booking.objects.filter(
+#         created_at__date__gte=seven_days_ago
+#     ).count()
+
+#     pending_bookings = Booking.objects.filter(status='pending').count()
+
+#     total_guests = (
+#         Booking.objects.filter(
+#             status__in=['confirmed', 'completed']
+#         ).aggregate(total=Sum('guest_count'))['total']
+#         or 0
+#     )
+
+#     recent_bookings = Booking.objects.all().order_by('-created_at')[:5]
+
+#     # =======================
+#     # CHART DATA (6 MONTHS)
+#     # =======================
+
+#     labels = []
+#     booking_data = []
+
+#     for i in range(5, -1, -1):
+#         month_start = (today.replace(day=1) - timedelta(days=30 * i)).replace(day=1)
+#         month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+#         count = Booking.objects.filter(
+#             created_at__date__gte=month_start,
+#             created_at__date__lte=month_end
+#         ).count()
+
+#         labels.append(month_start.strftime("%b"))
+#         booking_data.append(count)
+
+#     status_data = [
+#         Booking.objects.filter(status='confirmed').count(),
+#         Booking.objects.filter(status='pending').count(),
+#         Booking.objects.filter(status='cancelled').count(),
+#         Booking.objects.filter(status='completed').count(),
+#     ]
+
+#     context = {
+#         "overall_revenue": overall_revenue,
+#         "monthly_revenue": monthly_revenue,
+#         "weekly_revenue": weekly_revenue,
+#         "weekly_bookings": weekly_bookings,
+#         "pending_bookings": pending_bookings,
+#         "total_guests": total_guests,
+#         "recent_bookings": recent_bookings,
+#         "chart_labels": json.dumps(labels),
+#         "chart_data": json.dumps(booking_data),
+#         "status_data": json.dumps(status_data),
+#     }
+
+#     return render(request, "adminpanel/dashboard.html", context)
+from django.utils import timezone
+from django.db.models import Sum
+from datetime import timedelta
+from decimal import Decimal
+import json
+
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin, login_url='vivaan_admin:login')
 def dashboard(request):
-    today = timezone.now().date()
-    seven_days_ago = today - timedelta(days=7)
-    first_day_of_month = today.replace(day=1)
 
     # =======================
-    # REVENUE CALCULATIONS
+    # DATE SETUP
+    # =======================
+    today = timezone.now().date()
+    weekly_start = today - timedelta(days=6)     # last 7 days (incl today)
+    monthly_start = today - timedelta(days=29)   # last 30 days (incl today)
+
+    paid_filter = {
+        "payment_status__in": ["paid", "partial"]
+    }
+
+    # =======================
+    # REVENUE (BASED ON CHECK-IN DATE)
     # =======================
 
     overall_revenue = (
-        Booking.objects.filter(
-            payment_status__in=['paid', 'partial']
-        ).aggregate(total=Sum('total_amount'))['total']
-        or Decimal('0.00')
+        Booking.objects.filter(**paid_filter)
+        .aggregate(total=Sum("total_amount"))["total"]
+        or Decimal("0.00")
     )
 
-    monthly_revenue = (
+    today_revenue = (
         Booking.objects.filter(
-            payment_status__in=['paid', 'partial'],
-            created_at__date__gte=first_day_of_month
-        ).aggregate(total=Sum('total_amount'))['total']
-        or Decimal('0.00')
+            **paid_filter,
+            check_in=today
+        ).aggregate(total=Sum("total_amount"))["total"]
+        or Decimal("0.00")
     )
 
     weekly_revenue = (
         Booking.objects.filter(
-            payment_status__in=['paid', 'partial'],
-            created_at__date__gte=seven_days_ago
-        ).aggregate(total=Sum('total_amount'))['total']
-        or Decimal('0.00')
+            **paid_filter,
+            check_in__range=[weekly_start, today]
+        ).aggregate(total=Sum("total_amount"))["total"]
+        or Decimal("0.00")
+    )
+
+    monthly_revenue = (
+        Booking.objects.filter(
+            **paid_filter,
+            check_in__range=[monthly_start, today]
+        ).aggregate(total=Sum("total_amount"))["total"]
+        or Decimal("0.00")
     )
 
     # =======================
@@ -153,22 +290,22 @@ def dashboard(request):
     # =======================
 
     weekly_bookings = Booking.objects.filter(
-        created_at__date__gte=seven_days_ago
+        check_in__range=[weekly_start, today]
     ).count()
 
-    pending_bookings = Booking.objects.filter(status='pending').count()
+    pending_bookings = Booking.objects.filter(status="pending").count()
 
     total_guests = (
         Booking.objects.filter(
-            status__in=['confirmed', 'completed']
-        ).aggregate(total=Sum('guest_count'))['total']
+            status__in=["confirmed", "completed"]
+        ).aggregate(total=Sum("guest_count"))["total"]
         or 0
     )
 
-    recent_bookings = Booking.objects.all().order_by('-created_at')[:5]
+    recent_bookings = Booking.objects.all().order_by("-created_at")[:5]
 
     # =======================
-    # CHART DATA (6 MONTHS)
+    # CHART DATA (LAST 6 MONTHS – BY CREATED DATE)
     # =======================
 
     labels = []
@@ -187,20 +324,27 @@ def dashboard(request):
         booking_data.append(count)
 
     status_data = [
-        Booking.objects.filter(status='confirmed').count(),
-        Booking.objects.filter(status='pending').count(),
-        Booking.objects.filter(status='cancelled').count(),
-        Booking.objects.filter(status='completed').count(),
+        Booking.objects.filter(status="confirmed").count(),
+        Booking.objects.filter(status="pending").count(),
+        Booking.objects.filter(status="cancelled").count(),
+        Booking.objects.filter(status="completed").count(),
     ]
+
+    # =======================
+    # CONTEXT
+    # =======================
 
     context = {
         "overall_revenue": overall_revenue,
-        "monthly_revenue": monthly_revenue,
+        "today_revenue": today_revenue,
         "weekly_revenue": weekly_revenue,
+        "monthly_revenue": monthly_revenue,
+
         "weekly_bookings": weekly_bookings,
         "pending_bookings": pending_bookings,
         "total_guests": total_guests,
         "recent_bookings": recent_bookings,
+
         "chart_labels": json.dumps(labels),
         "chart_data": json.dumps(booking_data),
         "status_data": json.dumps(status_data),
@@ -209,65 +353,129 @@ def dashboard(request):
     return render(request, "adminpanel/dashboard.html", context)
 
 # --- Bookings ---
+from .forms import *
+
+# LIST
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def booking_list(request):
-    bookings = Booking.objects.all().order_by('-created_at')
-    return render(request, 'adminpanel/booking_list.html', {'bookings': bookings})
+    bookings = Booking.objects.all()
+    return render(request, "adminpanel/booking_list.html", {"bookings": bookings})
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def booking_create(request):
-    if request.method == 'POST':
-        Booking.objects.create(
-            guest_name=request.POST.get('guest_name'),
-            guest_email=request.POST.get('guest_email'),
-            guest_phone=request.POST.get('guest_phone'),
-            guest_count=request.POST.get('guest_count'),
-            status=request.POST.get('status'),
-            total_amount=request.POST.get('total_amount'),
-            check_in=request.POST.get('check_in'),
-            check_out=request.POST.get('check_out'),
-            special_requests=request.POST.get('special_requests'),
-            cancellation_reason=request.POST.get('cancellation_reason')
-        )
-        messages.success(request, "New booking created manually.")
-        return redirect('vivaan_admin:booking_list')
-    return render(request, 'adminpanel/booking_form.html')
+
+    # ==========================
+    # BOOKED DATES (GREEN)
+    # ==========================
+    booked_dates = set()
+
+    bookings = Booking.objects.filter(
+        status__in=["confirmed", "pending"],
+        check_out__gt=timezone.now().date()
+    )
+
+    for booking in bookings:
+        d = booking.check_in
+        while d < booking.check_out:
+            booked_dates.add(d.isoformat())  # YYYY-MM-DD
+            d += timedelta(days=1)
+
+    # ==========================
+    # BLOCKED DATES (RED)
+    # ==========================
+    blocked_dates = set()
+
+    blocks = BlockedDate.objects.all()
+    for block in blocks:
+        d = block.start_date
+        while d <= block.end_date:
+            blocked_dates.add(d.isoformat())
+            d += timedelta(days=1)
+
+    form = AdminBookingForm(request.POST or None)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Booking created successfully.")
+        return redirect("vivaan_admin:booking_list")
+
+    return render(request, "adminpanel/booking_form.html", {
+        "form": form,
+
+        # 👇 REQUIRED FOR CALENDAR COLORS
+        "booked_dates": sorted(booked_dates),
+        "blocked_dates": sorted(blocked_dates),
+    })
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def booking_edit(request, pk):
-    booking = get_object_or_404(Booking, pk=pk)
-    if request.method == 'POST':
-        booking.guest_name = request.POST.get('guest_name')
-        booking.guest_email = request.POST.get('guest_email')
-        booking.guest_phone = request.POST.get('guest_phone')
-        booking.guest_count = request.POST.get('guest_count')
-        booking.status = request.POST.get('status')
-        booking.total_amount = request.POST.get('total_amount')
-        booking.check_in = request.POST.get('check_in')
-        booking.check_out = request.POST.get('check_out')
-        booking.special_requests = request.POST.get('special_requests')
-        booking.cancellation_reason = request.POST.get('cancellation_reason')
-        booking.save()
-        messages.success(request, f"Booking #{booking.booking_id} updated successfully.")
-        return redirect('vivaan_admin:booking_list')
-    return render(request, 'adminpanel/booking_form.html', {'booking': booking})
 
+    booking = get_object_or_404(Booking, pk=pk)
+
+    # ==========================
+    # BOOKED DATES (EXCLUDE CURRENT BOOKING)
+    # ==========================
+    booked_dates = set()
+
+    bookings = Booking.objects.filter(
+        status__in=["confirmed", "pending"]
+    ).exclude(pk=pk)
+
+    for b in bookings:
+        d = b.check_in
+        while d < b.check_out:
+            booked_dates.add(d.isoformat())
+            d += timedelta(days=1)
+
+    # ==========================
+    # BLOCKED DATES
+    # ==========================
+    blocked_dates = set()
+
+    blocks = BlockedDate.objects.all()
+    for block in blocks:
+        d = block.start_date
+        while d <= block.end_date:
+            blocked_dates.add(d.isoformat())
+            d += timedelta(days=1)
+
+    form = AdminBookingForm(request.POST or None, instance=booking)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Booking {booking.booking_id} updated.")
+        return redirect("vivaan_admin:booking_list")
+
+    return render(request, "adminpanel/booking_form.html", {
+        "form": form,
+        "booking": booking,
+
+        # 👇 REQUIRED FOR CALENDAR COLORS
+        "booked_dates": sorted(booked_dates),
+        "blocked_dates": sorted(blocked_dates),
+    })
+
+# DETAIL
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def booking_detail(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
-    return render(request, 'adminpanel/booking_detail.html', {'booking': booking})
+    return render(request, "adminpanel/booking_detail.html", {"booking": booking})
 
+
+# DELETE
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def booking_delete(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     booking.delete()
     messages.success(request, "Booking deleted.")
-    return redirect('vivaan_admin:booking_list')
+    return redirect("vivaan_admin:booking_list")
 
 # --- Rooms & Categories ---
 
@@ -448,40 +656,48 @@ def pricing_edit(request):
     return render(request, 'adminpanel/pricing_form.html', {'pricing': pricing})
 
 # --- Amenities ---
+
+
+# --- LIST ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def amenity_list(request):
     amenities = Amenity.objects.all()
     return render(request, 'adminpanel/amenity_list.html', {'amenities': amenities})
 
+# --- CREATE ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def amenity_create(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        Amenity.objects.create(name=name)
-        messages.success(request, "Amenity created.")
+    form = AmenityForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Amenity created successfully.")
         return redirect('vivaan_admin:amenity_list')
-    return render(request, 'adminpanel/amenity_form.html')
+    return render(request, 'adminpanel/amenity_form.html', {'form': form})
 
+# --- EDIT ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def amenity_edit(request, pk):
     amenity = get_object_or_404(Amenity, pk=pk)
-    if request.method == 'POST':
-        amenity.name = request.POST.get('name')
-        amenity.save()
-        messages.success(request, "Amenity updated.")
+    form = AmenityForm(request.POST or None, request.FILES or None, instance=amenity)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Amenity updated successfully.")
         return redirect('vivaan_admin:amenity_list')
-    return render(request, 'adminpanel/amenity_form.html', {'amenity': amenity})
+    return render(request, 'adminpanel/amenity_form.html', {'form': form, 'amenity': amenity})
 
+# --- DELETE ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def amenity_delete(request, pk):
     amenity = get_object_or_404(Amenity, pk=pk)
     amenity.delete()
-    messages.success(request, "Amenity deleted.")
+    messages.success(request, "Amenity deleted successfully.")
     return redirect('vivaan_admin:amenity_list')
+
+
 
 # --- Banners ---
 @login_required(login_url='vivaan_admin:login')
@@ -540,110 +756,333 @@ def banner_delete(request, pk):
 
 # --- Blocked Dates ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def blocked_date_list(request):
-    blocked_dates = BlockedDate.objects.all()
-    return render(request, 'adminpanel/blocked_date_list.html', {'blocked_dates': blocked_dates})
+    blocked_dates = BlockedDate.objects.all().order_by('-start_date')
+    return render(request, 'adminpanel/blocked_date_list.html', {
+        'blocked_dates': blocked_dates
+    })
+from resort.models import *
+from resort.forms import *
+
+from datetime import timedelta
+from django.utils import timezone
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def blocked_date_create(request):
-    if request.method == 'POST':
-        BlockedDate.objects.create(
-            start_date=request.POST.get('start_date'),
-            end_date=request.POST.get('end_date'),
-            reason=request.POST.get('reason'),
-            created_by=request.user
-        )
-        messages.success(request, "Date block added.")
-        return redirect('vivaan_admin:blocked_date_list')
-    return render(request, 'adminpanel/blocked_date_form.html')
+
+    booked_dates = set()
+    blocked_dates = set()
+
+    # BOOKED DATES
+    bookings = Booking.objects.filter(
+        status__in=["confirmed", "pending"],
+        check_out__gt=timezone.now().date()
+    )
+
+    for booking in bookings:
+        d = booking.check_in
+        while d < booking.check_out:
+            booked_dates.add(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
+
+    # EXISTING BLOCKED DATES
+    blocks = BlockedDate.objects.all()
+    for block in blocks:
+        d = block.start_date
+        while d <= block.end_date:
+            blocked_dates.add(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
+
+    if request.method == "POST":
+        form = BlockedDateForm(request.POST)
+        if form.is_valid():
+            blocked = form.save(commit=False)
+            blocked.created_by = request.user
+            blocked.save()
+            messages.success(request, "Dates blocked successfully.")
+            return redirect("vivaan_admin:blocked_date_list")
+    else:
+        form = BlockedDateForm()
+
+    return render(request, "adminpanel/blocked_date_form.html", {
+        "form": form,
+        "booked_dates": list(booked_dates),
+        "blocked_dates": list(blocked_dates),
+    })
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blocked_date_edit(request, pk):
+
+    blocked_date = get_object_or_404(BlockedDate, pk=pk)
+
+    disabled_dates = set()
+
+    # BOOKED DATES
+    bookings = Booking.objects.filter(
+        status__in=["confirmed", "pending"],
+        check_out__gt=timezone.now().date()
+    )
+
+    for booking in bookings:
+        d = booking.check_in
+        while d < booking.check_out:
+            disabled_dates.add(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
+
+    # BLOCKED DATES (EXCEPT CURRENT)
+    blocks = BlockedDate.objects.exclude(pk=pk)
+    for block in blocks:
+        d = block.start_date
+        while d <= block.end_date:
+            disabled_dates.add(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
+
+    if request.method == "POST":
+        form = BlockedDateForm(request.POST, instance=blocked_date)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blocked date updated.")
+            return redirect("vivaan_admin:blocked_date_list")
+    else:
+        form = BlockedDateForm(instance=blocked_date)
+
+    return render(request, "adminpanel/blocked_date_form.html", {
+        "form": form,
+        "blocked_date": blocked_date,
+        "disabled_dates": list(disabled_dates)
+    })
+
+# DELETE
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def blocked_date_delete(request, pk):
-    get_object_or_404(BlockedDate, pk=pk).delete()
+    blocked = get_object_or_404(BlockedDate, pk=pk)
+    blocked.delete()
+    messages.success(request, "Blocked date removed.")
     return redirect('vivaan_admin:blocked_date_list')
-
 # --- Coupons ---
+
+
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def coupon_list(request):
-    coupons = Coupon.objects.all()
-    return render(request, 'adminpanel/coupon_list.html', {'coupons': coupons})
+    coupons = Coupon.objects.all().order_by("-created_at")
+    return render(request, "adminpanel/coupon_list.html", {"coupons": coupons})
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def coupon_create(request):
-    if request.method == 'POST':
-        Coupon.objects.create(
-            code=request.POST.get('code'),
-            discount_amount=request.POST.get('discount_amount'),
-            valid_from=request.POST.get('valid_from'),
-            valid_until=request.POST.get('valid_until')
-        )
-        return redirect('vivaan_admin:coupon_list')
-    return render(request, 'adminpanel/coupon_form.html')
+    form = CouponForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Coupon created successfully.")
+        return redirect("vivaan_admin:coupon_list")
+    return render(request, "adminpanel/coupon_form.html", {"form": form})
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def coupon_edit(request, pk):
+    coupon = get_object_or_404(Coupon, pk=pk)
+    form = CouponForm(request.POST or None, instance=coupon)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Coupon updated successfully.")
+        return redirect("vivaan_admin:coupon_list")
+    return render(request, "adminpanel/coupon_form.html", {
+        "form": form,
+        "coupon": coupon
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def coupon_delete(request, pk):
-    get_object_or_404(Coupon, pk=pk).delete()
-    return redirect('vivaan_admin:coupon_list')
+    coupon = get_object_or_404(Coupon, pk=pk)
+    coupon.delete()
+    messages.success(request, "Coupon deleted.")
+    return redirect("vivaan_admin:coupon_list")
 
 # --- Gallery ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def gallery_list(request):
     photos = Gallery.objects.all()
-    return render(request, 'adminpanel/gallery_list.html', {'photos': photos})
+    return render(request, "adminpanel/gallery_list.html", {
+        "photos": photos
+    })
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def gallery_create(request):
-    if request.method == 'POST':
-        Gallery.objects.create(
-            title=request.POST.get('title'),
-            category=request.POST.get('category'),
-            image=request.FILES.get('image')
-        )
-        return redirect('vivaan_admin:gallery_list')
-    return render(request, 'adminpanel/gallery_form.html')
+    form = GalleryForm(request.POST or None, request.FILES or None)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Gallery image added successfully.")
+        return redirect("vivaan_admin:gallery_list")
+
+    return render(request, "adminpanel/gallery_form.html", {
+        "form": form
+    })
+
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def gallery_edit(request, pk):
+    photo = get_object_or_404(Gallery, pk=pk)
+    form = GalleryForm(request.POST or None, request.FILES or None, instance=photo)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Gallery image updated successfully.")
+        return redirect("vivaan_admin:gallery_list")
+
+    return render(request, "adminpanel/gallery_form.html", {
+        "form": form,
+        "photo": photo
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def gallery_delete(request, pk):
-    get_object_or_404(Gallery, pk=pk).delete()
-    return redirect('vivaan_admin:gallery_list')
+    photo = get_object_or_404(Gallery, pk=pk)
+    photo.delete()
+    messages.success(request, "Gallery image deleted.")
+    return redirect("vivaan_admin:gallery_list")
 
 # --- Testimonials ---
-@login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
-def testimonial_list(request):
-    testimonials = Testimonial.objects.all()
-    return render(request, 'adminpanel/testimonial_list.html', {'testimonials': testimonials})
+from django.core.paginator import Paginator
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def testimonial_list(request):
+    testimonials_qs = Testimonial.objects.all().order_by("-created_at")
+
+    paginator = Paginator(testimonials_qs, 3)  # 6 testimonials per page
+    page_number = request.GET.get("page")
+    testimonials = paginator.get_page(page_number)
+
+    return render(request, "adminpanel/testimonial_list.html", {
+        "testimonials": testimonials
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def testimonial_create(request):
+    form = TestimonialForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Testimonial added successfully.")
+        return redirect("vivaan_admin:testimonial_list")
+
+    return render(request, "adminpanel/testimonial_form.html", {
+        "form": form
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def testimonial_edit(request, pk):
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    form = TestimonialForm(request.POST or None, instance=testimonial)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Testimonial updated successfully.")
+        return redirect("vivaan_admin:testimonial_list")
+
+    return render(request, "adminpanel/testimonial_form.html", {
+        "form": form,
+        "testimonial": testimonial
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def testimonial_delete(request, pk):
-    get_object_or_404(Testimonial, pk=pk).delete()
-    return redirect('vivaan_admin:testimonial_list')
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    testimonial.delete()
+    messages.success(request, "Testimonial deleted.")
+    return redirect("vivaan_admin:testimonial_list")
 
 # --- Messages & Users (Existing) ---
+# LIST
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def message_list(request):
-    messages = ContactMessage.objects.all().order_by('-created_at')
-    return render(request, 'adminpanel/message_list.html', {'messages': messages})
+    qs = ContactMessage.objects.all()
+
+    paginator = Paginator(qs, 10)
+    page_number = request.GET.get("page")
+    messages_page = paginator.get_page(page_number)
+
+    return render(request, 'adminpanel/message_list.html', {
+        'messages': messages_page
+    })
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def message_create(request):
+    if request.method == "POST":
+        ContactMessage.objects.create(
+            name=request.POST.get("name"),
+            email=request.POST.get("email"),
+            phone=request.POST.get("phone"),
+            subject=request.POST.get("subject"),
+            message=request.POST.get("message"),
+            is_read=True  # admin-added messages are read
+        )
+        messages.success(request, "Message added successfully.")
+        return redirect("vivaan_admin:message_list")
+
+    return render(request, "adminpanel/message_form.html")
+
+# VIEW / DETAIL
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def message_detail(request, pk):
+    msg = get_object_or_404(ContactMessage, pk=pk)
+
+    if not msg.is_read:
+        msg.is_read = True
+        msg.save()
+
+    return render(request, 'adminpanel/message_detail.html', {
+        'message': msg
+    })
+
+
+# DELETE
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def message_delete(request, pk):
+    msg = get_object_or_404(ContactMessage, pk=pk)
+    msg.delete()
+    messages.success(request, "Message deleted successfully.")
+    return redirect('vivaan_admin:message_list')
+
+
+
+# LIST
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def user_list(request):
     users = User.objects.all().order_by('-date_joined')
     return render(request, 'adminpanel/user_list.html', {'users': users})
 
+
+# CREATE
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
 def user_create(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -652,20 +1091,108 @@ def user_create(request):
         role = request.POST.get('role')
 
         if User.objects.filter(username=username).exists():
-            return render(request, 'adminpanel/user_form.html', {'error': 'Username already exists.'})
+            messages.error(request, "Username already exists.")
+            return redirect('vivaan_admin:user_create')
 
-        user = User.objects.create_user(username=username, email=email, password=password)
-        if role == 'superuser':
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        if role == "superuser":
             user.is_superuser = True
             user.is_staff = True
-        elif role == 'staff':
+        elif role == "staff":
             user.is_staff = True
-        
+
         user.save()
         messages.success(request, f"User {username} created successfully.")
         return redirect('vivaan_admin:user_list')
 
     return render(request, 'adminpanel/user_form.html')
+
+
+# EDIT
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
+    if request.method == 'POST':
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        role = request.POST.get('role')
+
+        user.is_superuser = False
+        user.is_staff = False
+
+        if role == "superuser":
+            user.is_superuser = True
+            user.is_staff = True
+        elif role == "staff":
+            user.is_staff = True
+
+        password = request.POST.get('password')
+        if password:
+            user.set_password(password)
+
+        user.save()
+        messages.success(request, "User updated successfully.")
+        return redirect('vivaan_admin:user_list')
+
+    return render(request, 'adminpanel/user_form.html', {'edit_user': user})
+
+
+# DELETE
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
+    if user == request.user:
+        messages.error(request, "You cannot delete your own account.")
+    else:
+        user.delete()
+        messages.success(request, "User deleted successfully.")
+
+    return redirect('vivaan_admin:user_list')
+
+
+
+
+
+
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+# def user_list(request):
+#     users = User.objects.all().order_by('-date_joined')
+#     return render(request, 'adminpanel/user_list.html', {'users': users})
+
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+# def user_create(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
+#         role = request.POST.get('role')
+
+#         if User.objects.filter(username=username).exists():
+#             return render(request, 'adminpanel/user_form.html', {'error': 'Username already exists.'})
+
+#         user = User.objects.create_user(username=username, email=email, password=password)
+#         if role == 'superuser':
+#             user.is_superuser = True
+#             user.is_staff = True
+#         elif role == 'staff':
+#             user.is_staff = True
+        
+#         user.save()
+#         messages.success(request, f"User {username} created successfully.")
+#         return redirect('vivaan_admin:user_list')
+
+#     return render(request, 'adminpanel/user_form.html')
 
 
 

@@ -1,41 +1,215 @@
-{% extends 'adminpanel/base.html' %}
-{% block title %}Testimonials | Vivaan Admin{% endblock %}
+{% extends "adminpanel/base.html" %}
+{% block title %}Testimonials{% endblock %}
 {% block header %}Testimonials{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="card-header">
+<style>
+/* TABLE */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 14px;
+    background: #f9fafb;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+    font-size: 14px;
+}
+
+.admin-table tr:hover {
+    background: #f9fafb;
+}
+
+/* STARS */
+.star { color:#f59e0b; font-size:0.85rem; }
+.star-empty { color:#d1d5db; font-size:0.85rem; }
+
+/* BADGES */
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-green { background:#16a34a; color:white; }
+.badge-gray { background:#e5e7eb; color:#374151; }
+
+/* PAGINATION */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+.pagination {
+    display: flex;
+    gap: 6px;
+}
+.pagination a,
+.pagination span {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    font-size: 14px;
+}
+.pagination a:hover {
+    background: #f3f4f6;
+}
+.pagination .active {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+}
+.pagination .disabled {
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+
+
+
+
+</style>
+<style>
+    .btn-sm {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-view {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.btn-view:hover {
+    background: #c7d2fe;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+}
+
+</style>
+<div class="card p-2">
+    <div class="card-header flex-between">
         <h2>Guest Reviews</h2>
+        <a href="{% url 'vivaan_admin:testimonial_create' %}" class="btn-primary">
+            + Add Review
+        </a>
     </div>
-    <table>
+
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>Guest</th>
                 <th>Rating</th>
                 <th>Comment</th>
+                <th>Flags</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for review in testimonials %}
+        {% for review in testimonials %}
             <tr>
-                <td>{{ review.guest_name }}<br><small style="color:#999">{{ review.guest_location }}</small></td>
+                <!-- GUEST -->
+                <td>
+                    <strong>{{ review.guest_name }}</strong><br>
+                    <small style="color:#6b7280">{{ review.guest_location }}</small>
+                </td>
+
+                <!-- RATING -->
                 <td>
                     {% for i in "12345" %}
-                    {% if forloop.counter <= review.rating %} <i class="fa-solid fa-star"
-                        style="color:#f59e0b; font-size:0.75rem;"></i>
+                        {% if forloop.counter <= review.rating %}
+                            <i class="fa-solid fa-star star"></i>
                         {% else %}
-                        <i class="fa-regular fa-star" style="color:#ccc; font-size:0.75rem;"></i>
+                            <i class="fa-regular fa-star star-empty"></i>
                         {% endif %}
-                        {% endfor %}
+                    {% endfor %}
                 </td>
-                <td style="max-width:300px;">{{ review.comment|truncatechars:50 }}</td>
-                <td><a href="{% url 'vivaan_admin:testimonial_delete' review.id %}" class="btn-action btn-delete"
-                        onclick="return confirm('Delete?');">Delete</a></td>
+
+                <!-- COMMENT -->
+                <td style="max-width:300px;">
+                    {{ review.comment|truncatechars:80 }}
+                </td>
+
+                <!-- FLAGS -->
+                <td>
+                    {% if review.is_featured %}
+                        <span class="badge badge-green">Featured</span><br>
+                    {% endif %}
+                    {% if review.slot_position %}
+                        <span class="badge badge-gray">Slot {{ review.slot_position }}</span>
+                    {% endif %}
+                </td>
+
+                <!-- ACTIONS -->
+                <td>
+                    <a href="{% url 'vivaan_admin:testimonial_edit' review.id %}" class="btn-sm btn-view">
+                        Edit
+                    </a>
+                    <a href="{% url 'vivaan_admin:testimonial_delete' review.id %}"
+                       class="btn-sm btn-delete"
+                       onclick="return confirm('Delete this testimonial?');">
+                        Delete
+                    </a>
+                </td>
             </tr>
-            {% empty %}<tr>
-                <td colspan="4">No reviews found.</td>
-            </tr>{% endfor %}
+        {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;color:#6b7280;">
+                    No testimonials found.
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
+
+    <!-- PAGINATION -->
+    {% if testimonials.paginator.num_pages > 1 %}
+    <div class="pagination-wrapper">
+        <div class="pagination">
+            {% if testimonials.has_previous %}
+                <a href="?page={{ testimonials.previous_page_number }}">‹ Prev</a>
+            {% else %}
+                <span class="disabled">‹ Prev</span>
+            {% endif %}
+
+            {% for page in testimonials.paginator.page_range %}
+                {% if testimonials.number == page %}
+                    <span class="active">{{ page }}</span>
+                {% elif page >= testimonials.number|add:-2 and page <= testimonials.number|add:2 %}
+                    <a href="?page={{ page }}">{{ page }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if testimonials.has_next %}
+                <a href="?page={{ testimonials.next_page_number }}">Next ›</a>
+            {% else %}
+                <span class="disabled">Next ›</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
