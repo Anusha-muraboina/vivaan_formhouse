@@ -17,7 +17,7 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = [
-            'guest_name', 'guest_email', 'guest_phone', 'payment_method',
+            'guest_name', 'guest_email', 'guest_phone', 'payment_method','check_in_time','special_requests',
             'guest_count', 'check_in', 'check_out', 'special_requests','extra_guest_count',
         ]
         labels = {
@@ -69,19 +69,42 @@ class BookingForm(forms.ModelForm):
                 'rows': '4',
                 'placeholder': 'Any special requests or requirements...'
             }),
+            
+            "check_in": forms.DateInput(attrs={"type": "date"}),
+            "check_out": forms.DateInput(attrs={"type": "date"}),
+
         }
 
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     check_in = cleaned_data.get('check_in')
+    #     check_out = cleaned_data.get('check_out')
+
+    #     if check_in and check_out:
+    #         if check_out <= check_in:
+    #             raise forms.ValidationError('Check-out date must be after check-in date.')
+
+    #     return cleaned_data
+        
     def clean(self):
-        cleaned_data = super().clean()
-        check_in = cleaned_data.get('check_in')
-        check_out = cleaned_data.get('check_out')
+            cleaned = super().clean()
 
-        if check_in and check_out:
-            if check_out <= check_in:
-                raise forms.ValidationError('Check-out date must be after check-in date.')
+            check_in = cleaned.get("check_in")
+            check_out = cleaned.get("check_out")
+            in_time = cleaned.get("check_in_time")
+            out_time = cleaned.get("check_out_time")
 
-        return cleaned_data
+            if check_in and check_out and check_out < check_in:
+                raise forms.ValidationError("Check-out must be after check-in")
 
+            # ✅ SAME DAY TIME VALIDATION
+            if check_in == check_out and in_time and out_time:
+                if out_time <= in_time:
+                    raise forms.ValidationError(
+                        "Check-out time must be after check-in time"
+                    )
+
+            return cleaned
     def clean_guest_count(self):
         guest_count = self.cleaned_data.get("guest_count")
 

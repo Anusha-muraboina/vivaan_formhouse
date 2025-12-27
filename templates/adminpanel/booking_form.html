@@ -1,372 +1,105 @@
 {% extends "adminpanel/base.html" %}
-{% block title %}Booking{% endblock %}
-{% block header %}Booking{% endblock %}
+{% load static %}
 
 {% block content %}
-<div class="booking-wrapper">
 
-    <div class="booking-card">
-        <div class="booking-card-header">
-            <h2>{% if booking %}Edit{% else %}Add{% endif %} Booking</h2>
-            <p>Booked & blocked dates are shown in the calendar</p>
-        </div>
+<h2>Create Booking (Admin)</h2>
 
-        <form method="POST" class="booking-form">
-            {% csrf_token %}
+<style>
+.flatpickr-day.admin-booked {
+    background: #ef4444 !important;
+    color: white !important;
+}
 
-            <!-- ================= GUEST DETAILS ================= -->
-            <h3 class="section-title">Guest Details</h3>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Guest Name</label>
-                    {{ form.guest_name }}
-                </div>
+.flatpickr-day.admin-blocked {
+    background: #f59e0b !important;
+    color: white !important;
+}
 
-                <div class="form-group">
-                    <label>Email</label>
-                    {{ form.guest_email }}
-                </div>
+.flatpickr-day.flatpickr-disabled {
+    opacity: 1 !important;
+}
+</style>
 
-                <div class="form-group">
-                    <label>Phone</label>
-                    {{ form.guest_phone }}
-                </div>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-success">Create Booking</button>
+</form>
 
-                <div class="form-group">
-                    <label>Guest Count</label>
-                    {{ form.guest_count }}
-                </div>
+<!-- 🔑 DATA -->
+{{ booked_dates|json_script:"booked-dates" }}
+{{ blocked_dates|json_script:"blocked-dates" }}
 
-                <div class="form-group">
-                    <label>Extra Guests</label>
-                    {{ form.extra_guest_count }}
-                </div>
-            </div>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-            <!-- ================= DATE & TIME ================= -->
-            <h3 class="section-title">Check-in / Check-out</h3>
-            <div class="grid-4">
-                <div class="form-group">
-                    <label>Check-in Date</label>
-                    {{ form.check_in }}
-                </div>
-
-                <div class="form-group">
-                    <label>Check-in Time</label>
-                    {{ form.check_in_time }}
-                </div>
-
-                <div class="form-group">
-                    <label>Check-out Date</label>
-                    {{ form.check_out }}
-                </div>
-
-                <div class="form-group">
-                    <label>Check-out Time</label>
-                    {{ form.check_out_time }}
-                </div>
-            </div>
-
-            <!-- ================= STATUS ================= -->
-            <h3 class="section-title">Booking & Payment</h3>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Status</label>
-                    {{ form.status }}
-                </div>
-
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    {{ form.payment_method }}
-                </div>
-
-                <div class="form-group">
-                    <label>Payment Status</label>
-                    {{ form.payment_status }}
-                </div>
-            </div>
-
-            <!-- ================= AMOUNTS ================= -->
-            <h3 class="section-title">Amount Details</h3>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Total Amount</label>
-                    {{ form.total_amount }}
-                </div>
-
-                <div class="form-group">
-                    <label>Remaining Amount</label>
-                    {{ form.remaining_amount }}
-                </div>
-            </div>
-
-            <!-- ================= NOTES ================= -->
-            <h3 class="section-title">Additional Notes</h3>
-            <div class="form-group">
-                <label>Special Requests</label>
-                {{ form.special_requests }}
-            </div>
-
-            <div class="form-group">
-                <label>Cancellation Reason</label>
-                {{ form.cancellation_reason }}
-            </div>
-
-            <!-- ================= ACTIONS ================= -->
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">Save Booking</button>
-                <a href="{% url 'vivaan_admin:booking_list' %}" class="btn-secondary">Cancel</a>
-            </div>
-        </form>
-
-        <!-- LEGEND -->
-        <div class="legend">
-            <span><span class="dot booked"></span> Booked</span>
-            <span><span class="dot blocked"></span> Blocked</span>
-        </div>
-    </div>
-</div>
-
-<!-- ================= DATA FROM VIEW ================= -->
-{{ booked_dates|json_script:"booked-dates-data" }}
-{{ blocked_dates|json_script:"blocked-dates-data" }}
-
-<!-- ================= FLATPICKR ================= -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    if (typeof flatpickr === "undefined") {
-        console.error("Flatpickr not loaded");
-        return;
-    }
-
     const bookedDates = JSON.parse(
-        document.getElementById("booked-dates-data").textContent
+        document.getElementById("booked-dates").textContent
     );
-
     const blockedDates = JSON.parse(
-        document.getElementById("blocked-dates-data").textContent
+        document.getElementById("blocked-dates").textContent
     );
 
     const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
 
-    function formatDate(date) {
-        return date.toISOString().split("T")[0];
+    function formatLocal(date) {
+        return date.getFullYear() + "-" +
+            String(date.getMonth() + 1).padStart(2, "0") + "-" +
+            String(date.getDate()).padStart(2, "0");
     }
 
-    function decorateDay(dayElem) {
-        const dateStr = formatDate(dayElem.dateObj);
+    function decorate(dayElem) {
+        const d = formatLocal(dayElem.dateObj);
 
-        if (bookedDates.includes(dateStr)) {
-            dayElem.classList.add("fp-booked");
+        if (bookedDates.includes(d)) {
+            dayElem.classList.add("admin-booked");
             dayElem.title = "Already booked";
         }
 
-        if (blockedDates.includes(dateStr)) {
-            dayElem.classList.add("fp-blocked");
+        if (blockedDates.includes(d)) {
+            dayElem.classList.add("admin-blocked");
             dayElem.title = "Blocked by admin";
         }
     }
 
-    let checkInPicker;
     let checkOutPicker;
 
-    // CHECK-IN
-    checkInPicker = flatpickr("input[name='check_in']", {
+    // ✅ CHECK-IN (ONLY COLOR — NO DISABLE)
+    const checkInPicker = flatpickr("input[name='check_in']", {
         dateFormat: "Y-m-d",
         minDate: "today",
-        disable: disabledDates,
-        allowInput: true,
+        disableMobile: true,
 
         onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
+            decorate(dayElem);
         },
 
         onChange(selectedDates) {
             if (!selectedDates.length) return;
 
-            const nextDay = new Date(selectedDates[0]);
-            nextDay.setDate(nextDay.getDate() + 1);
-            checkOutPicker.set("minDate", nextDay);
+            const next = new Date(selectedDates[0]);
+            next.setDate(next.getDate() + 1);
+            checkOutPicker.set("minDate", next);
+            checkOutPicker.open();
         }
     });
 
-    // CHECK-OUT
+    // ✅ CHECK-OUT (DISABLE + COLOR)
     checkOutPicker = flatpickr("input[name='check_out']", {
         dateFormat: "Y-m-d",
         minDate: "today",
         disable: disabledDates,
-        allowInput: true,
+        disableMobile: true,
 
         onDayCreate(_, __, ___, dayElem) {
-            decorateDay(dayElem);
-        },
-
-        onChange(selectedDates) {
-            if (!selectedDates.length) return;
-
-            const checkInDate = checkInPicker.selectedDates[0];
-            if (!checkInDate) {
-                alert("Select check-in date first");
-                checkOutPicker.clear();
-                return;
-            }
-
-            let current = new Date(checkInDate);
-            const end = new Date(selectedDates[0]);
-
-            while (current < end) {
-                const dStr = formatDate(current);
-                if (disabledDates.includes(dStr)) {
-                    alert("Selected range includes booked/blocked dates");
-                    checkOutPicker.clear();
-                    return;
-                }
-                current.setDate(current.getDate() + 1);
-            }
+            decorate(dayElem);
         }
     });
 
 });
 </script>
 
-<!-- ================= STYLES ================= -->
-<style>
-.booking-wrapper {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.booking-card {
-    width: 100%;
-    max-width: 1100px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(0,0,0,.08);
-}
-
-.booking-card-header {
-    padding: 1.8rem 2rem;
-    border-bottom: 1px solid #eee;
-}
-
-.booking-card-header h2 {
-    margin: 0;
-    font-size: 1.6rem;
-}
-
-.booking-card-header p {
-    margin-top: 6px;
-    color: #6b7280;
-}
-
-.booking-form {
-    padding: 2rem;
-}
-
-.section-title {
-    margin: 2rem 0 1rem;
-    font-size: 1.1rem;
-    border-left: 4px solid #6366f1;
-    padding-left: 10px;
-    color: #374151;
-}
-
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-}
-
-.form-group textarea {
-    min-height: 90px;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: #6366f1;
-    outline: none;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 2rem;
-}
-
-.btn-primary {
-    background: #6366f1;
-    color: white;
-    padding: 10px 28px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    padding: 10px 28px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #374151;
-}
-
-/* CALENDAR COLORS */
-.flatpickr-day.fp-booked {
-    background: #22c55e !important;
-    color: white !important;
-    border-radius: 50%;
-    cursor: not-allowed;
-}
-
-.flatpickr-day.fp-blocked {
-    background: #ef4444 !important;
-    color: white !important;
-    border-radius: 50%;
-    cursor: not-allowed;
-}
-
-.flatpickr-day.flatpickr-disabled {
-    opacity: 1 !important;
-}
-
-/* LEGEND */
-.legend {
-    padding: 1rem 2rem 2rem;
-    font-size: 14px;
-    display: flex;
-    gap: 20px;
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 6px;
-}
-
-.dot.booked { background: #22c55e; }
-.dot.blocked { background: #ef4444; }
-</style>
 {% endblock %}

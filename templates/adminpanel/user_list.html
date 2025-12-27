@@ -16,7 +16,7 @@
 </style>
 
 <style>
-    .btn-sm {
+    {% comment %} .btn-sm {
     padding: 6px 14px;
     border-radius: 8px;
     font-size: 13px;
@@ -40,7 +40,7 @@
 
 .btn-delete:hover {
     background: #fecaca;
-}
+} {% endcomment %}
 
 </style>
 <div class="card">
@@ -50,7 +50,7 @@
             + Create User
         </a>
     </div>
-
+<div class="table-responsive">
     <table class="admin-table">
         <thead>
             <tr>
@@ -96,5 +96,6 @@
         {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 {% endblock %}

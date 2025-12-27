@@ -272,6 +272,9 @@ def room_detail(request, slug):
             try:
                 with transaction.atomic():
                     booking = form.save(commit=False)
+                    booking.check_in_time = form.cleaned_data.get("check_in_time")
+                    booking.check_out_time = form.cleaned_data.get("check_out_time")
+
                     booking.sub_total = base_amount
                     booking.disc_price = discount
                     booking.total_amount = 0

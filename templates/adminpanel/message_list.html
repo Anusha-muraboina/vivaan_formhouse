@@ -4,7 +4,7 @@
 
 {% block content %}
 <style>
-.badge {
+{% comment %} .badge {
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 12px;
@@ -43,7 +43,7 @@
 
 .btn-delete:hover {
     background: #fecaca;
-}
+} {% endcomment %}
 
 </style>
 
@@ -54,7 +54,7 @@
         + Add Message
     </a>
     </div>
-
+<div class="table-responsive">
     <table class="admin-table">
         <thead>
             <tr>
@@ -103,7 +103,7 @@
         {% endfor %}
         </tbody>
     </table>
-
+</div>
     <!-- PAGINATION -->
     {% if messages.paginator.num_pages > 1 %}
     <div class="pagination-wrapper">

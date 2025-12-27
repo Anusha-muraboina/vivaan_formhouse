@@ -363,52 +363,97 @@ def booking_list(request):
     return render(request, "adminpanel/booking_list.html", {"bookings": bookings})
 
 
-@login_required(login_url='vivaan_admin:login')
+from resort.views import calculate_booking_cost
+from decimal import Decimal
+from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.urls import reverse
+from django.db import transaction, IntegrityError
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
+
+# from .models import Booking, BlockedDate, Coupon, VillaPricing
+from .forms import AdminBookingForm
+from resort.views import send_email_async
+# vivaan_admin/views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from datetime import timedelta
+from decimal import Decimal
+
+from resort.models import Booking, BlockedDate, VillaPricing
+from .forms import AdminBookingForm
+
+
+
+
+@login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
-def booking_create(request):
+def admin_booking_create(request):
 
-    # ==========================
-    # BOOKED DATES (GREEN)
-    # ==========================
-    booked_dates = set()
+    # ================= BOOKED DATES =================
+    booked_dates = []
+    bookings = Booking.objects.filter(status__in=["confirmed", "pending"])
 
-    bookings = Booking.objects.filter(
-        status__in=["confirmed", "pending"],
-        check_out__gt=timezone.now().date()
-    )
-
-    for booking in bookings:
-        d = booking.check_in
-        while d < booking.check_out:
-            booked_dates.add(d.isoformat())  # YYYY-MM-DD
+    for b in bookings:
+        d = b.check_in
+        while d < b.check_out:
+            booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
-    # ==========================
-    # BLOCKED DATES (RED)
-    # ==========================
-    blocked_dates = set()
-
-    blocks = BlockedDate.objects.all()
-    for block in blocks:
+    # ================= BLOCKED DATES =================
+    blocked_dates = []
+    for block in BlockedDate.objects.all():
         d = block.start_date
         while d <= block.end_date:
-            blocked_dates.add(d.isoformat())
+            blocked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
-    form = AdminBookingForm(request.POST or None)
+    pricing = VillaPricing.objects.first()
 
-    if form.is_valid():
-        form.save()
-        messages.success(request, "Booking created successfully.")
-        return redirect("vivaan_admin:booking_list")
+    # ================= POST =================
+    if request.method == "POST":
+        form = AdminBookingForm(request.POST)
+
+        if form.is_valid():
+            booking = form.save(commit=False)
+
+            # 🔒 ADMIN OVERRIDES
+            booking.payment_method = "farmhouse"
+            booking.payment_status = "paid"
+            booking.status = "confirmed"
+
+            # 💰 PRICE CALCULATION
+            nights = (booking.check_out - booking.check_in).days
+            base = pricing.weekday_price * nights
+            extra = booking.extra_guest_count * pricing.extra_guest_price
+
+            booking.sub_total = base + extra
+            booking.disc_price = Decimal("0.00")
+            booking.total_amount = booking.sub_total
+            booking.remaining_amount = Decimal("0.00")
+
+            booking.save()
+
+            messages.success(request, "Booking created successfully")
+            return redirect("vivaan_admin:booking_list")
+
+    else:
+        form = AdminBookingForm()
 
     return render(request, "adminpanel/booking_form.html", {
         "form": form,
-
-        # 👇 REQUIRED FOR CALENDAR COLORS
-        "booked_dates": sorted(booked_dates),
-        "blocked_dates": sorted(blocked_dates),
+        "booked_dates": booked_dates,
+        "blocked_dates": blocked_dates,
     })
+
+
+
+
+
+
 
 
 @login_required(login_url='vivaan_admin:login')
@@ -660,11 +705,17 @@ def pricing_edit(request):
 
 # --- LIST ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='vivaan_admin:login')
 def amenity_list(request):
-    amenities = Amenity.objects.all()
-    return render(request, 'adminpanel/amenity_list.html', {'amenities': amenities})
+    amenity_qs = Amenity.objects.all().order_by('-id')
 
+    paginator = Paginator(amenity_qs, 10)  # 8 amenities per page
+    page_number = request.GET.get('page')
+    amenities = paginator.get_page(page_number)
+
+    return render(request, 'adminpanel/amenity_list.html', {
+        'amenities': amenities
+    })
 # --- CREATE ---
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
@@ -703,9 +754,15 @@ def amenity_delete(request, pk):
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin, login_url='vivaan_admin:login')
 def banner_list(request):
-    banners = MainBanner.objects.all()
-    return render(request, 'adminpanel/banner_list.html', {'banners': banners})
+    banner_qs = MainBanner.objects.all().order_by('-id')
 
+    paginator = Paginator(banner_qs, 10)  # 5 banners per page
+    page_number = request.GET.get('page')
+    banners = paginator.get_page(page_number)
+
+    return render(request, 'adminpanel/banner_list.html', {
+        'banners': banners
+    })
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
 def banner_create(request):
@@ -764,54 +821,40 @@ def blocked_date_list(request):
     })
 from resort.models import *
 from resort.forms import *
-
-from datetime import timedelta
-from django.utils import timezone
-
-@login_required(login_url='vivaan_admin:login')
+@login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def blocked_date_create(request):
 
-    booked_dates = set()
-    blocked_dates = set()
-
-    # BOOKED DATES
-    bookings = Booking.objects.filter(
-        status__in=["confirmed", "pending"],
-        check_out__gt=timezone.now().date()
-    )
-
-    for booking in bookings:
-        d = booking.check_in
-        while d < booking.check_out:
-            booked_dates.add(d.strftime("%Y-%m-%d"))
+    booked_dates = []
+    for b in Booking.objects.filter(status__in=["confirmed", "pending"]):
+        d = b.check_in
+        while d < b.check_out:
+            booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
-    # EXISTING BLOCKED DATES
-    blocks = BlockedDate.objects.all()
-    for block in blocks:
+    blocked_dates = []
+    for block in BlockedDate.objects.all():
         d = block.start_date
-        while d <= block.end_date:
-            blocked_dates.add(d.strftime("%Y-%m-%d"))
+        while d <= block.end_date:  # ✅ inclusive
+            blocked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
     if request.method == "POST":
-        form = BlockedDateForm(request.POST)
+        form = AdminBlockedDateForm(request.POST)
         if form.is_valid():
             blocked = form.save(commit=False)
-            blocked.created_by = request.user
+            blocked.full_clean()   # 🔥 THIS WAS MISSING
             blocked.save()
             messages.success(request, "Dates blocked successfully.")
             return redirect("vivaan_admin:blocked_date_list")
     else:
-        form = BlockedDateForm()
+        form = AdminBlockedDateForm()
 
     return render(request, "adminpanel/blocked_date_form.html", {
         "form": form,
-        "booked_dates": list(booked_dates),
-        "blocked_dates": list(blocked_dates),
+        "booked_dates": booked_dates,
+        "blocked_dates": blocked_dates,
     })
-
 
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
@@ -842,13 +885,13 @@ def blocked_date_edit(request, pk):
             d += timedelta(days=1)
 
     if request.method == "POST":
-        form = BlockedDateForm(request.POST, instance=blocked_date)
+        form = AdminBlockedDateForm(request.POST, instance=blocked_date)
         if form.is_valid():
             form.save()
             messages.success(request, "Blocked date updated.")
             return redirect("vivaan_admin:blocked_date_list")
     else:
-        form = BlockedDateForm(instance=blocked_date)
+        form = AdminBlockedDateForm(instance=blocked_date)
 
     return render(request, "adminpanel/blocked_date_form.html", {
         "form": form,

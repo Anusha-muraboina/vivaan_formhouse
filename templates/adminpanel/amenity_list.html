@@ -3,7 +3,8 @@
 {% block header %}Amenities{% endblock %}
 
 {% block content %}
-<div class="card">
+
+<div class="card pb-3">
     <div class="card-header">
         <h2>Amenity List</h2>
         <a href="{% url 'vivaan_admin:amenity_create' %}" class="btn-action btn-view">
@@ -11,6 +12,7 @@
         </a>
     </div>
 
+<div class="table-responsive">
     <table>
         <thead>
             <tr>
@@ -46,5 +48,34 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+{% if amenities.has_other_pages %}
+<div class="pagination-wrapper">
+    <ul class="pagination">
+
+        {% if amenities.has_previous %}
+            <li><a href="?page={{ amenities.previous_page_number }}">« Prev</a></li>
+        {% else %}
+            <li class="disabled"><span>« Prev</span></li>
+        {% endif %}
+
+        {% for num in amenities.paginator.page_range %}
+            {% if amenities.number == num %}
+                <li class="active"><span>{{ num }}</span></li>
+            {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if amenities.has_next %}
+            <li><a href="?page={{ amenities.next_page_number }}">Next »</a></li>
+        {% else %}
+            <li class="disabled"><span>Next »</span></li>
+        {% endif %}
+
+    </ul>
+</div>
+{% endif %}
+
 </div>
 {% endblock %}

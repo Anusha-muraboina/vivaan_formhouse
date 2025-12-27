@@ -1,54 +1,112 @@
 
 
 from django import forms
-from resort.models import Booking
+from resort.models import *
+
+# class AdminBookingForm(forms.ModelForm):
+#     class Meta:
+#         model = Booking
+#         fields = [
+#             "guest_name",
+#             "guest_email",
+#             "guest_phone",
+#             "guest_count",
+#             "extra_guest_count",
+#             "check_in",
+#             "check_out",
+#             "check_in_time",
+#             "check_out_time",
+#             "status",
+#             "payment_method",
+#             "payment_status",
+#             "total_amount",
+#             "remaining_amount",
+#             "special_requests",
+#             "cancellation_reason",
+#         ]
+
+#         widgets = {
+#             "guest_name": forms.TextInput(attrs={"class": "form-input"}),
+#             "guest_email": forms.EmailInput(attrs={"class": "form-input"}),
+#             "guest_phone": forms.TextInput(attrs={"class": "form-input"}),
+#             "guest_count": forms.NumberInput(attrs={"class": "form-input"}),
+#             "extra_guest_count": forms.NumberInput(attrs={"class": "form-input"}),
+#             "check_in": forms.DateInput(attrs={"type": "date", "class": "form-input"}),
+#             "check_out": forms.DateInput(attrs={"type": "date", "class": "form-input"}),
+#                         # Time fields ✅
+#             "check_in_time": forms.TimeInput(attrs={
+#                 "type": "time",
+#                 "class": "form-input"
+#             }),
+#             "check_out_time": forms.TimeInput(attrs={
+#                 "type": "time",
+#                 "class": "form-input"
+#             }),
+#             "status": forms.Select(attrs={"class": "form-input"}),
+#             "payment_method": forms.Select(attrs={"class": "form-input"}),
+#             "payment_status": forms.Select(attrs={"class": "form-input"}),
+#             "total_amount": forms.NumberInput(attrs={"class": "form-input"}),
+#             "remaining_amount": forms.NumberInput(attrs={"class": "form-input"}),
+#             "special_requests": forms.Textarea(attrs={"class": "form-input", "rows": 3}),
+#             "cancellation_reason": forms.Textarea(attrs={"class": "form-input", "rows": 3}),
+#         }
+
+
+
+
+
+
+
+class AdminBlockedDateForm(forms.ModelForm):
+    class Meta:
+        model = BlockedDate
+        fields = ['start_date', 'end_date', 'reason']
+
+        widgets = {
+            'start_date': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Select start date'
+            }),
+            'end_date': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Select end date'
+            }),
+            'reason': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g. Maintenance'
+            }),
+        }
+
+
+
+
+
+
 
 class AdminBookingForm(forms.ModelForm):
+
     class Meta:
         model = Booking
         fields = [
-            "guest_name",
-            "guest_email",
-            "guest_phone",
-            "guest_count",
-            "extra_guest_count",
-            "check_in",
-            "check_out",
-            "check_in_time",
-            "check_out_time",
-            "status",
-            "payment_method",
-            "payment_status",
-            "total_amount",
-            "remaining_amount",
+            "guest_name", "guest_email", "guest_phone",
+            "guest_count", "extra_guest_count",
+            "check_in", "check_out",
             "special_requests",
-            "cancellation_reason",
         ]
 
         widgets = {
-            "guest_name": forms.TextInput(attrs={"class": "form-input"}),
-            "guest_email": forms.EmailInput(attrs={"class": "form-input"}),
-            "guest_phone": forms.TextInput(attrs={"class": "form-input"}),
-            "guest_count": forms.NumberInput(attrs={"class": "form-input"}),
-            "extra_guest_count": forms.NumberInput(attrs={"class": "form-input"}),
-            "check_in": forms.DateInput(attrs={"type": "date", "class": "form-input"}),
-            "check_out": forms.DateInput(attrs={"type": "date", "class": "form-input"}),
-                        # Time fields ✅
-            "check_in_time": forms.TimeInput(attrs={
-                "type": "time",
-                "class": "form-input"
+            "check_in": forms.TextInput(attrs={
+                "class": "form-control",
+                "readonly": "readonly",
+                "inputmode": "none",
+                "placeholder": "Select check-in date"
             }),
-            "check_out_time": forms.TimeInput(attrs={
-                "type": "time",
-                "class": "form-input"
+            "check_out": forms.TextInput(attrs={
+                "class": "form-control",
+                "readonly": "readonly",
+                "inputmode": "none",
+                "placeholder": "Select check-out date"
             }),
-            "status": forms.Select(attrs={"class": "form-input"}),
-            "payment_method": forms.Select(attrs={"class": "form-input"}),
-            "payment_status": forms.Select(attrs={"class": "form-input"}),
-            "total_amount": forms.NumberInput(attrs={"class": "form-input"}),
-            "remaining_amount": forms.NumberInput(attrs={"class": "form-input"}),
-            "special_requests": forms.Textarea(attrs={"class": "form-input", "rows": 3}),
-            "cancellation_reason": forms.Textarea(attrs={"class": "form-input", "rows": 3}),
         }
 
 
