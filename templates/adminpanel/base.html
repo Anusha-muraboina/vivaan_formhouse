@@ -594,6 +594,75 @@
 }
 
 
+{% comment %} @media (max-width: 768px) {
+
+    /* Enable horizontal scroll */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent column stretching */
+    .admin-table {
+        table-layout: fixed;
+        min-width: 720px; /* forces scroll instead of squeeze */
+    }
+
+    /* Prevent row height increase */
+    .admin-table th,
+    .admin-table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    /* Actions buttons align nicely */
+    .admin-table td:last-child {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .admin-table td:last-child a {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+} {% endcomment %}
+@media (max-width: 768px) {
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive table {
+        min-width: 720px;
+        table-layout: fixed;
+    }
+
+    .table-responsive th,
+    .table-responsive td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .table-responsive td:last-child {
+        display: flex;
+        gap: 6px;
+    }
+
+    .table-responsive td:last-child a {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+}
+
+
     </style>
 </head>
 
@@ -708,11 +777,12 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
+{% comment %} <script>
 document.addEventListener("DOMContentLoaded", function () {
     flatpickr("input[name='check_in']");
 });
-</script>
+</script> {% endcomment %}
+{% block extra_js %}{% endblock %}
 
 <script>
 document.addEventListener("click", function (e) {

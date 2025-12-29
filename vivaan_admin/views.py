@@ -389,6 +389,68 @@ from .forms import AdminBookingForm
 
 
 
+# @login_required(login_url="vivaan_admin:login")
+# @user_passes_test(is_admin)
+# def admin_booking_create(request):
+
+#     # ================= BOOKED DATES =================
+#     booked_dates = []
+#     bookings = Booking.objects.filter(status__in=["confirmed", "pending"])
+
+#     for b in bookings:
+#         d = b.check_in
+#         while d < b.check_out:
+#             booked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     # ================= BLOCKED DATES =================
+#     blocked_dates = []
+#     for block in BlockedDate.objects.all():
+#         d = block.start_date
+#         while d <= block.end_date:
+#             blocked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     pricing = VillaPricing.objects.first()
+
+#     # ================= POST =================
+#     if request.method == "POST":
+#         form = AdminBookingForm(request.POST)
+
+#         if form.is_valid():
+#             booking = form.save(commit=False)
+
+#             # 🔒 ADMIN OVERRIDES
+#             booking.payment_method = "farmhouse"
+#             booking.payment_status = "paid"
+#             booking.status = "confirmed"
+
+#             # 💰 PRICE CALCULATION
+#             nights = (booking.check_out - booking.check_in).days
+#             base = pricing.weekday_price * nights
+#             extra = booking.extra_guest_count * pricing.extra_guest_price
+
+#             booking.sub_total = base + extra
+#             booking.disc_price = Decimal("0.00")
+#             booking.total_amount = booking.sub_total
+#             booking.remaining_amount = Decimal("0.00")
+
+#             booking.save()
+
+#             messages.success(request, "Booking created successfully")
+#             return redirect("vivaan_admin:booking_list")
+
+#     else:
+#         form = AdminBookingForm()
+
+#     return render(request, "adminpanel/booking_form.html", {
+#         "form": form,
+#         "booked_dates": booked_dates,
+#         "blocked_dates": blocked_dates,
+#     })
+
+
+from resort.views import * 
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def admin_booking_create(request):
@@ -413,31 +475,34 @@ def admin_booking_create(request):
 
     pricing = VillaPricing.objects.first()
 
-    # ================= POST =================
     if request.method == "POST":
         form = AdminBookingForm(request.POST)
 
         if form.is_valid():
             booking = form.save(commit=False)
 
-            # 🔒 ADMIN OVERRIDES
-            booking.payment_method = "farmhouse"
-            booking.payment_status = "paid"
-            booking.status = "confirmed"
+            # ✅ DEFAULTS
+            booking.payment_status = booking.payment_status or "pending"
+            booking.payment_method = booking.payment_method or "farmhouse"
+            booking.status = booking.status or "confirmed"
 
             # 💰 PRICE CALCULATION
             nights = (booking.check_out - booking.check_in).days
             base = pricing.weekday_price * nights
-            extra = booking.extra_guest_count * pricing.extra_guest_price
+            extra = (booking.extra_guest_count or 0) * pricing.extra_guest_price
 
             booking.sub_total = base + extra
             booking.disc_price = Decimal("0.00")
             booking.total_amount = booking.sub_total
-            booking.remaining_amount = Decimal("0.00")
+            booking.remaining_amount = booking.total_amount
 
             booking.save()
 
-            messages.success(request, "Booking created successfully")
+            # 📧 SEND EMAILS (ASYNC)
+            # send_email_async(booking)
+            send_email_async(booking, old_status=None)
+
+            messages.success(request, "Booking created and emails sent successfully")
             return redirect("vivaan_admin:booking_list")
 
     else:
@@ -454,19 +519,15 @@ def admin_booking_create(request):
 
 
 
-
-
-@login_required(login_url='vivaan_admin:login')
+@login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def booking_edit(request, pk):
 
     booking = get_object_or_404(Booking, pk=pk)
+    old_status = booking.status  # 🔑 capture old status
 
-    # ==========================
-    # BOOKED DATES (EXCLUDE CURRENT BOOKING)
-    # ==========================
+    # ================= BOOKED DATES (EXCLUDE CURRENT) =================
     booked_dates = set()
-
     bookings = Booking.objects.filter(
         status__in=["confirmed", "pending"]
     ).exclude(pk=pk)
@@ -477,13 +538,9 @@ def booking_edit(request, pk):
             booked_dates.add(d.isoformat())
             d += timedelta(days=1)
 
-    # ==========================
-    # BLOCKED DATES
-    # ==========================
+    # ================= BLOCKED DATES =================
     blocked_dates = set()
-
-    blocks = BlockedDate.objects.all()
-    for block in blocks:
+    for block in BlockedDate.objects.all():
         d = block.start_date
         while d <= block.end_date:
             blocked_dates.add(d.isoformat())
@@ -492,18 +549,33 @@ def booking_edit(request, pk):
     form = AdminBookingForm(request.POST or None, instance=booking)
 
     if form.is_valid():
-        form.save()
-        messages.success(request, f"Booking {booking.booking_id} updated.")
+        updated_booking = form.save(commit=False)
+
+        # Defaults (safe)
+        updated_booking.payment_status = updated_booking.payment_status or "pending"
+        updated_booking.payment_method = updated_booking.payment_method or "farmhouse"
+        updated_booking.status = updated_booking.status or "confirmed"
+
+        updated_booking.save()
+
+        # 📧 SEND EMAIL ONLY IF STATUS CHANGED
+        if old_status != updated_booking.status:
+            send_booking_emails(updated_booking, old_status)
+
+
+        messages.success(
+            request,
+            f"Booking {updated_booking.booking_id} updated successfully."
+        )
         return redirect("vivaan_admin:booking_list")
 
     return render(request, "adminpanel/booking_form.html", {
         "form": form,
         "booking": booking,
-
-        # 👇 REQUIRED FOR CALENDAR COLORS
         "booked_dates": sorted(booked_dates),
         "blocked_dates": sorted(blocked_dates),
     })
+
 
 # DETAIL
 @login_required(login_url='vivaan_admin:login')

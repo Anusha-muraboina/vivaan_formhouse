@@ -147,56 +147,139 @@ razorpay_client = razorpay.Client(
 
 
 
-def send_booking_emails(booking):
+# def send_booking_emails(booking):
     
-        # CC Emails
-    cc_recipients = settings.CC_EMAIL
-    # User Email
-    user_subject = "Booking Confirmation – Vivaan Farmhouse"
-    user_html = render_to_string("emails/user_booking_email.html", {
-        "booking": booking
-    })
+#         # CC Emails
+#     cc_recipients = settings.CC_EMAIL
+#     # User Email
+#     user_subject = "Booking Confirmation – Vivaan Farmhouse"
+#     user_html = render_to_string("emails/user_booking_email.html", {
+#         "booking": booking
+#     })
 
-    user_email = EmailMultiAlternatives(
-        user_subject,
-        "",
-        settings.DEFAULT_FROM_EMAIL,
-        [booking.guest_email],
-        # cc=cc_recipients  
-    )
-    user_email.attach_alternative(user_html, "text/html")
-    user_email.send()
+#     # user_email = EmailMultiAlternatives(
+#     #     user_subject,
+#     #     "",
+#     #     settings.DEFAULT_FROM_EMAIL,
+#     #     [booking.guest_email],
+#     #     # cc=cc_recipients  
+#     # )
+    
+#     user_email = EmailMultiAlternatives(
+#     subject=user_subject,
+#     body="Your booking at Vivaan Farmhouse has been received successfully.",
+#     from_email=settings.DEFAULT_FROM_EMAIL,
+#     to=[booking.guest_email],
+#     reply_to=[settings.EMAIL_HOST_USER],
+# )
 
-    # Admin Email
-    admin_subject = "New Booking Received"
-    admin_html = render_to_string("emails/admin_booking_email.html", {
-        "booking": booking
-    })
+#     user_email.attach_alternative(user_html, "text/html")
+#     user_email.send(fail_silently=False)
 
-    admin_email = EmailMultiAlternatives(
-        admin_subject,
-        "",
-        settings.DEFAULT_FROM_EMAIL,
-        [settings.ADMIN_EMAIL], # configure in settings.py
-        cc=cc_recipients  
-    )
-    admin_email.attach_alternative(admin_html, "text/html")
-    admin_email.send()
+#     # user_email.attach_alternative(user_html, "text/html")
+#     # user_email.send()
+
+#     # Admin Email
+#     admin_subject = "New Booking Received"
+#     admin_html = render_to_string("emails/admin_booking_email.html", {
+#         "booking": booking
+#     })
+
+#     admin_email = EmailMultiAlternatives(
+#         admin_subject,
+#         "",
+#         settings.DEFAULT_FROM_EMAIL,
+#         [settings.ADMIN_EMAIL], # configure in settings.py
+#         cc=cc_recipients  
+#     )
+#     admin_email.attach_alternative(admin_html, "text/html")
+#     admin_email.send()
 
 
 
+def send_booking_emails(booking, old_status=None):
+    from django.conf import settings
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
 
+    # ================= USER EMAIL =================
+    user_subject = None
+    user_template = None
 
+    if booking.status == "confirmed":
+        user_subject = "Booking Confirmed – Vivaan Farmhouse"
+        user_template = "emails/user_booking_email.html"
 
+    elif booking.status == "completed":
+        user_subject = "Stay Completed – Vivaan Farmhouse"
+        user_template = "emails/booking_completed_user.html"
+
+    elif booking.status == "cancelled":
+        user_subject = "Booking Cancelled – Vivaan Farmhouse"
+        user_template = "emails/booking_cancelled_user.html"
+
+    elif booking.payment_status == "failed":
+        user_subject = "Payment Failed – Vivaan Farmhouse"
+        user_template = "emails/payment_failed_user.html"
+
+    if user_subject and user_template:
+        user_html = render_to_string(user_template, {
+            "booking": booking,
+            "old_status": old_status,
+        })
+
+        user_email = EmailMultiAlternatives(
+            subject=user_subject,
+            body="Booking update from Vivaan Farmhouse.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[booking.guest_email],
+            reply_to=[settings.EMAIL_HOST_USER],
+        )
+        user_email.attach_alternative(user_html, "text/html")
+        user_email.send(fail_silently=False)
+
+    # ================= ADMIN EMAIL =================
+    if booking.status in ["confirmed", "completed"]:
+        admin_subject = f"Booking {booking.status.title()} – {booking.booking_id}"
+        admin_template = (
+            "emails/admin_booking_email.html"
+            if booking.status == "confirmed"
+            else "emails/booking_completed_admin.html"
+        )
+
+        admin_html = render_to_string(admin_template, {
+            "booking": booking,
+            "old_status": old_status,
+        })
+
+        admin_email = EmailMultiAlternatives(
+            subject=admin_subject,
+            body="Booking status update.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[settings.ADMIN_EMAIL],
+            cc=settings.CC_EMAIL,
+        )
+        admin_email.attach_alternative(admin_html, "text/html")
+        admin_email.send(fail_silently=False)
 
 import threading
 
-def send_email_async(booking):
+def send_email_async(booking, old_status=None):
     threading.Thread(
         target=send_booking_emails,
-        args=(booking,),
+        args=(booking, old_status),
         daemon=True
     ).start()
+
+
+# import threading
+
+# def send_email_async(booking):
+#     threading.Thread(
+#         target=send_booking_emails,
+#         args=(booking,),
+#         daemon=True
+#     ).start()
 
 
 
@@ -283,7 +366,8 @@ def room_detail(request, slug):
                     booking.status = "confirmed"
                     booking.save()
 
-                send_email_async(booking)
+                # send_email_async(booking)
+                send_email_async(booking, old_status=None)
 
                 return JsonResponse({
                     "redirect": True,

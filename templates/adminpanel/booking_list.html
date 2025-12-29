@@ -8,7 +8,7 @@
         <h2>All Bookings</h2>
         <a href="{% url 'vivaan_admin:booking_create' %}" class="btn-action btn-view">+ Add Booking</a>
     </div>
-
+<div class="table-responsive">
     <table>
         <thead>
             <tr>
@@ -43,5 +43,6 @@
         {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 {% endblock %}

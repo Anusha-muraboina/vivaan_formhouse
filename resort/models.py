@@ -197,7 +197,7 @@ class Booking(models.Model):
         if not self.booking_id:
             import random
             import string
-            self.booking_id = 'SKR' + ''.join(random.choices(string.digits, k=8))
+            self.booking_id = 'VFH' + ''.join(random.choices(string.digits, k=8))
         super().save(*args, **kwargs)
 
     def __str__(self):

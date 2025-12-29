@@ -1,37 +1,163 @@
 {% extends "adminpanel/base.html" %}
-{% load static %}
+{% block title %}Create Booking{% endblock %}
 
 {% block content %}
 
-<h2>Create Booking (Admin)</h2>
-
 <style>
+/* ================= WRAPPER ================= */
+.booking-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* ================= HEADER ================= */
+.booking-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #1f2937;
+}
+
+/* ================= CARD ================= */
+.booking-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 28px;
+}
+
+/* ================= FORM ================= */
+.booking-card p {
+    margin-bottom: 16px;
+}
+
+.booking-card label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.booking-card input,
+.booking-card select,
+.booking-card textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.booking-card input:focus,
+.booking-card select:focus,
+.booking-card textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* ================= LEGEND ================= */
+.calendar-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+}
+
+.legend-booked { background: #ef4444; }
+.legend-blocked { background: #f59e0b; }
+.legend-available { background: #e5e7eb; }
+
+/* ================= ACTION ================= */
+.booking-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.booking-actions button {
+    padding: 12px 28px;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.booking-actions button:hover {
+    background: #15803d;
+}
+
+/* ================= FLATPICKR ================= */
 .flatpickr-day.admin-booked {
     background: #ef4444 !important;
-    color: white !important;
+    color: #fff !important;
 }
 
 .flatpickr-day.admin-blocked {
     background: #f59e0b !important;
-    color: white !important;
+    color: #fff !important;
 }
 
-.flatpickr-day.flatpickr-disabled {
-    opacity: 1 !important;
+.flatpickr-calendar {
+    z-index: 9999 !important;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+    .booking-card {
+        padding: 20px;
+    }
 }
 </style>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-success">Create Booking</button>
-</form>
+<div class="booking-container">
 
-<!-- 🔑 DATA -->
+    <div class="booking-title">Create Booking (Admin)</div>
+
+    <div class="booking-card">
+
+        <!-- DATE LEGEND -->
+        <div class="calendar-legend">
+            <div class="legend-item">
+                <span class="legend-box legend-booked"></span> Booked
+            </div>
+            <div class="legend-item">
+                <span class="legend-box legend-blocked"></span> Blocked
+            </div>
+            <div class="legend-item">
+                <span class="legend-box legend-available"></span> Available
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <div class="booking-actions">
+                <button type="submit">Create Booking</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!-- DJANGO DATA -->
 {{ booked_dates|json_script:"booked-dates" }}
 {{ blocked_dates|json_script:"blocked-dates" }}
-
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -43,16 +169,149 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("blocked-dates").textContent
     );
 
-    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+    const allMarked = [...new Set([...bookedDates, ...blockedDates])];
 
-    function formatLocal(date) {
-        return date.getFullYear() + "-" +
-            String(date.getMonth() + 1).padStart(2, "0") + "-" +
-            String(date.getDate()).padStart(2, "0");
+    function format(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
     }
 
     function decorate(dayElem) {
-        const d = formatLocal(dayElem.dateObj);
+        if (!dayElem.dateObj) return;
+        const d = format(dayElem.dateObj);
+
+        if (bookedDates.includes(d)) {
+            dayElem.classList.add("admin-booked");
+        }
+
+        if (blockedDates.includes(d)) {
+            dayElem.classList.add("admin-blocked");
+        }
+    }
+
+    let checkOutPicker;
+
+    flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: allMarked,
+        onDayCreate(_, __, ___, dayElem) { decorate(dayElem); },
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+            const next = new Date(selectedDates[0]);
+            next.setDate(next.getDate() + 1);
+            checkOutPicker.set("minDate", next);
+            checkOutPicker.open();
+        }
+    });
+
+    checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: allMarked,
+        onDayCreate(_, __, ___, dayElem) { decorate(dayElem); }
+    });
+
+});
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "adminpanel/base.html" %}
+
+{% block title %}Create Booking{% endblock %}
+
+{% block content %}
+
+<style>
+/* ---------- FLATPICKR ADMIN COLORS ---------- */
+.flatpickr-day.admin-booked {
+    background: #ef4444 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.admin-blocked {
+    background: #f59e0b !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.flatpickr-disabled {
+    opacity: 1 !important;
+}
+
+/* ---------- FORM STYLING ---------- */
+.form-wrapper {
+    max-width: 800px;
+    margin: auto;
+}
+
+.form-wrapper h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-wrapper button {
+    padding: 10px 20px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+</style>
+
+<div class="card form-wrapper">
+    <h2>Create Booking (Admin)</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Create Booking</button>
+    </form>
+</div>
+
+<!-- DJANGO DATA -->
+{{ booked_dates|json_script:"booked-dates" }}
+{{ blocked_dates|json_script:"blocked-dates" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* ---------- READ DJANGO DATA ---------- */
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates").textContent
+    );
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates").textContent
+    );
+
+    const allMarked = [...new Set([...bookedDates, ...blockedDates])];
+
+function format(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+
+    function decorate(dayElem) {
+        if (!dayElem.dateObj) return;
+
+        const d = format(dayElem.dateObj);
 
         if (bookedDates.includes(d)) {
             dayElem.classList.add("admin-booked");
@@ -67,11 +326,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let checkOutPicker;
 
-    // ✅ CHECK-IN (ONLY COLOR — NO DISABLE)
-    const checkInPicker = flatpickr("input[name='check_in']", {
+    /* ---------- CHECK-IN ---------- */
+    flatpickr("input[name='check_in']", {
         dateFormat: "Y-m-d",
         minDate: "today",
         disableMobile: true,
+        disable: allMarked,
 
         onDayCreate(_, __, ___, dayElem) {
             decorate(dayElem);
@@ -82,17 +342,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const next = new Date(selectedDates[0]);
             next.setDate(next.getDate() + 1);
+
             checkOutPicker.set("minDate", next);
             checkOutPicker.open();
         }
     });
 
-    // ✅ CHECK-OUT (DISABLE + COLOR)
+    /* ---------- CHECK-OUT ---------- */
     checkOutPicker = flatpickr("input[name='check_out']", {
         dateFormat: "Y-m-d",
         minDate: "today",
-        disable: disabledDates,
         disableMobile: true,
+        disable: allMarked,
 
         onDayCreate(_, __, ___, dayElem) {
             decorate(dayElem);
@@ -102,4 +363,4 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-{% endblock %}
+{% endblock %} {% endcomment %}
