@@ -451,21 +451,82 @@ from .forms import AdminBookingForm
 
 
 from resort.views import * 
+# @login_required(login_url="vivaan_admin:login")
+# @user_passes_test(is_admin)
+# def admin_booking_create(request):
+
+#     # ================= BOOKED DATES =================
+#     booked_dates = []
+#     bookings = Booking.objects.filter(status__in=["confirmed", "pending"])
+
+#     for b in bookings:
+#         d = b.check_in
+#         while d < b.check_out:
+#             booked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     # ================= BLOCKED DATES =================
+#     blocked_dates = []
+#     for block in BlockedDate.objects.all():
+#         d = block.start_date
+#         while d <= block.end_date:
+#             blocked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     pricing = VillaPricing.objects.first()
+
+#     if request.method == "POST":
+#         form = AdminBookingForm(request.POST)
+
+#         if form.is_valid():
+#             booking = form.save(commit=False)
+
+#             # ✅ DEFAULTS
+#             booking.payment_status = booking.payment_status or "pending"
+#             booking.payment_method = booking.payment_method or "farmhouse"
+#             booking.status = booking.status or "confirmed"
+
+#             # 💰 PRICE CALCULATION
+#             nights = (booking.check_out - booking.check_in).days
+#             base = pricing.weekday_price * nights
+#             extra = (booking.extra_guest_count or 0) * pricing.extra_guest_price
+
+#             booking.sub_total = base + extra
+#             booking.disc_price = Decimal("0.00")
+#             booking.total_amount = booking.sub_total
+#             booking.remaining_amount = booking.total_amount
+
+#             booking.save()
+
+#             # 📧 SEND EMAILS (ASYNC)
+#             # send_email_async(booking)
+#             send_email_async(booking, old_status=None)
+
+#             messages.success(request, "Booking created and emails sent successfully")
+#             return redirect("vivaan_admin:booking_list")
+
+#     else:
+#         form = AdminBookingForm()
+
+#     return render(request, "adminpanel/booking_form.html", {
+#         "form": form,
+#         "booked_dates": booked_dates,
+#         "blocked_dates": blocked_dates,
+#     })
+
+
+
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def admin_booking_create(request):
 
-    # ================= BOOKED DATES =================
     booked_dates = []
-    bookings = Booking.objects.filter(status__in=["confirmed", "pending"])
-
-    for b in bookings:
+    for b in Booking.objects.filter(status__in=["confirmed", "pending"]):
         d = b.check_in
         while d < b.check_out:
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
-    # ================= BLOCKED DATES =================
     blocked_dates = []
     for block in BlockedDate.objects.all():
         d = block.start_date
@@ -481,28 +542,37 @@ def admin_booking_create(request):
         if form.is_valid():
             booking = form.save(commit=False)
 
-            # ✅ DEFAULTS
+            # ================= DEFAULTS =================
             booking.payment_status = booking.payment_status or "pending"
             booking.payment_method = booking.payment_method or "farmhouse"
             booking.status = booking.status or "confirmed"
 
-            # 💰 PRICE CALCULATION
+            # ================= PRICE =================
             nights = (booking.check_out - booking.check_in).days
             base = pricing.weekday_price * nights
             extra = (booking.extra_guest_count or 0) * pricing.extra_guest_price
 
-            booking.sub_total = base + extra
-            booking.disc_price = Decimal("0.00")
-            booking.total_amount = booking.sub_total
+            sub_total = base + extra
+
+            # ================= COUPON =================
+            coupon = form.cleaned_data.get("coupon_code")
+            discount = Decimal("0.00")
+
+            if coupon:
+                discount = coupon.discount_amount
+                booking.disc_price = coupon
+
+            booking.sub_total = sub_total
+            booking.disc_price = discount
+            booking.total_amount = sub_total - discount
             booking.remaining_amount = booking.total_amount
 
             booking.save()
 
-            # 📧 SEND EMAILS (ASYNC)
-            # send_email_async(booking)
+            # ================= EMAIL =================
             send_email_async(booking, old_status=None)
 
-            messages.success(request, "Booking created and emails sent successfully")
+            messages.success(request, "Booking created successfully")
             return redirect("vivaan_admin:booking_list")
 
     else:
@@ -513,7 +583,6 @@ def admin_booking_create(request):
         "booked_dates": booked_dates,
         "blocked_dates": blocked_dates,
     })
-
 
 
 
@@ -893,6 +962,7 @@ def blocked_date_list(request):
     })
 from resort.models import *
 from resort.forms import *
+
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def blocked_date_create(request):

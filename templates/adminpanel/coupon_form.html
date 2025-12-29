@@ -120,6 +120,69 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+
+/* ================= MOBILE RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+    /* Card spacing */
+    .form-card {
+        margin: 10px;
+        border-radius: 12px;
+    }
+
+    /* Header */
+    .form-card .card-header {
+        padding: 1.2rem 1.2rem;
+    }
+
+    .form-card .card-header h2 {
+        font-size: 1.2rem;
+    }
+
+    /* Form padding */
+    .admin-form {
+        padding: 1.2rem;
+    }
+
+    /* Grid → single column */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Checkbox alignment */
+    .form-group.checkbox {
+        grid-column: span 1;
+        margin-top: 6px;
+    }
+
+    .form-group.checkbox input {
+        transform: scale(1.3);
+    }
+
+    /* Inputs touch friendly */
+    .form-input {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    /* Actions stack */
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        text-align: center;
+        padding: 14px;
+        font-size: 15px;
+    }
+}
+
 </style>
 
 <div class="card form-card">

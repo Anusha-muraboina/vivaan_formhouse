@@ -3,104 +3,91 @@
 {% block header %}Testimonial{% endblock %}
 
 {% block content %}
-<style>
-.form-card {
-    max-width: 750px;
-    margin: auto;
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.08);
-}
 
-.form-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid #eee;
-}
+<div class="px-2 md:px-4 py-3 md:py-6">
 
-.form-body {
-    padding: 2rem;
-}
+    <!-- CARD -->
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg">
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
-}
+        <!-- HEADER -->
+        <div class="px-6 py-5 border-b">
+            <h2 class="text-xl font-bold text-gray-900">
+                {% if testimonial %}Edit{% else %}Add{% endif %} Testimonial
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Share guest feedback shown on the website
+            </p>
+        </div>
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
+        <!-- FORM -->
+        <form method="POST" class="px-6 py-6 space-y-5">
+            {% csrf_token %}
 
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.form-input,
-.form-select {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 14px;
-    margin-top: 2rem;
-}
-</style>
-
-<div class="form-card">
-    <div class="form-header">
-        <h2>{% if testimonial %}Edit{% else %}Add{% endif %} Testimonial</h2>
-    </div>
-
-    <form method="POST" class="form-body">
-        {% csrf_token %}
-
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Guest Name</label>
+            <!-- Guest Name -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Guest Name
+                </label>
                 {{ form.guest_name }}
             </div>
 
-            <div class="form-group">
-                <label>Guest Location</label>
+            <!-- Guest Location -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Guest Location
+                </label>
                 {{ form.guest_location }}
             </div>
 
-            <div class="form-group">
-                <label>Rating</label>
+            <!-- Rating -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Rating
+                </label>
                 {{ form.rating }}
             </div>
 
-            <div class="form-group">
-                <label>Display Order</label>
+            <!-- Display Order -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Display Order
+                </label>
                 {{ form.slot_position }}
             </div>
 
-            <div class="form-group" style="grid-column: span 2;">
-                <label>Comment</label>
+            <!-- Comment -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Comment
+                </label>
                 {{ form.comment }}
             </div>
 
-            <div class="form-group" style="grid-column: span 2;">
-                <label>
-                    {{ form.is_featured }} Featured Review
-                </label>
+            <!-- Featured -->
+            <div class="flex items-center gap-3 pt-2">
+                {{ form.is_featured }}
+                <span class="text-sm text-gray-700 font-medium">
+                    Featured Review
+                </span>
             </div>
-        </div>
 
-        <div class="form-actions">
-            <button class="btn-primary">
-                {% if testimonial %}Update{% else %}Save{% endif %}
-            </button>
-            <a href="{% url 'vivaan_admin:testimonial_list' %}" class="btn-secondary">
-                Cancel
-            </a>
-        </div>
-    </form>
+            <!-- ACTIONS -->
+            <div class="pt-4 flex flex-col gap-3">
+                <button
+                    type="submit"
+                    class="w-full h-12 rounded-xl bg-indigo-600 text-white font-bold text-base hover:bg-indigo-700 transition">
+                    {% if testimonial %}Update{% else %}Save{% endif %}
+                </button>
+
+                <a href="{% url 'vivaan_admin:testimonial_list' %}"
+                   class="w-full h-11 rounded-xl bg-gray-100 text-gray-700 font-semibold text-center leading-[44px]">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+
 </div>
+
 {% endblock %}

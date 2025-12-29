@@ -15,7 +15,7 @@
             {% csrf_token %}
 
             <!-- GRID -->
-            <div class="grid-2">
+            <div class="grid-1  md:grid-2">
                 <div class="form-group">
                     <label>Amenity Name</label>
                     {{ form.name }}
@@ -33,7 +33,7 @@
                 {{ form.description }}
             </div>
 
-            <div class="grid-2">
+            <div class="grid-1 md:grid-2">
                 <div class="form-group">
                     <label>Display Order</label>
                     {{ form.slot_position }}

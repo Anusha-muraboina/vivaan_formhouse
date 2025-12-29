@@ -121,6 +121,61 @@
         padding: 20px;
     }
 }
+
+
+
+
+
+
+.time-dropdown {
+    position: relative;
+}
+
+.time-btn {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0 10px;
+    background: white;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.time-list {
+    position: absolute;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    margin-top: 4px;
+    z-index: 50;
+}
+
+.time-option {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.time-option:hover {
+    background-color: #047857;
+    color: white;
+}
+
+.time-list::-webkit-scrollbar {
+    width: 6px;
+}
+.time-list::-webkit-scrollbar-thumb {
+    background: #047857;
+    border-radius: 4px;
+}
+
 </style>
 
 <div class="booking-container">
@@ -142,7 +197,158 @@
             </div>
         </div>
 
-        <form method="post">
+
+
+          <form method="post">
+            {% csrf_token %}
+
+            <!-- ================= GUEST INFO ================= -->
+            {% comment %} <h3 class="font-semibold mb-2">Guest Information</h3> {% endcomment %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Guest Name</label>
+                    {{ form.guest_name }}
+                </div>
+                <div>
+                    <label>Guest Email</label>
+                    {{ form.guest_email }}
+                </div>
+                <div>
+                    <label>Guest Phone</label>
+                    {{ form.guest_phone }}
+                </div>
+            </div>
+
+            <!-- ================= GUEST COUNT ================= -->
+            {% comment %} <h3 class="font-semibold mt-6 mb-2">Guests</h3> {% endcomment %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Guest Count</label>
+                    {{ form.guest_count }}
+                </div>
+                <div>
+                    <label>Extra Guest Count</label>
+                    {{ form.extra_guest_count }}
+                </div>
+            </div>
+
+            <!-- ================= DATES ================= -->
+            {% comment %} <h3 class="font-semibold mt-6 mb-2">Dates</h3> {% endcomment %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Check-in Date</label>
+                    {{ form.check_in }}
+                </div>
+                <div>
+                    <label>Check-out Date</label>
+                    {{ form.check_out }}
+                </div>
+            </div> 
+
+
+            <!-- ================= TIME ================= -->
+            {% comment %} <h3 class="font-semibold mt-6 mb-2">Time</h3> {% endcomment %}
+            <div class="grid grid-cols-2 gap-4">
+                {% comment %} <div>
+                    <label>Check-in Time</label>
+                    {{ form.check_in_time }}
+                </div>
+                <div>
+                    <label>Check-out Time</label>
+                    {{ form.check_out_time }}
+                </div> {% endcomment %}
+
+
+
+                
+            <!-- CHECK-IN TIME -->
+<div>
+    <label class="block text-gray-700 font-semibold mb-2">
+        Check-In Time
+    </label>
+
+    <!-- value saved to Django form -->
+    <input type="hidden" name="check_in_time" id="checkInTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('in')">
+            Select Check-In Time
+        </button>
+        <div id="timeListIn" class="time-list hidden"></div>
+    </div>
+</div>
+
+<!-- CHECK-OUT TIME -->
+<div>
+    <label class="block text-gray-700 font-semibold mb-2">
+        Check-Out Time
+    </label>
+
+    <!-- value saved to Django form -->
+    <input type="hidden" name="check_out_time" id="checkOutTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('out')">
+            Select Check-Out Time
+        </button>
+        <div id="timeListOut" class="time-list hidden"></div>
+    </div>
+</div>
+
+
+            </div>
+
+            <!-- ================= COUPON ================= -->
+            {% comment %} <h3 class="font-semibold mt-6 mb-2">Coupon</h3> {% endcomment %}
+            <div>
+                <label>Coupon Code</label>
+                {{ form.coupon_code }}
+                {% if form.coupon_code.errors %}
+                    <p class="text-red-600 text-sm">{{ form.coupon_code.errors }}</p>
+                {% endif %}
+            </div>
+
+            <!-- ================= PAYMENT ================= -->
+            <h3 class="font-semibold mt-6 mb-2">Payment</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Payment Method</label>
+                    {{ form.payment_method }}
+                </div>
+                <div>
+                    <label>Payment Status</label>
+                    {{ form.payment_status }}
+                </div>
+            </div>
+
+            <!-- ================= STATUS ================= -->
+            {% comment %} <h3 class="font-semibold mt-6 mb-2">Booking Status</h3> {% endcomment %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Status</label>
+                    {{ form.status }}
+                </div>
+                <div>
+                    <label>Cancellation Reason</label>
+                    {{ form.cancellation_reason }}
+                    {% if form.cancellation_reason.errors %}
+                        <p class="text-red-600 text-sm">{{ form.cancellation_reason.errors }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ================= NOTES ================= -->
+            <h3 class="font-semibold mt-6 mb-2">Special Requests</h3>
+            <div>
+                {{ form.special_requests }}
+            </div>
+
+            <!-- ================= SUBMIT ================= -->
+            <div class="booking-actions">
+                <button type="submit">Create Booking</button>
+            </div>
+        </form>
+        {% comment %} <form method="post">
             {% csrf_token %}
 
             {{ form.as_p }}
@@ -150,7 +356,7 @@
             <div class="booking-actions">
                 <button type="submit">Create Booking</button>
             </div>
-        </form>
+        </form> {% endcomment %}
 
     </div>
 </div>
@@ -158,6 +364,65 @@
 <!-- DJANGO DATA -->
 {{ booked_dates|json_script:"booked-dates" }}
 {{ blocked_dates|json_script:"blocked-dates" }}
+<script>
+const startHour = 7;   // 7 AM
+const endHour = 22;    // 10 PM
+
+function formatHour(h) {
+    const suffix = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:00 ${suffix}`;
+}
+
+function buildDropdown(listId, inputId, button) {
+    const list = document.getElementById(listId);
+    list.innerHTML = "";
+
+    for (let h = startHour; h < endHour; h++) {
+        const label = formatHour(h);
+        const div = document.createElement("div");
+        div.className = "time-option";
+        div.innerText = label;
+
+        div.onclick = () => {
+            let hour = parseInt(label);
+            const isPM = label.includes("PM");
+
+            if (isPM && hour !== 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
+
+            // ✅ save in Django format (HH:00)
+            document.getElementById(inputId).value =
+                String(hour).padStart(2, "0") + ":00";
+
+            // ✅ show selected label
+            button.innerText = label;
+            list.classList.add("hidden");
+        };
+
+        list.appendChild(div);
+    }
+}
+
+function toggleTime(type) {
+    const list = document.getElementById(
+        type === "in" ? "timeListIn" : "timeListOut"
+    );
+    const btn = list.previousElementSibling;
+    const inputId = type === "in" ? "checkInTime" : "checkOutTime";
+
+    buildDropdown(list.id, inputId, btn);
+    list.classList.toggle("hidden");
+}
+
+// Close dropdown when clicking outside
+document.addEventListener("click", e => {
+    if (!e.target.closest(".time-dropdown")) {
+        document.querySelectorAll(".time-list")
+            .forEach(l => l.classList.add("hidden"));
+    }
+});
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -228,139 +493,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-{% comment %} {% extends "adminpanel/base.html" %}
-
-{% block title %}Create Booking{% endblock %}
-
-{% block content %}
-
-<style>
-/* ---------- FLATPICKR ADMIN COLORS ---------- */
-.flatpickr-day.admin-booked {
-    background: #ef4444 !important;
-    color: #fff !important;
-}
-
-.flatpickr-day.admin-blocked {
-    background: #f59e0b !important;
-    color: #fff !important;
-}
-
-.flatpickr-day.flatpickr-disabled {
-    opacity: 1 !important;
-}
-
-/* ---------- FORM STYLING ---------- */
-.form-wrapper {
-    max-width: 800px;
-    margin: auto;
-}
-
-.form-wrapper h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-.form-wrapper button {
-    padding: 10px 20px;
-    background: #16a34a;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-</style>
-
-<div class="card form-wrapper">
-    <h2>Create Booking (Admin)</h2>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-
-        <button type="submit">Create Booking</button>
-    </form>
-</div>
-
-<!-- DJANGO DATA -->
-{{ booked_dates|json_script:"booked-dates" }}
-{{ blocked_dates|json_script:"blocked-dates" }}
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    /* ---------- READ DJANGO DATA ---------- */
-    const bookedDates = JSON.parse(
-        document.getElementById("booked-dates").textContent
-    );
-    const blockedDates = JSON.parse(
-        document.getElementById("blocked-dates").textContent
-    );
-
-    const allMarked = [...new Set([...bookedDates, ...blockedDates])];
-
-function format(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-}
 
 
-    function decorate(dayElem) {
-        if (!dayElem.dateObj) return;
 
-        const d = format(dayElem.dateObj);
 
-        if (bookedDates.includes(d)) {
-            dayElem.classList.add("admin-booked");
-            dayElem.title = "Already booked";
-        }
 
-        if (blockedDates.includes(d)) {
-            dayElem.classList.add("admin-blocked");
-            dayElem.title = "Blocked by admin";
-        }
-    }
 
-    let checkOutPicker;
-
-    /* ---------- CHECK-IN ---------- */
-    flatpickr("input[name='check_in']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disableMobile: true,
-        disable: allMarked,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorate(dayElem);
-        },
-
-        onChange(selectedDates) {
-            if (!selectedDates.length) return;
-
-            const next = new Date(selectedDates[0]);
-            next.setDate(next.getDate() + 1);
-
-            checkOutPicker.set("minDate", next);
-            checkOutPicker.open();
-        }
-    });
-
-    /* ---------- CHECK-OUT ---------- */
-    checkOutPicker = flatpickr("input[name='check_out']", {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disableMobile: true,
-        disable: allMarked,
-
-        onDayCreate(_, __, ___, dayElem) {
-            decorate(dayElem);
-        }
-    });
-
-});
-</script>
-
-{% endblock %} {% endcomment %}

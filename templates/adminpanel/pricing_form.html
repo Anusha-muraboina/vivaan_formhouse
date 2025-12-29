@@ -1,4 +1,190 @@
-{% extends 'adminpanel/base.html' %}
+{% extends "adminpanel/base.html" %}
+{% block title %}Edit Villa Pricing{% endblock %}
+{% block header %}Edit Villa Pricing{% endblock %}
+
+{% block content %}
+
+<style>
+/* ================= WRAPPER ================= */
+.pricing-container {
+    max-width: 700px;
+    margin: auto;
+}
+
+/* ================= CARD ================= */
+.pricing-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    padding: 32px;
+}
+
+/* ================= TITLE ================= */
+.pricing-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 24px;
+}
+
+/* ================= FORM ================= */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.15);
+}
+
+/* ================= INFO ================= */
+.price-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* ================= ACTION ================= */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn {
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-save {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #15803d;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 640px) {
+    .pricing-card {
+        padding: 22px;
+    }
+}
+</style>
+
+<div class="pricing-container">
+
+    <div class="pricing-card">
+
+        <div class="pricing-title">Villa Pricing Settings</div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- WEEKDAY PRICE -->
+            <div class="form-group">
+                <label>Weekday Price (Mon – Fri)</label>
+                <input
+                    type="number"
+                    name="weekday_price"
+                    value="{{ pricing.weekday_price }}"
+                    required
+                >
+                <div class="price-hint">
+                    Applied from Monday to Friday
+                </div>
+            </div>
+
+            <!-- WEEKEND PRICE -->
+            <div class="form-group">
+                <label>Weekend Price (Sat – Sun)</label>
+                <input
+                    type="number"
+                    name="weekend_price"
+                    value="{{ pricing.weekend_price }}"
+                    required
+                >
+                <div class="price-hint">
+                    Applied on Saturday and Sunday
+                </div>
+            </div>
+
+            <!-- EXTRA GUEST PRICE -->
+            <div class="form-group">
+                <label>Extra Guest Price (Per Person)</label>
+                <input
+                    type="number"
+                    name="extra_guest_price"
+                    value="{{ pricing.extra_guest_price }}"
+                    required
+                >
+                <div class="price-hint">
+                    Charged per extra guest per night
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="actions">
+                <a href="{% url 'vivaan_admin:dashboard' %}" class="btn btn-cancel">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-save">
+                    Update Pricing
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'adminpanel/base.html' %}
 {% block header %}Edit Villa Pricing{% endblock %}
 
 {% block content %}
@@ -16,4 +202,5 @@
 
     <button type="submit">Update Pricing</button>
 </form>
-{% endblock %}
+{% endblock %} {% endcomment %}
+
