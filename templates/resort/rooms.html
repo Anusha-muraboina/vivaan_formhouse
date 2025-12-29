@@ -1,12 +1,12 @@
-{% extends 'resort/base.html' %}
+{% comment %} {% extends 'resort/base.html' %}
 
 {% block title %}Our Rooms - Strawberry King Resort{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
+
 <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
-        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 to-red-700/80 z-10"></div> {% endcomment %}
+      
         <div class="absolute inset-0 bg-cover bg-center"
             style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
         </div>
@@ -19,37 +19,12 @@
     </div>
 </section>
 
-<!-- Filters -->
-{% comment %} <section class="py-8 bg-white shadow-md sticky top-20 z-40">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'rooms' %}"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if not request.GET.view_type %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                All Rooms
-            </a>
-            <a href="?view_type=valley"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.view_type == 'valley' %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                Valley View
-            </a>
-            <a href="?view_type=garden"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.view_type == 'garden' %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                Garden View
-            </a>
-            <a href="?balcony=true"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.balcony %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                With Balcony
-            </a>
-        </div>
-    </div>
-</section> {% endcomment %}
-
-<!-- Rooms Grid -->
 <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for room in room_categories %}
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
-                <!-- Room Image -->
+             
                 <div class="relative h-72 bg-gradient-to-br from-red-400 to-red-600 overflow-hidden group">
                     {% if room.image %}
                     <img src="{{ room.image.url }}" alt="{{ room.name }}"
@@ -60,7 +35,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Badges -->
+                   
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
                         {% if room.has_balcony %}
                         <span class="bg-white text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
@@ -74,13 +49,10 @@
                         {% endif %}
                     </div>
 
-                    {% comment %} <div
-                        class="absolute top-4 right-4 bg-amber-500 text-white px-4 py-2 rounded-full font-bold text-lg">
-                        ₹{{ room.base_price }}
-                    </div> {% endcomment %}
+             
                 </div>
 
-                <!-- Room Details -->
+             
                 <div class="p-6">
                     <h3 class="text-2xl font-bold text-gray-800 mb-3">{{ room.name }}</h3>
 
@@ -93,10 +65,7 @@
                     <p class="text-gray-600 mb-6 line-clamp-3">{{ room.description|truncatewords:25 }}</p>
 
                     <div class="flex gap-3">
-                        {% comment %} <a href="{% url 'room_detail' room.slug %}"
-                            class="flex-1 text-center btn-primary text-white py-3 rounded-lg font-semibold">
-                            Book Now
-                        </a> {% endcomment %}
+                     
                         <a href="{% url 'room_detail' room.slug %}"
                             class="flex-1 text-center bg-red-900 text-white py-3 rounded-lg font-semibold">
                             Details
@@ -114,7 +83,7 @@
     </div>
 </section>
 
-<!-- Features Section -->
+
 <section class="py-16 bg-white">
     <div class="container mx-auto px-4">
         <h2 class="text-3xl font-bold text-center mb-12">All Rooms Include</h2>
@@ -146,4 +115,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}

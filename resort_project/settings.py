@@ -39,7 +39,14 @@ INSTALLED_APPS = [
     'vivaan_admin',
     
     'ckeditor',
+    
+    
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
 ]
+
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

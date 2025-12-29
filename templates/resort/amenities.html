@@ -1,4 +1,4 @@
-{% extends 'resort/base.html' %}
+{% comment %} {% extends 'resort/base.html' %}
 
 {% block title %}Amenities - Strawberry King Resort{% endblock %}
 
@@ -6,7 +6,7 @@
 <!-- Header -->
 <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
-        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-black-900/90 to-black-700/80 z-10"></div> {% endcomment %}
+        
         <div class="absolute inset-0 bg-cover bg-center"
             style="background-image: url('https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
         </div>
@@ -132,7 +132,7 @@
     </div>
 </section>
 
-<!-- Event Space -->
+
 <section class="py-10 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
@@ -174,4 +174,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}

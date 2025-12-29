@@ -1,9 +1,9 @@
-{% extends 'resort/base.html' %}
+{% comment %} {% extends 'resort/base.html' %}
 
 {% block title %}Gallery - Strawberry King Resort{% endblock %}
 
 {% block content %}
-<!-- Header -->
+
 <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
         
@@ -19,25 +19,6 @@
     </div>
 </section>
 
-<!-- Filter -->
-{% comment %} <section class="py-8 bg-white shadow-md sticky top-20 z-40">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'gallery' %}"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if not request.GET.category %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                All Photos
-            </a>
-            {% for cat_value, cat_label in categories %}
-            <a href="?category={{ cat_value }}"
-                class="px-6 py-2 rounded-full border-2 border-red-600 {% if request.GET.category == cat_value %}bg-red-600 text-white{% else %}text-red-600 hover:bg-red-50{% endif %} transition">
-                {{ cat_label }}
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-</section> {% endcomment %}
-
-<!-- Gallery Grid -->
 <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -67,4 +48,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}
