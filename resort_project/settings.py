@@ -37,12 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'resort',
     'vivaan_admin',
-    
+
     'ckeditor',
-    
-    
+
     'django.contrib.sites',
     'django.contrib.sitemaps',
+
 ]
 
 SITE_ID = 1
