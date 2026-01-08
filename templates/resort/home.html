@@ -29,7 +29,55 @@
 
 
 <!-- Hero Carousel Section -->
+
+
 <section id="home"
+  class="relative h-[220px] sm:h-[300px] md:h-screen overflow-hidden flex items-center justify-center text-white">
+
+  <!-- Carousel Wrapper -->
+  <div id="hero-carousel" class="absolute inset-0 z-0">
+
+    {% for banner in banners %}
+    <div
+      class="carousel-item absolute inset-0
+             bg-center bg-no-repeat
+             bg-contain md:bg-cover
+             transition-opacity duration-1000
+             {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}"
+      style="background-image: url('{{ banner.image.url }}');">
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- PREV BUTTON -->
+  <button id="prevBtn"
+    class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20
+           bg-black/60 hover:bg-black/80
+           p-3 md:p-4 rounded-full transition">
+    <i class="fas fa-chevron-left text-lg md:text-2xl"></i>
+  </button>
+
+  <!-- NEXT BUTTON -->
+  <button id="nextBtn"
+    class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20
+           bg-black/60 hover:bg-black/80
+           p-3 md:p-4 rounded-full transition">
+    <i class="fas fa-chevron-right text-lg md:text-2xl"></i>
+  </button>
+
+</section>
+
+
+
+
+
+
+
+
+
+
+{% comment %} <section id="home"
   class="relative h-[220px] sm:h-[300px] md:h-screen overflow-hidden flex items-center justify-center text-white">
 
   <!-- Carousel Wrapper -->
@@ -80,7 +128,7 @@
     <i class="fas fa-chevron-right text-lg md:text-2xl"></i>
   </button>
 
-</section>
+</section> {% endcomment %}
 
 {% comment %} 
 <!-- About Section -->
@@ -275,12 +323,12 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
 
 
 <!-- Featured Rooms -->
-<section id="rooms" class="md:py-24 py-4 ">
-    <div class="container mx-auto px-4">
+<section id="rooms" class="md:py-24 py-4 md:px-14 px-4 ">
+    <div class=" px-4">
         <div class="text-center mb-12">
             <h2 class="text-4xl md:text-5xl font-bold text-gray-800 section-title mb-4">Our Farmhouse</h2>
             <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                Choose from our collection of elegantly designed rooms, each offering comfort and breathtaking views
+               Vivaan Farmhouse is a tranquil natural retreat near shadnagar that provides comfort, natural beauty, and the ideal getaway from city life
             </p>
         </div>
 
@@ -306,7 +354,7 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
                         <span><i class="fas fa-users mr-1"></i>{{ room.max_occupancy }} Guests</span>
                         {% if room.has_balcony %}<span><i class="fas fa-door-open mr-1"></i>Balcony</span>{% endif %}
                     </div>
-                    <p class="text-gray-600 mb-4 line-clamp-3">{{ room.description|truncatewords:20 }}</p>
+                    <p class="text-gray-600 mb-4 line-clamp-3">{{ room.description|striptags|truncatewords:20 }}</p>
                     <a href="{% url 'room_detail' room.slug %}"
                         class="block w-full text-center bg-emerald-600 text-white py-3 rounded-lg font-semibold">
                         View Details & Book
@@ -328,10 +376,10 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
         <!-- Heading -->
         <div class="text-center mb-12">
             <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                World-Class Amenities
+                Amenities & Facilities
             </h2>
             <p class="text-lg text-gray-900">
-                Everything you need for a perfect stay
+              If you are looking for a relaxing, refreshing and rejuvenating experience altogether, we offer all of that under one roof.
             </p>
         </div>
 
@@ -458,11 +506,11 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
 </section> {% endcomment %}
 
 <!-- Gallery Section -->
-<section id="gallery" class="md:py-24 py-4  scroll-mt-20">
-    <div class="container mx-auto px-4">
+<section id="gallery" class="md:py-24 py-4  md:px-14 px-4 scroll-mt-20">
+    <div class=" px-4">
         <div class="text-center mb-16">
             <h2 class="text-4xl font-bold text-gay-900 section-title mb-4">Sights and Stories</h2>
-            <p class="text-gray-900 text-lg">Glimpses of paradise</p>
+            <p class="text-gray-900 text-lg">Explore a collection of lovely scenes from our farmhouse and its surroundings.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
@@ -569,6 +617,134 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
  {% endcomment %}
 
 
+
+
+
+{% comment %} 
+<section class=" py-10 md:py-20" id="location">
+  <div class=" mx-auto px-4">
+
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">
+        Scenery and Serenity
+      </h2>
+      <p class="text-gray-600 text-lg">
+        Glimpses of paradise
+      </p>
+    </div>
+
+    <!-- Map Card -->
+    <div class="h-[320px] sm:h-[400px] md:h-[500px]
+                bg-gray-200 rounded-2xl
+                overflow-hidden shadow-xl">
+
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.7666!2d73.6565!3d17.9244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDU1JzI3LjgiTiA3M8KwMzknMjMuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
+        class="w-full h-full border-0"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+
+    </div>
+
+  </div>
+</section>
+ {% endcomment %}
+
+ <section class="py-10 md:py-20" id="location">
+  <div class="mx-auto px-4">
+
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">
+        Scenery and Serenity
+      </h2>
+      <p class="text-gray-600 text-lg">
+        Glimpses of paradise
+      </p>
+    </div>
+
+    <!-- Map Card -->
+    <div class="h-[320px] sm:h-[400px] md:h-[500px]
+                bg-gray-200 rounded-2xl
+                overflow-hidden shadow-xl">
+
+      <iframe
+        src="https://www.google.com/maps?q=House%20No%209-12,%20near%20Palle%20Prakruthi%20Vanam,%20Elkatta,%20Telangana%20509410&output=embed"
+        class="w-full h-full border-0"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen>
+      </iframe>
+
+    </div>
+
+  </div>
+</section>
+
+<section id="about" class="md:py-24 py-4 md:px-14 px-4 scroll-mt-20 relative overflow-hidden">
+    <div class=" px-4 relative">
+
+       
+        <div class="absolute top-0 right-0 h-full w-full md:w-2/3 bg-emerald-50
+ rounded-l-3xl -z-10"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
+
+            
+            <div class="relative w-full md:h-[480px]  h-full rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                    src="{% static 'images/vihan-group1.webp' %}" 
+                    alt="About Resort"
+                    class="w-full h-full object-cover"
+                >
+            </div>
+
+           
+            <div class="text-gray-900 px-4 md:px-12  py-4 md:py-10">
+
+                <h2 class="text-4xl font-bold mb-6">
+                    About Us
+                </h2>
+
+                <h3 class="text-2xl font-serif text-gray-900 mb-4">
+                    Where Luxury Meets Nature
+                </h3>
+
+                <p class="leading-relaxed mb-4 text-gray-900">
+                    Nestled on the serene outskirts of Hyderabad, Vivaan Farmhouse offers a peaceful escape where nature,
+                    comfort, and elegance come together. Designed for relaxation and memorable gatherings, the farmhouse
+                    provides a perfect retreat away from the city’s bustle while still being easily accessible.
+                </p>
+
+                <p class="leading-relaxed mb-4 text-gray-900">
+                    Surrounded by lush greenery and open landscapes, Vivaan Farmhouse features thoughtfully designed
+                    spaces that blend modern amenities with a natural, rustic charm. Whether you’re planning a weekend
+                    getaway, a family celebration, or a private event, every corner of the property is crafted to offer
+                    comfort, privacy, and tranquility.
+                </p>
+
+                <p class="leading-relaxed text-gray-900">
+                    At Vivaan Farmhouse, we believe in creating experiences that feel both personal and refreshing.
+                    Spend your time unwinding by the pool, enjoying outdoor activities, hosting intimate celebrations,
+                    or simply soaking in the calm surroundings.
+                </p>
+
+            </div>
+
+        </div>
+    </div>
+</section> 
+
+
+
+
+
+
+
+
 <style>
     .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -581,8 +757,8 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
 </style>
 
 <!-- Review Section -->
-<section id="reviews" class="py-8 md:py-24 scroll-mt-20 bg-gray-50">
-    <div class="container mx-auto px-4">
+<section id="reviews" class="py-8 md:py-24 md:px-14 px-4 scroll-mt-20 bg-gray-50">
+    <div class=" px-4">
 
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-900 section-title mb-4">Guest Reviews</h2>
@@ -597,7 +773,7 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
                 class="flex overflow-x-auto snap-x snap-mandatory space-x-6 pb-6 scrollbar-hide">
 
                 {% for testimonial in testimonials %}
-                <div class="snap-center min-w-[350px] md:min-w-[32.33%] bg-emerald-50 p-8 rounded-2xl shadow-sm border border-white flex flex-col card-hover">
+                <div class="snap-center flex-shrink-0 w-full sm:w-full md:w-1/2 lg:w-1/3 bg-emerald-50 p-8 rounded-2xl shadow-sm border border-white flex flex-col card-hover">
                     <div class="flex items-center mb-6">
                         {% for i in "12345"|make_list %}
                         {% if forloop.counter <= testimonial.rating %}
@@ -731,8 +907,8 @@ function slideRight() {
 </section> {% endcomment %}
 {% load static %}
 
-<section class="relative py-8 md:py-24  overflow-hidden">
-  <div class="container mx-auto px-4 relative z-10">
+<section class="relative py-8 md:py-24 md:px-14 px-4  overflow-hidden">
+  <div class=" px-4 relative z-10">
 
     <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
@@ -759,23 +935,24 @@ function slideRight() {
       <!-- RIGHT: TEXT (NO BACKGROUND HERE) -->
       <div class="relative z-20 pl-4 lg:pl-16">
         <h2 class="text-4xl text-gray-800 font-serif mb-6">
-          Strawberry King Resort,<br>Mahabaleshwar
+          Vivaan Farmhouse,<br> Hyderabad
         </h2>
 
         <p class="text-gray-800 mb-4">
           <strong>Address:</strong><br>
-          145, Sr Number 2/16 Dhangarwadi Panchgani Road,<br>
-          Mahabaleshwar, Maharashtra – 412806
+          House No. 9-12, near Palle Prakruthi Vanam,<br> Elkatta, Telangana ,  509410
+          
+           is located approximately 42.8 km <br> from Rajiv Gandhi International Airport, Hyderabad
         </p>
 
         <p class="text-gray-800 mb-2">
           <strong>Phone:</strong><br>
-          +91 78 4108 4423 | +91 94 2048 4423
+          +91 96668 58675
         </p>
 
         <p class="text-gray-800">
           <strong>Email:</strong><br>
-          strawberrykingresort@gmail.com
+          info@vivaanfarmhouse.com
         </p>
       </div>
 
@@ -824,7 +1001,7 @@ function slideRight() {
   </script>
 {% endif %}
 
-<section id="contact" class="py-10">
+<section id="contact" class=" py-4 md:py-10 ">
   <div class="container mx-auto px-4 max-w-2xl">
 
     <h2 class="text-4xl font-bold text-center mb-6">Reach Out to Us</h2>

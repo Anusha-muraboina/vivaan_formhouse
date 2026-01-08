@@ -1,22 +1,9 @@
-{% extends 'resort/base.html' %}
+{% comment %} {% extends 'resort/base.html' %}
 
 {% block title %}Guest Reviews - Vivaan Farmhouse{% endblock %}
 
 {% block content %}
-<!-- Header -->
-{% comment %} <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
-    <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-teal-900/90 to-teal-700/80 z-10"></div>
-        <div class="absolute inset-0 bg-cover bg-center"
-            style="background-image: url('https://images.unsplash.com/photo-1596178060810-7691a0e14183?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
-        </div>
-    </div>
 
-    <div class="container mx-auto px-4 z-20 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-4">Guest Reviews</h1>
-        <p class="text-xl opacity-90">What our guests say about us</p>
-    </div>
-</section> {% endcomment %}
 
 <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
@@ -32,11 +19,11 @@
         <p class="text-xl opacity-90">What our guests say about us</p>
     </div>
 </section>
-<!-- Reviews & Form Section -->
+
 <section class="py-20 bg-gray-50">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            <!-- Review Form -->
+            
             <div class="bg-white rounded-2xl shadow-xl p-8 h-fit sticky top-24">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Leave a Review</h2>
                 <p class="text-gray-600 mb-6">We value your feedback! Please share your experience with us.</p>
@@ -81,7 +68,7 @@
                 </form>
             </div>
 
-            <!-- Existing Reviews -->
+          
             <div class="space-y-8">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Recent Reviews</h2>
 
@@ -123,4 +110,4 @@
     
 </section>
 {% endblock %}
-
+ {% endcomment %}

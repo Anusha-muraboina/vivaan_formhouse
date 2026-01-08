@@ -1,0 +1,210 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Booking Details | Vivaan Admin{% endblock %}
+{% block header %}Booking Details{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1000px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>Booking #{{ booking.booking_id }}</h2>
+        <div>
+            <a href="{% url 'vivaan_admin:booking_edit' booking.id %}" class="btn-action btn-view">Edit</a>
+            <a href="{% url 'vivaan_admin:booking_delete' booking.id %}" class="btn-action btn-delete"
+               onclick="return confirm('Delete this booking?');">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div style="padding: 2rem;">
+
+        <!-- STATUS -->
+        <div style="text-align:center; margin-bottom:2rem;">
+            <span class="status-badge status-{{ booking.status }}"
+                  style="font-size:1rem; padding:0.6rem 1.8rem;">
+                {{ booking.status|title }}
+            </span>
+        </div>
+
+        <!-- GRID -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2.5rem;">
+
+            <!-- GUEST INFO -->
+            <div>
+                <h3 class="section-title">Guest Information</h3>
+                <p><strong>Name:</strong> {{ booking.guest_name }}</p>
+                <p><strong>Email:</strong> {{ booking.guest_email }}</p>
+                <p><strong>Phone:</strong> {{ booking.guest_phone }}</p>
+                <p><strong>Guests:</strong> {{ booking.guest_count }}</p>
+                <p><strong>Extra Guests:</strong> {{ booking.extra_guest_count|default:"0" }}</p>
+            </div>
+
+            <!-- STAY INFO -->
+            <div>
+                <h3 class="section-title">Stay Details</h3>
+                <p><strong>Check-in:</strong> {{ booking.check_in }} {{ booking.check_in_time|default:"" }}</p>
+                <p><strong>Check-out:</strong> {{ booking.check_out }} {{ booking.check_out_time|default:"" }}</p>
+                <p><strong>Nights:</strong> {{ booking.num_nights }}</p>
+            </div>
+
+            <!-- PAYMENT INFO -->
+            <div>
+                <h3 class="section-title">Payment Details</h3>
+                <p><strong>Method:</strong> {{ booking.get_payment_method_display }}</p>
+                <p><strong>Status:</strong> {{ booking.get_payment_status_display }}</p>
+
+                {% if booking.transaction_id %}
+                    <p><strong>Transaction ID:</strong> {{ booking.transaction_id }}</p>
+                {% endif %}
+                {% if booking.payment_id %}
+                    <p><strong>Payment ID:</strong> {{ booking.payment_id }}</p>
+                {% endif %}
+            </div>
+
+            <!-- PRICING INFO -->
+            <div>
+                <h3 class="section-title">Pricing Breakdown</h3>
+                <p><strong>Sub Total:</strong> ₹{{ booking.sub_total }}</p>
+                <p><strong>Discount:</strong> ₹{{ booking.disc_price }}</p>
+                <p><strong>Tax:</strong> ₹{{ booking.tax_price|default:"0.00" }}</p>
+
+                <p style="font-size:1.1rem;">
+                    <strong>Total:</strong>
+                    <span style="font-weight:700;">₹{{ booking.total_amount }}</span>
+                </p>
+
+                <p><strong>Remaining:</strong> ₹{{ booking.remaining_amount }}</p>
+            </div>
+        </div>
+
+        <!-- SPECIAL REQUESTS -->
+        {% if booking.special_requests %}
+        <div style="margin-top:2rem;">
+            <h3 class="section-title">Special Requests</h3>
+            <div class="info-box">
+                {{ booking.special_requests }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- CANCELLATION -->
+        {% if booking.cancellation_reason %}
+        <div style="margin-top:2rem;">
+            <h3 class="section-title" style="color:#dc2626;">Cancellation Reason</h3>
+            <div class="error-box">
+                {{ booking.cancellation_reason }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- META -->
+        <div style="margin-top:2.5rem; border-top:1px solid #eee; padding-top:1rem; font-size:0.9rem; color:#666;">
+            <p>Created on: {{ booking.created_at }}</p>
+            <p>Last updated: {{ booking.updated_at }}</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-title {
+    color:#8B0000;
+    border-bottom:2px solid #eee;
+    padding-bottom:6px;
+    margin-bottom:12px;
+}
+
+.info-box {
+    background:#f9fafb;
+    padding:1rem;
+    border-radius:8px;
+    border:1px solid #e5e7eb;
+}
+
+.error-box {
+    background:#fef2f2;
+    color:#dc2626;
+    padding:1rem;
+    border-radius:8px;
+    border:1px solid #fee2e2;
+}
+</style>
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'adminpanel/base.html' %}
+
+{% block title %}Booking Details | Vivaan Admin{% endblock %}
+{% block header %}Booking Details{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>Booking #{{ booking.booking_id }}</h2>
+        <div>
+            <a href="{% url 'vivaan_admin:booking_edit' booking.id %}" class="btn-action btn-view">Edit</a>
+            <a href="{% url 'vivaan_admin:booking_delete' booking.id %}" class="btn-action btn-delete"
+                onclick="return confirm('Are you sure you want to delete this booking?');">Delete</a>
+        </div>
+    </div>
+    <div style="padding: 2rem;">
+        <!-- Status Badge -->
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <span class="status-badge status-{{ booking.status }}" style="font-size: 1rem; padding: 0.5rem 1.5rem;">
+                {{ booking.status|title }}
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+            <!-- Guest Info -->
+            <div>
+                <h3 style="color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                    Guest Information</h3>
+                <p style="margin-bottom: 0.5rem;"><strong>Name:</strong> {{ booking.guest_name }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Email:</strong> {{ booking.guest_email }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Phone:</strong> {{ booking.guest_phone }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Guests:</strong> {{ booking.guest_count }}</p>
+            </div>
+
+            <!-- Stay Info -->
+            <div>
+                <h3 style="color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                    Stay Details</h3>
+                <p style="margin-bottom: 0.5rem;"><strong>Check-in:</strong> {{ booking.check_in }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Check-out:</strong> {{ booking.check_out }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Nights:</strong> {{ booking.num_nights }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Total Amount:</strong> <span
+                        style="font-size: 1.2rem; font-weight: 700;">₹{{ booking.total_amount }}</span></p>
+            </div>
+        </div>
+
+        {% if booking.special_requests %}
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                Special Requests</h3>
+            <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+                {{ booking.special_requests }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if booking.cancellation_reason %}
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #dc2626; border-bottom: 2px solid #fee2e2; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                Cancellation Reason</h3>
+            <div
+                style="background: #fef2f2; color: #dc2626; padding: 1rem; border-radius: 8px; border: 1px solid #fee2e2;">
+                {{ booking.cancellation_reason }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; font-size: 0.9rem; color: #666;">
+            Created on: {{ booking.created_at }} <br>
+            Last info update: {{ booking.updated_at }}
+        </div>
+    </div>
+</div>
+{% endblock %} {% endcomment %}

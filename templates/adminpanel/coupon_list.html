@@ -1,0 +1,202 @@
+{% extends "adminpanel/base.html" %}
+{% block title %}Coupons{% endblock %}
+{% block header %}Coupons{% endblock %}
+
+{% block content %}
+<style>
+/* ===== CARD ===== */
+.coupon-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.coupon-card .card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coupon-card h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* ===== ADD BUTTON ===== */
+.btn-primary {
+    background: #4f46e5;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #4338ca;
+}
+
+/* ===== TABLE ===== */
+.coupon-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.coupon-table thead {
+    background: #f9fafb;
+}
+
+.coupon-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6b7280;
+}
+
+.coupon-table td {
+    padding: 14px 20px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+}
+
+.coupon-table tr:hover {
+    background: #f9fafb;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-green {
+    background: #16a34a;
+    color: white;
+}
+
+.badge-red {
+    background: #dc2626;
+    color: white;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.btn-sm {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-view {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.btn-view:hover {
+    background: #c7d2fe;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+}
+
+/* ===== EMPTY ===== */
+.empty-row {
+    text-align: center;
+    color: #6b7280;
+    padding: 20px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .coupon-table thead {
+        display: none;
+    }
+
+    .coupon-table tr {
+        display: block;
+        border-bottom: 1px solid #eee;
+    }
+
+    .coupon-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 16px;
+    }
+
+    .coupon-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #374151;
+    }
+}
+</style>
+
+<div class="coupon-card">
+    <div class="card-header">
+        <h2>Discount Coupons</h2>
+        <a href="{% url 'vivaan_admin:coupon_create' %}" class="btn-primary">
+            + Add Coupon
+        </a>
+    </div>
+<div class="table-responsive">
+    <table class="coupon-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Validity</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for coupon in coupons %}
+            <tr>
+                <td data-label="Code"><b>{{ coupon.code }}</b></td>
+                <td data-label="Discount">₹{{ coupon.discount_amount }}</td>
+                <td data-label="Validity">
+                    {{ coupon.valid_from }} → {{ coupon.valid_until }}
+                </td>
+                <td data-label="Status">
+                    {% if coupon.is_active %}
+                        <span class="badge badge-green">Active</span>
+                    {% else %}
+                        <span class="badge badge-red">Inactive</span>
+                    {% endif %}
+                </td>
+                <td data-label="Actions">
+                    <a href="{% url 'vivaan_admin:coupon_edit' coupon.id %}" class="btn-sm btn-view">Edit</a>
+                    <a href="{% url 'vivaan_admin:coupon_delete' coupon.id %}"
+                       class="btn-sm btn-delete"
+                       onclick="return confirm('Delete this coupon?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="empty-row">No coupons found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

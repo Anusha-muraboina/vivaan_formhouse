@@ -1,0 +1,81 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Amenities{% endblock %}
+{% block header %}Amenities{% endblock %}
+
+{% block content %}
+
+<div class="card pb-3">
+    <div class="card-header">
+        <h2>Amenity List</h2>
+        <a href="{% url 'vivaan_admin:amenity_create' %}" class="btn-action btn-view">
+            + Add Amenity
+        </a>
+    </div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Icon</th>
+                <th>Featured</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for amenity in amenities %}
+            <tr>
+                <td>{{ amenity.name }}</td>
+                <td>{{ amenity.icon }}</td>
+                <td>{{ amenity.is_featured|yesno:"Yes,No" }}</td>
+                <td>
+                    {% if amenity.amenity_image %}
+                        <img src="{{ amenity.amenity_image.url }}" width="60">
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'vivaan_admin:amenity_edit' amenity.id %}" class="btn-action btn-view">Edit</a>
+                    <a href="{% url 'vivaan_admin:amenity_delete' amenity.id %}"
+                       class="btn-action btn-delete"
+                       onclick="return confirm('Delete this amenity?');">
+                       Delete
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No amenities found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if amenities.has_other_pages %}
+<div class="pagination-wrapper">
+    <ul class="pagination">
+
+        {% if amenities.has_previous %}
+            <li><a href="?page={{ amenities.previous_page_number }}">« Prev</a></li>
+        {% else %}
+            <li class="disabled"><span>« Prev</span></li>
+        {% endif %}
+
+        {% for num in amenities.paginator.page_range %}
+            {% if amenities.number == num %}
+                <li class="active"><span>{{ num }}</span></li>
+            {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if amenities.has_next %}
+            <li><a href="?page={{ amenities.next_page_number }}">Next »</a></li>
+        {% else %}
+            <li class="disabled"><span>Next »</span></li>
+        {% endif %}
+
+    </ul>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}

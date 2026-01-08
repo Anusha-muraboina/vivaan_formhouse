@@ -1,0 +1,246 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Add Room Category{% endblock %}
+{% block header %}Add Room Category{% endblock %}
+
+{% block content %}
+
+<style>
+/* ================= CONTAINER ================= */
+.form-wrapper {
+    max-width: 850px;
+    margin: auto;
+    padding: 10px;
+}
+
+/* ================= CARD ================= */
+.form-card {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 14px 35px rgba(0,0,0,0.08);
+}
+
+/* ================= SECTION TITLE ================= */
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #065f46;
+    margin: 24px 0 14px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+}
+
+/* ================= GRID ================= */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* ================= FORM GROUP ================= */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group.full {
+    grid-column: span 2;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+/* ================= CHECKBOX ================= */
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.form-actions {
+    margin-top: 28px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.btn-action {
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.btn-save {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #15803d;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: span 1;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-action {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
+<div class="form-wrapper">
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="form-card">
+
+    <!-- BASIC INFO -->
+    <div class="section-title">Basic Information</div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Category Name</label>
+            <input type="text" name="name" placeholder="Deluxe Suite" required>
+        </div>
+
+        <div class="form-group">
+            <label>Floor</label>
+            <input type="text" name="floor" placeholder="Ground / 1st / 2nd">
+        </div>
+
+        <div class="form-group full">
+            <label>Description</label>
+            <textarea name="description" rows="4"
+                placeholder="Short description about this room category..."></textarea>
+        </div>
+    </div>
+
+    <!-- PRICING & CAPACITY -->
+    <div class="section-title">Pricing & Capacity</div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Base Price (₹)</label>
+            <input type="number" name="base_price" step="0.01" placeholder="8500" required>
+        </div>
+
+        <div class="form-group">
+            <label>Size (Sqft)</label>
+            <input type="number" name="size_sqft" placeholder="450" required>
+        </div>
+
+        <div class="form-group">
+            <label>Max Occupancy</label>
+            <input type="number" name="max_occupancy" placeholder="4" required>
+        </div>
+
+        <div class="form-group">
+            <label>View Type</label>
+            <select name="view_type">
+                <option value="standard">Standard</option>
+                <option value="garden">Garden View</option>
+                <option value="valley">Valley View</option>
+                <option value="pool">Pool View</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- IMAGE & FEATURES -->
+    <div class="section-title">Image & Features</div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Room Image</label>
+            <input type="file" name="image">
+        </div>
+
+        <div class="form-group">
+            <label>Features</label>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="has_balcony"> Balcony
+                </label>
+                <label>
+                    <input type="checkbox" name="has_bathtub"> Bathtub
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="form-actions">
+        <a href="{% url 'vivaan_admin:room_list' %}" class="btn-action btn-cancel">
+            Cancel
+        </a>
+        <button type="submit" class="btn-action btn-save">
+            Save Room Category
+        </button>
+    </div>
+
+</div>
+</form>
+</div>
+
+{% endblock %}

@@ -18,6 +18,14 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# ALLOWED_HOSTS = [
+#   "https://e23d39b29fc8.ngrok-free.app",
+#     "localhost",
+#     "127.0.0.1",
+# ]
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -28,9 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'resort',
-    
+    'vivaan_admin',
+
     'ckeditor',
+
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+
 ]
+
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,12 +82,30 @@ WSGI_APPLICATION = 'resort_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'vivaanfarmhouse',
+        'USER': 'root',
+        'PASSWORD': 'Chinnuyadav9697',
+        'HOST': 'localhost', 
+        'PORT': '3306',
+        # 'OPTIONS': {
+        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        # }
     }
 }
+
+
 
 
 # Password validation
@@ -112,9 +146,31 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
+# # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+
+
+
+
+# settings.py
+# RAZORPAY_KEY_ID = "rzp_live_RuxBrSrr1POPha"
+# RAZORPAY_KEY_SECRET = "PFH3WSOIA47pFs9ts3fVY67Q"
+
+RAZORPAY_KEY_ID = "rzp_test_Rv2abPyaI8rKSP"
+RAZORPAY_KEY_SECRET = "cOuReUYXYcYBWeNUg3LSYkmB"
+RAZORPAY_WEBHOOK_SECRET = "kdfwfbsdhfwberfdlnsrojofdiwer4y59ujdnf94yu5u#28nf"
+
+
+
+# STATIC_URL = '/static/'
+# STATIC_ROOT = '/home/ubuntu/vivaanfarmhouse/static/'
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = '/home/ubuntu/vivaanfarmhouse/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -123,25 +179,66 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'anushamuraboina9@gmail.com'
+# EMAIL_HOST_PASSWORD = 'mpywwnwfrubgkxoe'
+# DEFAULT_FROM_EMAIL = 'anushamuraboina9@gmail.com'
+# ADMIN_EMAIL = 'anushamuraboina9@gmail.com' 
+
+# # FRONTEND_URL = 'http://127.0.0.1:9000'  
+
+# CC_EMAIL = [
+#     'anushamuraboina9@gmail.com',
+#     'info@vivaanfarmhouse.com',
+# ]
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+# ACCOUNT_EMAIL_REQUIRED = True
+
+
+
+# EMAIL CONFIGURATION (HOSTINGER)
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'anushamuraboina9@gmail.com'
-EMAIL_HOST_PASSWORD = 'mpywwnwfrubgkxoe'
-DEFAULT_FROM_EMAIL = 'anushamuraboina9@gmail.com'
-ADMIN_EMAIL = 'anushamuraboina9@gmail.com' 
 
-# FRONTEND_URL = 'http://127.0.0.1:9000'  
+EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True        # IMPORTANT for port 465
+EMAIL_USE_TLS = False       # Must be False when using SSL
 
+EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
+EMAIL_HOST_PASSWORD = 'Shrikant@1234$' 
+
+DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
+ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
+
+# Optional CC emails
 CC_EMAIL = [
-    'anushamuraboina9@gmail.com',
+    # 'info@vivaanfarmhouse.com',
+    'anushamuraboina9@gmail.com'
 ]
+
+# Django allauth (if you are using it)
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
-
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://2d5698be9733.ngrok-free.app",
+]
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://2d5698be9733.ngrok-free.app",
+    # "https://e23d39b29fc8.ngrok-free.app/",
+]

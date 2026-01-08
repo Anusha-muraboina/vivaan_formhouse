@@ -1,17 +1,75 @@
-
-
 {% extends 'resort/base.html' %}
 
 {% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
-
+{% csrf_token %}
 {% load static %}
 {% block content %}
 
+
+<style>
+    /* 🔴 Booked dates */
+    .flatpickr-day.booked-date {
+        background: #f57e7eff !important;
+        /* red-500 */   
+        color: white !important;
+        border: 1px solid #fb8282ff !important;
+        cursor: not-allowed;
+    }
+
+    /* 🟠 Admin blocked dates */
+    .flatpickr-day.blocked-date {
+        background: rgba(233, 146, 84, 1) !important;
+        /* orange-500 */
+        color: white !important;
+        border: 1px solid #f8a970ff !important;
+        cursor: not-allowed;
+    }
+
+    /* 🟢 Selected range */
+    .flatpickr-day.inRange,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background: #c9f5d9ff !important;
+        /* green-500 */
+        color: white !important;
+        border: 1px solid #b7fbcfff !important;
+    }
+
+    /* 🔵 Today */
+    .flatpickr-day.today {
+        border-color: #011637ff !important;
+        /* blue-500 */
+    }
+
+    /* Disabled look */
+    .flatpickr-day.disabled {
+        opacity: 0.6;
+    }
+</style>
+
+
+<style>
+.collapse-header {
+    cursor: pointer;
+    padding: 16px;
+    background: white; /* emerald-900 */
+    color: #043c2a;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 2px solid #012a1d;
+}
+</style>
+<style>
+.collapse-header {
+    pointer-events: none;
+}
+</style>
+
 <div class="fixed inset-0 -z-10">
-  <div class="absolute inset-0 bg-cover bg-center"
-       style="background-image: url('{% static "images/vihan-group1.webp" %}');">
-  </div>
-  <div class="absolute inset-0 bg-white/90"></div>
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static " images/vihan-group1.webp"
+        %}');">
+    </div>
+    <div class="absolute inset-0 bg-white/90"></div>
 </div>
 
 <!-- Room Header -->
@@ -33,19 +91,19 @@
             <span><i class="fas fa-users mr-2"></i>Up to {{ room_category.max_occupancy }} Guests</span>
             <span><i class="fas fa-building mr-2"></i>{{ room_category.floor }}</span>
         </div>
-    </div> 
+    </div>
 </section> {% endcomment %}
 
 <!-- Room Details & Booking -->
 
 
-<section class="py-16 ">
+<section class=" py-4 md:py-16 ">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             <!-- Booking Form -->
             <div class="">
-                <div class="bg-white rounded-2xl shadow-xl p-8 sticky top-32">
+                <div class="bg-white rounded-2xl shadow-xl p-2  md:p-8 sticky top-32">
                     <div class="text-center mb-6">
                         <div class="space-y-2">
                             <div class="text-2xl font-bold text-gray-800">Entire Villa Booking</div>
@@ -63,102 +121,12 @@
 
                     <form method="post" class="space-y-4">
                         {% csrf_token %}
-
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
-                            {{ form.guest_name }}
-                        </div>
-
-                      
-
-
-                        <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Phone</label>
-                            {{ form.guest_phone }}
-                        </div>
-
-                  
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Email</label>
-                            {{ form.guest_email }}
-                        </div>
-
-
-                        </div>
-
-                     
+                        <input type="hidden" id="discountedTotal" value="{{ calculated_total }}">
 
 
 
 
 
- <div class="grid grid-cols-2 gap-4">
-  <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests Count</label>
-                            {{ form.extra_guest_count }}
-                        </div>
-
-
-      <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
-                            {{ form.guest_count }}
-                        </div>
-
-</div>
-
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
-                                <input type="text" name="check_in"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Date" required>
-                            </div>
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
-                                <input type="text" name="check_in_time"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Time">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
-                                <input type="text" name="check_out"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Date" required>
-                            </div>
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
-                                <input type="text" name="check_out_time"
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                    placeholder="Select Time">
-                            </div>
-                        </div>
-
-
-
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
-                            {{ form.special_requests }}
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Coupon Code</label>
-                            {{ form.coupon_code }}
-                        </div>
-
-
-                        <!-- Date Availability Notification -->
-                        <div id="dateNotification"
-                            class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-                            <div class="flex items-center">
-                                <i class="fas fa-exclamation-circle mr-2"></i>
-                                <span id="dateNotificationText"></span>
-                            </div>
-                        </div>
 
                         {% if form.errors %}
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -171,80 +139,339 @@
                         {% endif %}
 
 
+<!-- =========================== -->
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step1')">
+        1. Stay Details & Dates
+    </div>
+
+         <div  id="step1" class="collapse-body  p-6 space-y-4">
 
 
-<!-- PAYMENT METHOD -->
+
+                        <div class="flex flex-wrap gap-4 text-sm mt-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-green-300 rounded"></span> Selected
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-[#f57e7eff] rounded"></span> Booked
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 bg-[#f8a970ff] rounded"></span> Blocked by Admin
+                            </div>
+                        </div>
+
+                        <div class="grid  grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
+                                <input type="text" name="check_in"      readonly
+    inputmode="none"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Date" required>
+                            </div>
+
+   <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
+                                <input type="text" name="check_out"      readonly
+    inputmode="none"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Date" required>
+                            </div>
+
+
+                            <!-- <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Time</label>
+                                <input type="text" name="check_in_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Time">
+                            </div> -->
+                        </div>
+
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Check-in Time -->
+{% comment %} <div>
+    <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
+
+    <input type="hidden" name="check_in_time" id="checkInTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('in')">
+            Select Check-In Time
+        </button>
+
+        <div id="timeListIn" class="time-list hidden"></div>
+    </div>
+</div> {% endcomment %}
+
+<!-- Check-out Time -->
+{% comment %} <div>
+    <label class="block text-gray-700 font-semibold mb-2">Check-Out Time</label>
+
+    <input type="hidden" name="check_out_time" id="checkOutTime">
+
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('out')">
+            Select Check-Out Time
+        </button>
+
+        <div id="timeListOut" class="time-list hidden"></div>
+    </div>
+</div> {% endcomment %}
+
+<!-- CHECK-IN TIME -->
 <div>
-  <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
+    <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
 
-  <div class="space-y-3">
+    <input type="hidden" name="check_in_time" id="checkInTime">
 
-      <!-- Pay at Farmhouse -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="farmhouse" class="h-5 w-5 text-emerald-600" checked>
-          <span class="text-gray-800 font-medium">Pay at Check-in (Cash)</span>
-      </label>
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('in')">
+            Select Check-In Time
+        </button>
+        <div id="timeListIn" class="time-list hidden"></div>
+    </div>
+</div>
 
-      <!-- Partial 30% -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="partial_razorpay" class="h-5 w-5 text-emerald-600">
-          <span class="text-gray-800 font-medium">Pay 30% Online (Razorpay)</span>
-      </label>
+<!-- CHECK-OUT TIME -->
+<div>
+    <label class="block text-gray-700 font-semibold mb-2">Check-Out Time</label>
 
-      <!-- Full -->
-      <label class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
-          <input type="radio" name="payment_method" value="full_razorpay" class="h-5 w-5 text-emerald-600">
-          <span class="text-gray-800 font-medium">Pay Full Online (Razorpay)</span>
-      </label>
+    <input type="hidden" name="check_out_time" id="checkOutTime">
 
-  </div>
+    <div class="time-dropdown">
+        <button type="button" class="time-btn" onclick="toggleTime('out')">
+            Select Check-Out Time
+        </button>
+        <div id="timeListOut" class="time-list hidden"></div>
+    </div>
+</div>
+
+<!-- <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
+                                <input type="text" name="check_in_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Check In Time">
+                            </div>
+
+
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Check-Out Time</label>
+                                <input type="text" name="check_out_time"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Select Check Out Time">
+                            </div> -->
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" >
+
+                                   <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Guests</label>
+                                {{ form.guest_count }}
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Number of Extra Guests
+                                    Count</label>
+                                {{ form.extra_guest_count }}
+                            </div>
+
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
+                            {{ form.special_requests }}
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Coupon Code</label>
+                            {{ form.coupon_code }}
+                        </div>
+
+
+
+                        <div id="dateNotification"
+                            class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span id="dateNotificationText"></span>
+                            </div>
+                        </div>
+
+
+
+
+
+
+                         <div class="flex justify-end pt-4">
+    <button type="button"
+        onclick="validateStep1()"
+        class="bg-emerald-900 text-white px-6 py-2 rounded-lg font-semibold">
+        Next →
+    </button>
 </div>
 
 
-<!-- PAYMENT SUMMARY SECTION -->
-<div id="paymentSummary" class="hidden mt-5 space-y-3">
 
-  <div class="border rounded-lg p-4 bg-gray-50">
+ </div>
 
-      <p id="depositAmount" class="hidden flex justify-between text-gray-700 text-lg">
-          <span>Pay now (30%):</span>
-          <span class="font-bold text-emerald-700">₹<span id="depositValue"></span></span>
-      </p>
 
-      <p id="fullAmount" class="hidden flex justify-between text-gray-700 text-lg">
-          <span>Pay full:</span>
-          <span class="font-bold text-emerald-700">₹<span id="fullValue"></span></span>
-      </p>
 
-      <p id="remainingAmount" class="hidden text-sm text-gray-600">
-          Remaining at check-in:
-          <span class="font-semibold text-gray-800">₹<span id="remainingValue"></span></span>
-      </p>
+ </div>
+<!-- ======================================== -->
 
-  </div>
 
-  <!-- Razorpay Box -->
-  <div id="razorpayBox" class="hidden border p-4 rounded-xl space-y-2">
-      <p class="font-semibold text-gray-700">Select Razorpay to complete payment</p>
-      <div class="flex items-center space-x-3">
-          <input type="radio" checked class="h-5 w-5">
-          <img src="https://razorpay.com/favicon.png" class="h-6" />
-          <span class="font-medium text-gray-700">Razorpay Checkout</span>
-      </div>
-  </div>
 
+                        <!-- ============================= -->
+
+                        
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step2')">
+        2. Guest Information
+    </div>
+
+
+    <div id="step2" class="collapse-body hidden p-6 space-y-4">
+                        <div  >
+                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
+                            {{ form.guest_name }}
+                        </div>
+                        <!-- <div class="grid grid-cols-2 gap-4"> -->
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Phone</label>
+                                {{ form.guest_phone }}
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                                {{ form.guest_email }}
+                            </div>
+                        <!-- </div> -->
+
+
+
+
+
+                        <div class="flex justify-between pt-4">
+    <button type="button"
+        onclick="toggleCollapse('step1')"
+        class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+        ← Previous
+    </button>
+
+    <button type="button"
+        onclick="validateStep2()"
+        class="bg-emerald-900 text-white px-6 py-2 rounded-lg font-semibold">
+        Next →
+    </button>
+</div>
 </div>
 
 
 
 
 
+</div>
+<!-- ========================================= -->
 
+
+<!-- ========================== -->
+
+
+<div class="border rounded-xl">
+    <div class="collapse-header" onclick="toggleCollapse('step3')">
+        3️. Payment Method & Summary
+    </div>
+
+  <div  id="step3" class="collapse-body hidden p-6 space-y-4">
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
+
+                            <div class="space-y-3">
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="farmhouse"
+                                        class="h-5 w-5 text-emerald-600" checked>
+                                    <span class="text-gray-800 font-medium">Pay at Check-in (Cash)</span>
+                                </label>
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="partial_razorpay"
+                                        class="h-5 w-5 text-emerald-600">
+                                    <span class="text-gray-800 font-medium">Pay 30% Online (Razorpay)</span>
+                                </label>
+
+
+                                <label
+                                    class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
+                                    <input type="radio" name="payment_method" value="full_razorpay"
+                                        class="h-5 w-5 text-emerald-600">
+                                    <span class="text-gray-800 font-medium">Pay Full Online (Razorpay)</span>
+                                </label>
+
+                            </div>
+                        </div>
+
+
+                        <div id="paymentSummary" class="hidden mt-5 space-y-3">
+
+                            <div class="border rounded-lg p-4 bg-gray-50">
+
+                                <p id="depositAmount" class="hidden flex justify-between text-gray-700 text-lg">
+                                    <span>Pay now (30%):</span>
+                                    <span class="font-bold text-emerald-700">₹<span id="depositValue"></span></span>
+                                </p>
+
+                                <p id="fullAmount" class="hidden flex justify-between text-gray-700 text-lg">
+                                    <span>Pay full:</span>
+                                    <span class="font-bold text-emerald-700">₹<span id="fullValue"></span></span>
+                                </p>
+
+                                <p id="remainingAmount" class="hidden text-sm text-gray-600">
+                                    Remaining at check-in:
+                                    <span class="font-semibold text-gray-800">₹<span id="remainingValue"></span></span>
+                                </p>
+
+                            </div>
+
+
+                            <div id="razorpayBox" class="hidden border p-4 rounded-xl space-y-2">
+                                <p class="font-semibold text-gray-700">Select Razorpay to complete payment</p>
+                                <div class="flex items-center space-x-3">
+                                    <input type="radio" checked class="h-5 w-5">
+                                    <img src="https://razorpay.com/favicon.png" class="h-6" />
+                                    <span class="font-medium text-gray-700">Razorpay Checkout</span>
+                                </div>
+                            </div>
+
+                        </div>
+                 
+<div class="flex justify-start pt-2">
+    <button type="button"
+        onclick="toggleCollapse('step2')"
+        class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+        ← Previous
+    </button>
+</div>
+
+
+
+</div>
+
+
+</div>
 
                         <button type="submit"
                             class="w-full bg-emerald-900 text-white py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-emerald-700">
                             <i class="fas fa-calendar-check mr-2"></i>Book Entire Villa
                         </button>
+
 
                     </form>
 
@@ -273,7 +500,7 @@
 
             <!-- Room Information -->
             <div class="">
-             
+
                 <!-- Amenities -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Amenities</h2>
@@ -318,62 +545,13 @@
                 </div>
 
 
-   <!-- Description -->
+                <!-- Description -->
                 <div class=" rounded-2xl shadow-lg p-8  bg-white">
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">Room Description</h2>
-                  <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description|safe }}</p>
-{% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
-    {{ room_category.description|safe }}
-</div> {% endcomment %}
-
-
-
-<!-- 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-mountain text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">{{ room_category.get_view_type_display }}</h4>
-                                <p class="text-sm text-gray-500">Scenic Views</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-bed text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">King Size Bed</h4>
-                                <p class="text-sm text-gray-500">Luxury Bedding</p>
-                            </div>
-                        </div>
-
-                        {% if room_category.has_balcony %}
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-door-open text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Private Balcony</h4>
-                                <p class="text-sm text-gray-500">Outdoor Space</p>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if room_category.has_bathtub %}
-                        <div class="flex items-center text-gray-700">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-bath text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Bathtub</h4>
-                                <p class="text-sm text-gray-500">Luxury Bathroom</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div> -->
+                    <p class="text-gray-600 text-lg leading-relaxed mb-6">{{ room_category.description|safe }}</p>
+                    {% comment %} <div class="rounded-2xl shadow-lg p-8 bg-white">
+                        {{ room_category.description|safe }}
+                    </div> {% endcomment %}
                 </div>
 
 
@@ -392,389 +570,864 @@
 </section>
 
 {% block extra_js %}
+{% comment %} {{ booked_dates|json_script:"booked-dates-data" }} {% endcomment %}
 {{ booked_dates|json_script:"booked-dates-data" }}
+{{ booked_info|json_script:"booked-info-data" }}
+{{ blocked_dates|json_script:"blocked-dates-data" }}
 
-
-
-
-
-
-
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Form inputs
-    let checkIn = document.querySelector("input[name='check_in']");
-    let checkOut = document.querySelector("input[name='check_out']");
-    let guestCount = document.querySelector("input[name='guest_count']");
-    let extraGuest = document.querySelector("input[name='extra_guest_count']");
-    let radios = document.querySelectorAll("input[name='payment_method']");
-
-    // Payment display elements
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
-
-    // Backend pricing values
-    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
-    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
-    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
-
-    // Calculate Base Amount
-    function calculateTotal() {
-        const inDate = new Date(checkIn.value);
-        const outDate = new Date(checkOut.value);
-
-        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
-            return 0;
-        }
-
-        let total = 0;
-        let date = new Date(inDate);
-
-        // Loop through each night
-        while (date < outDate) {
-            let day = date.getDay();
-            if (day === 5 || day === 6) {
-                total += weekend;
-            } else {
-                total += weekday;
-            }
-            date.setDate(date.getDate() + 1);
-        }
-
-        // EXTRA GUEST COUNT logic (user entered)
-        let extra = parseInt(extraGuest.value || 0);
-
-        total += extra * extraGuestPrice;
-
-        // NO TAX (you set 0.00)
-        total += total * 0.00;
-
-        return Math.round(total);
-    }
-
-    // Update Payment Method Section
-    function updatePayment() {
-        let total = calculateTotal();
-
-        if (total <= 0) {
-            paymentSummary.classList.add("hidden");
-            return;
-        }
-
-        paymentSummary.classList.remove("hidden");
-
-        // Calculate 30%
-        let deposit = Math.round(total * 0.30);
-        let remaining = total - deposit;
-
-        document.getElementById("depositValue").innerText = deposit;
-        document.getElementById("fullValue").innerText = total;
-        document.getElementById("remainingValue").innerText = remaining;
-
-        let selected = document.querySelector("input[name='payment_method']:checked").value;
-
-        if (selected === "farmhouse") {
-            depositAmount.classList.add("hidden");
-            fullAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.add("hidden");
-        }
-
-        if (selected === "partial_razorpay") {
-            depositAmount.classList.remove("hidden");
-            remainingAmount.classList.remove("hidden");
-            fullAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-
-        if (selected === "full_razorpay") {
-            fullAmount.classList.remove("hidden");
-            depositAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-    }
-
-    // Attach event listeners
-    radios.forEach(r => r.addEventListener("change", updatePayment));
-    checkIn.addEventListener("change", updatePayment);
-    checkOut.addEventListener("change", updatePayment);
-    guestCount.addEventListener("change", updatePayment);
-    extraGuest.addEventListener("change", updatePayment);
-
-});
-
-
-guestCount.addEventListener("input", function () {
-    if (parseInt(this.value) > 15) {
-        alert("Guest count cannot exceed 15.");
-        this.value = 15;
-    }
-});
-
-extraGuest.addEventListener("input", function () {
-    if (parseInt(this.value) > 5) {
-        alert("Extra guest count cannot exceed 5.");
-        this.value = 5;
-    }
-});
-
-</script>
-
-
-
-{% comment %} <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    let checkIn = document.querySelector("input[name='check_in']");
-    let checkOut = document.querySelector("input[name='check_out']");
-    let guestCount = document.querySelector("input[name='guest_count']");
-    let radios = document.querySelectorAll("input[name='payment_method']");
-
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
-
-    // backend values
-    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
-    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
-    const extraGuestPrice = parseFloat(`{{ extra_price }}`);
-
-    function calculateTotal() {
-        const inDate = new Date(checkIn.value);
-        const outDate = new Date(checkOut.value);
-
-        if (!checkIn.value || !checkOut.value || outDate <= inDate) {
-            return 0;
-        }
-
-        let total = 0;
-        let date = new Date(inDate);
-
-        while (date < outDate) {
-            let day = date.getDay();
-            if (day === 5 || day === 6) {
-                total += weekend;
-            } else {
-                total += weekday;
-            }
-            date.setDate(date.getDate() + 1);
-        }
-
-        let guests = parseInt(guestCount.value || 15);
-        let extra = Math.max(0, guests - 15);
-
-        total += extra * extraGuestPrice;
-
-        total += total * 0.00; // tax 12%
-
-        return Math.round(total);
-    }
-
-    function updatePayment() {
-        let total = calculateTotal();
-
-        if (total <= 0) {
-            paymentSummary.classList.add("hidden");
-            return;
-        }
-
-        paymentSummary.classList.remove("hidden");
-
-        let deposit = Math.round(total * 0.30);
-        let remaining = total - deposit;
-
-        document.getElementById("depositValue").innerText = deposit;
-        document.getElementById("fullValue").innerText = total;
-        document.getElementById("remainingValue").innerText = remaining;
-
-        let selected = document.querySelector("input[name='payment_method']:checked").value;
-
-        if (selected === "farmhouse") {
-            depositAmount.classList.add("hidden");
-            fullAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.add("hidden");
-        }
-
-        if (selected === "partial_razorpay") {
-            depositAmount.classList.remove("hidden");
-            remainingAmount.classList.remove("hidden");
-            fullAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-
-        if (selected === "full_razorpay") {
-            fullAmount.classList.remove("hidden");
-            depositAmount.classList.add("hidden");
-            remainingAmount.classList.add("hidden");
-            razorpayBox.classList.remove("hidden");
-        }
-    }
-
-    radios.forEach(r => r.addEventListener("change", updatePayment));
-    checkIn.addEventListener("change", updatePayment);
-    checkOut.addEventListener("change", updatePayment);
-    guestCount.addEventListener("change", updatePayment);
-
-});
+{% comment %}
+<script id="blocked-dates-data" type="application/json">
+    {{ blocked_dates|json_script:"blocked-dates-data" }}
 </script> {% endcomment %}
 
 
 
-{% comment %} 
+
+
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+function toggleCollapse(id) {
+    document.querySelectorAll('.collapse-body').forEach(el => {
+        if (el.id === id) {
+            el.classList.toggle('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
+}
+</script>
 
-    const radios = document.querySelectorAll('input[name="payment_method"]');
 
-    const paymentSummary = document.getElementById("paymentSummary");
-    const depositAmount = document.getElementById("depositAmount");
-    const fullAmount = document.getElementById("fullAmount");
-    const remainingAmount = document.getElementById("remainingAmount");
-    const razorpayBox = document.getElementById("razorpayBox");
 
-    // IMPORTANT — backend must set this
-    const total = {{ calculated_total|default:0 }};
-    
-    const deposit = Math.round(total * 0.30);
-    const remaining = total - deposit;
+ <script>
+const startHour = 7;   // 7 AM
+const endHour = 22;    // 10 PM
 
-    document.getElementById("depositValue").innerText = deposit;
-    document.getElementById("fullValue").innerText = total;
-    document.getElementById("remainingValue").innerText = remaining;
+function generateSlots() {
+    const slots = [];
+    for (let h = startHour; h < endHour; h++) {
+        slots.push(formatHour(h));
+    }
+    return slots;
+}
 
-    radios.forEach(radio => {
-        radio.addEventListener("change", function() {
+function formatHour(h) {
+    const suffix = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:00 ${suffix}`;
+}
+
+function buildDropdown(listId, inputId, button) {
+    const list = document.getElementById(listId);
+    list.innerHTML = "";
+
+    generateSlots().forEach(label => {
+        const div = document.createElement("div");
+        div.className = "time-option";
+        div.innerText = label;
+
+        div.onclick = () => {
+            // Convert 12h → 24h (DB format)
+            let hour = parseInt(label);
+            const isPM = label.includes("PM");
+
+            if (isPM && hour !== 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
+
+            // ✅ Save to hidden input
+            document.getElementById(inputId).value =
+                String(hour).padStart(2, "0") + ":00";
+
+            // ✅ Show selected time
+            button.innerText = label;
+
+            list.classList.add("hidden");
+        };
+
+        list.appendChild(div);
+    });
+}
+
+function toggleTime(type) {
+    const list = document.getElementById(
+        type === "in" ? "timeListIn" : "timeListOut"
+    );
+    const btn = list.previousElementSibling;
+    const inputId = type === "in" ? "checkInTime" : "checkOutTime";
+
+    buildDropdown(list.id, inputId, btn);
+    list.classList.toggle("hidden");
+}
+
+// Close dropdown on outside click
+document.addEventListener("click", e => {
+    if (!e.target.closest(".time-dropdown")) {
+        document.querySelectorAll(".time-list")
+            .forEach(l => l.classList.add("hidden"));
+    }
+});
+</script>
+
+
+<script>
+/* =========================
+   STEP-1 VALIDATION
+   ========================= */
+function validateStep1() {
+    const checkInDate = document.querySelector("input[name='check_in']").value;
+    const checkOutDate = document.querySelector("input[name='check_out']").value;
+    const checkInTime = document.querySelector("#checkInTime").value;
+    const checkOutTime = document.querySelector("#checkOutTime").value;
+
+    if (!checkInDate) {
+        alert("Please select check-in date");
+        return;
+    }
+
+    if (!checkOutDate) {
+        alert("Please select check-out date");
+        return;
+    }
+
+    if (!checkInTime) {
+        alert("Please select check-in time");
+        return;
+    }
+
+    if (!checkOutTime) {
+        alert("Please select check-out time");
+        return;
+    }
+
+    // ✅ SAME-DAY TIME VALIDATION
+    if (checkInDate === checkOutDate) {
+        const inHour = parseInt(checkInTime.split(":")[0]);
+        const outHour = parseInt(checkOutTime.split(":")[0]);
+
+        if (outHour <= inHour) {
+            alert("Check-out time must be after check-in time");
+            return;
+        }
+    }
+
+    // ✅ MOVE TO STEP-2
+    toggleCollapse("step2");
+}
+
+/* =========================
+   STEP-2 VALIDATION
+   ========================= */
+function validateStep2() {
+    const name = document.querySelector("input[name='guest_name']").value.trim();
+    const phone = document.querySelector("input[name='guest_phone']").value.trim();
+    const email = document.querySelector("input[name='guest_email']").value.trim();
+
+    if (!name) {
+        alert("Please enter full name");
+        return;
+    }
+
+    if (!phone || phone.length < 10) {
+        alert("Please enter valid phone number");
+        return;
+    }
+
+    if (!email || !email.includes("@")) {
+        alert("Please enter valid email address");
+        return;
+    }
+
+    // ✅ STEP-2 COMPLETED → OPEN STEP-3
+    toggleCollapse("step3");
+}
+
+/* =========================
+   INITIAL STATE
+   ========================= */
+document.addEventListener("DOMContentLoaded", function () {
+    toggleCollapse("step1"); // open only step-1 on load
+});
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ✅ DECLARE ONCE (FIX)
+        let couponDiscount = 0;
+        let couponTimer = null;
+        // Form inputs
+        let checkIn = document.querySelector("input[name='check_in']");
+        let checkOut = document.querySelector("input[name='check_out']");
+        let guestCount = document.querySelector("input[name='guest_count']");
+        let extraGuest = document.querySelector("input[name='extra_guest_count']");
+        let radios = document.querySelectorAll("input[name='payment_method']");
+
+        let couponInput = document.querySelector("input[name='coupon_code']");
+
+
+        // Payment display elements
+        const paymentSummary = document.getElementById("paymentSummary");
+        const depositAmount = document.getElementById("depositAmount");
+        const fullAmount = document.getElementById("fullAmount");
+        const remainingAmount = document.getElementById("remainingAmount");
+        const razorpayBox = document.getElementById("razorpayBox");
+
+        // Backend pricing values
+        const weekday = parseFloat(`{{ pricing.weekday_price }}`);
+        const weekend = parseFloat(`{{ pricing.weekend_price }}`);
+        const extraGuestPrice = parseFloat(`{{ extra_price }}`);
+
+        // Calculate Base Amount
+        function calculateTotal() {
+            const inDate = new Date(checkIn.value);
+            const outDate = new Date(checkOut.value);
+
+            if (!checkIn.value || !checkOut.value || outDate <= inDate) {
+                return 0;
+            }
+
+            let total = 0;
+            let date = new Date(inDate);
+
+            // Loop through each night
+            while (date < outDate) {
+                let day = date.getDay();
+                if (day === 5 || day === 6) {
+                    total += weekend;
+                } else {
+                    total += weekday;
+                }
+                date.setDate(date.getDate() + 1);
+            }
+
+            // EXTRA GUEST COUNT logic (user entered)
+            let extra = parseInt(extraGuest.value || 0);
+
+            total += extra * extraGuestPrice;
+
+            // NO TAX (you set 0.00)
+            total += total * 0.00;
+
+            return Math.round(total);
+        }
+
+        // Update Payment Method Section
+        function updatePayment() {
+            let total = calculateTotal();
+
+
+            // apply coupon discount LIVE
+            if (couponDiscount > 0) {
+                total = total - couponDiscount;
+                if (total < 0) total = 0;
+            }
+
+
+            if (total <= 0) {
+                paymentSummary.classList.add("hidden");
+                return;
+            }
 
             paymentSummary.classList.remove("hidden");
 
-            if (this.value === "farmhouse") {
+            // Calculate 30%
+            let deposit = Math.round(total * 0.30);
+            let remaining = total - deposit;
+
+            document.getElementById("depositValue").innerText = deposit;
+            document.getElementById("fullValue").innerText = total;
+            document.getElementById("remainingValue").innerText = remaining;
+
+            let selected = document.querySelector("input[name='payment_method']:checked").value;
+
+            if (selected === "farmhouse") {
                 depositAmount.classList.add("hidden");
                 fullAmount.classList.add("hidden");
                 remainingAmount.classList.add("hidden");
                 razorpayBox.classList.add("hidden");
             }
 
-            if (this.value === "partial_razorpay") {
+            if (selected === "partial_razorpay") {
                 depositAmount.classList.remove("hidden");
                 remainingAmount.classList.remove("hidden");
                 fullAmount.classList.add("hidden");
                 razorpayBox.classList.remove("hidden");
             }
 
-            if (this.value === "full_razorpay") {
+            if (selected === "full_razorpay") {
                 fullAmount.classList.remove("hidden");
                 depositAmount.classList.add("hidden");
                 remainingAmount.classList.add("hidden");
                 razorpayBox.classList.remove("hidden");
             }
+        }
+
+        /**************************************
+            LIVE COUPON VALIDATION (AJAX)
+           **************************************/
+        couponInput.addEventListener("change", function () {
+
+            let code = couponInput.value.trim();
+
+            if (code === "") {
+                couponDiscount = 0;
+                updatePayment();
+                return;
+            }
+
+            fetch(`/validate-coupon/?code=${code}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        couponDiscount = parseFloat(data.discount);
+                        alert(`Coupon Applied! Discount: ₹${couponDiscount}`);
+                    } else {
+                        couponDiscount = 0;
+                        alert("Invalid coupon code!");
+                    }
+                    updatePayment();
+                })
+                .catch(() => {
+                    couponDiscount = 0;
+                    updatePayment();
+                });
         });
+
+
+
+        // ===============================
+        // DEBOUNCED COUPON CHECK
+        // ===============================
+
+
+
+
+
+
+
+
+
+        // ===============================
+        // DEBOUNCED COUPON CHECK
+        // ===============================
+
+        // Attach event listeners
+        radios.forEach(r => r.addEventListener("change", updatePayment));
+        checkIn.addEventListener("change", updatePayment);
+        checkOut.addEventListener("change", updatePayment);
+        guestCount.addEventListener("input", updatePayment);
+        extraGuest.addEventListener("input", updatePayment);
+
+        // moved validation here
+        guestCount.addEventListener("input", function () {
+            if (parseInt(this.value) > 15) {
+                alert("Guest count cannot exceed 15.");
+                this.value = 15;
+            }
+        });
+
+        extraGuest.addEventListener("input", function () {
+            if (parseInt(this.value) > 5) {
+                alert("Extra guest count cannot exceed 5.");
+                this.value = 5;
+            }
+        });
+
+        updatePayment();
+
     });
 
-});
 </script>
- {% endcomment %}
 
 
+
+{% comment %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+</script>
+
+<script>
+    document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.redirect) {
+                    window.location.href = data.url;
+                    return;
+                }
+
+                if (data.razorpay) {
+                    openRazorpay(data.amount);
+                }
+            });
+    });
+
+
+    function openRazorpay(amount) {
+
+        fetch("/create-razorpay-order/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `amount=${amount}`
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Vivaan Farmhouse",
+                    order_id: data.order_id,
+
+                    handler: function (response) {
+
+                        // ❌ If payment cancelled
+                        if (!response.razorpay_payment_id) {
+                            alert("Payment cancelled or failed");
+                            return;
+                        }
+
+                        // ✅ STORE ORDER ID FOR POLLING
+                        localStorage.setItem(
+                            "rzp_order_id",
+                            response.razorpay_order_id
+                        );
+
+                        // 🚀 REDIRECT IMMEDIATELY (FAST UX)
+                        window.location.href = "/payment-processing/";
+
+                        // 🔁 VERIFY IN BACKGROUND (DO NOT WAIT)
+                        fetch("/verify-payment/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body:
+                                `razorpay_payment_id=${response.razorpay_payment_id}` +
+                                `&razorpay_order_id=${response.razorpay_order_id}` +
+                                `&razorpay_signature=${response.razorpay_signature}`
+                        });
+                    },
+
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled");
+                        }
+                    },
+
+                    theme: {
+                        color: "#047857"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(err => {
+                console.error("Razorpay error:", err);
+                alert("Payment initialization failed");
+            });
+    }
+
+
+</script>
 
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Booked dates from backend
-        const bookedDatesElement = document.getElementById('booked-dates-data');
-        const bookedDates = bookedDatesElement ? JSON.parse(bookedDatesElement.textContent) : [];
 
-        const dateNotification = document.getElementById('dateNotification');
-        const dateNotificationText = document.getElementById('dateNotificationText');
+        if (typeof flatpickr === "undefined") {
+            console.error("❌ Flatpickr not loaded");
+            return;
+        }
 
-        function showNotification(message) {
-            if (dateNotification && dateNotificationText) {
-                dateNotificationText.textContent = message;
-                dateNotification.classList.remove('hidden');
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function decorateDay(dayElem) {
+            const dateStr = formatDate(dayElem.dateObj);
+
+            if (bookedDates.includes(dateStr)) {
+                dayElem.classList.add("booked-date");
+                dayElem.title = "Already booked";
             }
-            // Temporarily using alert as fallback/emphasis
-            // alert(message); 
+
+            if (blockedDates.includes(dateStr)) {
+                dayElem.classList.add("blocked-date");
+                dayElem.title = "Blocked by admin";
+            }
+
+            
         }
 
-        function isDateBooked(dateString) {
-            return bookedDates.includes(dateString);
-        }
+        let checkInPicker;
+        let checkOutPicker;
 
-        // Initialize Check-in Picker
-        const checkInPicker = flatpickr("input[name='check_in']", {
+        // ✅ CHECK-IN
+        checkInPicker = flatpickr("input[name='check_in']", {
             dateFormat: "Y-m-d",
             minDate: "today",
-            disable: bookedDates,
-            onChange: function (selectedDates, dateStr, instance) {
-                // Update Check-out minDate
-                if (selectedDates[0]) {
-                    const nextDay = new Date(selectedDates[0]);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    checkOutPicker.set('minDate', nextDay);
-                }
+            disable: disabledDates,
+            allowInput: true,
 
-                // Clear invalid check-out
-                const checkOutInput = document.querySelector("input[name='check_out']");
-                if (checkOutInput.value && checkOutInput.value <= dateStr) {
-                    checkOutInput.value = '';
-                }
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+
+                checkOutPicker.set("minDate", nextDay);
             }
         });
 
-        // Initialize Check-out Picker
-        const checkOutPicker = flatpickr("input[name='check_out']", {
+        // ✅ CHECK-OUT
+        checkOutPicker = flatpickr("input[name='check_out']", {
             dateFormat: "Y-m-d",
             minDate: "today",
-            disable: bookedDates,
-            onChange: function (selectedDates, dateStr, instance) {
-                const checkInInput = document.querySelector("input[name='check_in']");
-                const checkInDateStr = checkInInput.value;
+            disable: disabledDates,
+            allowInput: true,
 
-                if (!checkInDateStr) {
-                    showNotification('⚠️ Please select check-in date first.');
-                    instance.clear();
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (!selectedDates.length) return;
+
+                const checkInDate = checkInPicker.selectedDates[0];
+
+                if (!checkInDate) {
+                    alert("⚠️ Please select check-in date first");
+                    checkOutPicker.clear();
                     return;
                 }
 
-                // Range validation: ensure no booked dates in between
-                let currentDate = new Date(checkInDateStr);
-                const endDate = new Date(dateStr);
+                let current = new Date(checkInDate);
+                const end = new Date(selectedDates[0]);
 
-                while (currentDate < endDate) {
-                    const dStr = currentDate.toISOString().split('T')[0];
-                    if (isDateBooked(dStr)) {
-                        showNotification('⚠️ RANGE INCLUDES BOOKED DATES! Please select a valid continuous range.');
-                        instance.clear();
-                        break;
+                while (current <= end) {
+                    const dStr = formatDate(current);
+
+                    if (blockedDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes dates blocked by admin");
+                        checkOutPicker.clear();
+                        return;
                     }
-                    currentDate.setDate(currentDate.getDate() + 1);
+
+                    current.setDate(current.getDate() + 1);
+                }
+
+            }
+        });
+
+        console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {% comment %} div.onclick = () => {
+            document.getElementById(inputId).value = slot;
+            button.innerText = slot;
+            list.classList.add("hidden");
+        }; {% endcomment %}
+
+
+
+    {% comment %}
+    function openRazorpay(bookingId, amount) {
+
+        fetch("/create-razorpay-order/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `booking_id=${bookingId}&amount=${amount}`
+        })
+            .then(res => res.json())
+            .then(data => {
+
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Vivaan Farmhouse",
+                    order_id: data.order_id,
+
+                    handler: function (response) {
+                        console.log("Razorpay response:", response);
+
+                        if (!response.razorpay_payment_id) {
+                            alert("Payment cancelled or failed");
+                            return;
+                        }
+
+                        fetch("/verify-payment/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body:
+                                `razorpay_payment_id=${response.razorpay_payment_id}` +
+                                `&razorpay_order_id=${response.razorpay_order_id}` +
+                                `&razorpay_signature=${response.razorpay_signature}`
+                        })
+                            .then(res => res.json())
+                            .then(result => {
+                                console.log("Verify result:", result);
+
+                                if (result.status === "success") {
+                                    window.location.href = `/booking/${result.booking_id}/`;
+                                } else {
+                                    alert("Payment verification failed");
+                                }
+                            });
+                    },
+
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled");
+                        }
+                    },
+
+                    prefill: {
+                        name: data.name,
+                        email: data.email,
+                        contact: data.contact
+                    },
+
+                    theme: {
+                        color: "#047857"
+                    }
+                }; // ✅ VERY IMPORTANT — object closed
+
+                const rzp = new Razorpay(options); // ✅ SAFE NOW
+                rzp.open();
+            })
+            .catch(err => {
+                console.error("Razorpay error:", err);
+                alert("Payment initialization failed");
+            });
+    } {% endcomment %}
+
+
+
+{% comment %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        if (typeof flatpickr === "undefined") {
+            console.error("❌ Flatpickr not loaded");
+            return;
+        }
+
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            return date.toISOString().split("T")[0];
+        }
+
+        // CHECK-IN
+        const checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+            onChange: function (selectedDates) {
+                if (selectedDates.length) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutPicker.set("minDate", nextDay);
                 }
             }
         });
 
-        // Initialize Time Pickers
-        flatpickr("input[name='check_in_time'], input[name='check_out_time']", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: false
+        // CHECK-OUT
+        const checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+            onChange: function (selectedDates) {
+                const checkInVal = document.querySelector("input[name='check_in']").value;
+                if (!checkInVal) {
+                    alert("⚠️ Please select check-in date first");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                let current = new Date(checkInVal);
+                const end = new Date(selectedDates[0]);
+
+                while (current < end) {
+                    const dStr = formatDate(current);
+                    if (disabledDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes blocked/booked dates");
+                        checkOutPicker.clear();
+                        return;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+            }
         });
 
-        console.log('Flatpickr initialized. Booked dates:', bookedDates.length);
+        console.log("✅ Flatpickr initialized successfully");
     });
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const bookedDates = JSON.parse(
+            document.getElementById("booked-dates-data")?.textContent || "[]"
+        );
+
+        const blockedDates = JSON.parse(
+            document.getElementById("blocked-dates-data")?.textContent || "[]"
+        );
+
+        const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+        function formatDate(date) {
+            return date.toISOString().split("T")[0];
+        }
+
+        function decorateDay(dayElem) {
+            const dateStr = formatDate(dayElem.dateObj);
+
+            if (bookedDates.includes(dateStr)) {
+                dayElem.classList.add("booked-date");
+                dayElem.title = "Already booked";
+            }
+
+            if (blockedDates.includes(dateStr)) {
+                dayElem.classList.add("blocked-date");
+                dayElem.title = "Blocked by admin";
+            }
+        }
+
+        // CHECK-IN
+        const checkInPicker = flatpickr("input[name='check_in']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                if (selectedDates.length) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutPicker.set("minDate", nextDay);
+                }
+            }
+        });
+
+        // CHECK-OUT
+        const checkOutPicker = flatpickr("input[name='check_out']", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disable: disabledDates,
+            allowInput: true,
+
+            onDayCreate(_, __, ___, dayElem) {
+                decorateDay(dayElem);
+            },
+
+            onChange(selectedDates) {
+                const checkInVal = document.querySelector("input[name='check_in']").value;
+                if (!checkInVal) {
+                    alert("⚠️ Select check-in date first");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                let current = new Date(checkInVal);
+                const end = new Date(selectedDates[0]);
+
+                while (current < end) {
+                    const dStr = formatDate(current);
+                    if (disabledDates.includes(dStr)) {
+                        alert("⚠️ Selected range includes unavailable dates");
+                        checkOutPicker.clear();
+                        return;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+        });
+
+    });
+</script> {% endcomment %}
 {% endblock %}
 {% endblock %}
+
+
+
+
+
+
 
 
 {% comment %} {% extends 'resort/base.html' %}
@@ -962,7 +1615,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             {{ form.special_requests }}
                         </div>
 
-                       
+
                         <div id="dateNotification"
                             class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
                             <div class="flex items-center">

@@ -1,0 +1,45 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Blocked Dates{% endblock %}
+{% block header %}Blocked Dates{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Blocked Periods</h2>
+        <a href="{% url 'vivaan_admin:blocked_date_create' %}" class="btn-action btn-view">
+            + Block Date
+        </a>
+    </div>
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for date in blocked_dates %}
+            <tr>
+                <td>{{ date.start_date }}</td>
+                <td>{{ date.end_date }}</td>
+                <td>{{ date.reason|default:"—" }}</td>
+                <td>
+                    <a href="{% url 'vivaan_admin:blocked_date_edit' date.id %}" class="btn-action btn-view">Edit</a>
+                    <a href="{% url 'vivaan_admin:blocked_date_delete' date.id %}"
+                       class="btn-action btn-delete"
+                       onclick="return confirm('Unblock this date range?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No dates blocked.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

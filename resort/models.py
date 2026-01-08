@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from ckeditor.fields import RichTextField
 from decimal import Decimal
+from django.core.exceptions import ValidationError
 
 class MainBanner(models.Model):
     """Main banner for the resort"""
@@ -50,14 +51,14 @@ class RoomCategory(models.Model):
         return self.name
 
 
-class Room(models.Model):
-    """Individual rooms in the resort"""
-    category = models.ForeignKey(RoomCategory, on_delete=models.CASCADE, related_name='rooms')
-    room_number = models.CharField(max_length=10, unique=True)
-    is_available = models.BooleanField(default=True)
+# class Room(models.Model):
+#     """Individual rooms in the resort"""
+#     category = models.ForeignKey(RoomCategory, on_delete=models.CASCADE, related_name='rooms')
+#     room_number = models.CharField(max_length=10, unique=True)
+#     is_available = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.category.name} - Room {self.room_number}"
+#     def __str__(self):
+#         return f"{self.category.name} - Room {self.room_number}"
 
 
 class Amenity(models.Model):
@@ -67,7 +68,7 @@ class Amenity(models.Model):
     description = models.TextField(blank=True)
     is_featured = models.BooleanField(default=False)
     amenity_image = models.ImageField(upload_to='amenities/', null=True, blank=True)
-
+    slot_position = models.IntegerField(null=True, blank=True)
     class Meta:
         verbose_name_plural = 'Amenities'
         ordering = ['name']
@@ -141,12 +142,13 @@ class Booking(models.Model):
 
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('partial','partial'),
         ('paid', 'Paid'),
         ('failed', 'Failed'),
     ]
 
     booking_id = models.CharField(max_length=20, unique=True, editable=False)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings', null=True, blank=True)
+    # room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings', null=True, blank=True)
 
     guest_name = models.CharField(max_length=200)
     guest_email = models.EmailField()
@@ -176,19 +178,26 @@ class Booking(models.Model):
     )
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
     payment_id = models.CharField(max_length=100, blank=True, null=True)    
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
 
+    # class Meta:
+    #     ordering = ['-created_at']
     class Meta:
         ordering = ['-created_at']
-
+        constraints = [
+            models.UniqueConstraint(
+                fields=["guest_email", "check_in", "check_out", "payment_method"],
+                name="unique_booking_guest_dates"
+            )
+        ]
     def save(self, *args, **kwargs):
         if not self.booking_id:
             import random
             import string
-            self.booking_id = 'SKR' + ''.join(random.choices(string.digits, k=8))
+            self.booking_id = 'VFH' + ''.join(random.choices(string.digits, k=8))
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -202,6 +211,28 @@ class Booking(models.Model):
         return (self.sub_total or 0) - (self.disc_price or 0)
 
 
+# models.py
+class BlockedDate(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def clean(self):
+        if self.start_date > self.end_date:
+            raise ValidationError("End date must be after start date.")
+
+        overlaps = BlockedDate.objects.filter(
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exclude(pk=self.pk)
+
+        if overlaps.exists():
+            raise ValidationError("These dates overlap with an existing blocked range.")
+
+    def __str__(self):
+        return f"Blocked: {self.start_date} → {self.end_date}"
+
+
 class Testimonial(models.Model):
     """Guest testimonials"""
     guest_name = models.CharField(max_length=200)
@@ -211,6 +242,7 @@ class Testimonial(models.Model):
         default=5
     )
     comment = models.TextField()
+    slot_position = models.IntegerField(null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -233,6 +265,7 @@ class Gallery(models.Model):
         ('events', 'Events'),
     ], default='views')
     is_featured = models.BooleanField(default=False)
+    slot_position = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

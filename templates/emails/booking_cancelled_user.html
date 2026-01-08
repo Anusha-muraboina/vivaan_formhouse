@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Booking Cancelled ❌</h2>
+
+    <p>Your booking {{ booking.booking_id }} has been cancelled.</p>
+
+    {% if booking.cancellation_reason %}
+        <p>Reason: {{ booking.cancellation_reason }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,1153 @@
+
+
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Dashboard | Vivaan Admin{% endblock %}
+{% block header %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-info h3 {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-info p {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+    }
+
+    .stat-subtext {
+        font-size: 0.8rem;
+        color: #10b981;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .bg-blue-light {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .bg-green-light {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .bg-yellow-light {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .bg-purple-light {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .charts-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        height: 400px;
+    }
+
+    @media (max-width: 1024px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Stats Cards -->
+{% comment %} <div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Monthly Revenue</h3>
+            <p>₹{{ monthly_revenue }}</p>
+            <div class="stat-subtext"><i class="fa-solid fa-arrow-trend-up"></i> This Month</div>
+        </div>
+        <div class="stat-icon bg-green-light"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Bookings</h3>
+            <p>{{ weekly_bookings }}</p>
+            <div class="stat-subtext">Last 7 Days</div>
+        </div>
+        <div class="stat-icon bg-blue-light"><i class="fa-solid fa-calendar-week"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Actions</h3>
+            <p>{{ pending_bookings }}</p>
+            <div class="stat-subtext" style="color: #f59e0b;">Requires Attention</div>
+        </div>
+        <div class="stat-icon bg-yellow-light"><i class="fa-solid fa-bell"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Guests</h3>
+            <p>{{ total_guests }}</p>
+            <div class="stat-subtext">All Time</div>
+        </div>
+        <div class="stat-icon bg-purple-light"><i class="fa-solid fa-users"></i></div>
+    </div>
+</div> {% endcomment %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Overall Revenue</h3>
+            <p>₹{{ overall_revenue }}</p>
+            <div class="stat-subtext">Overall Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Monthly Revenue</h3>
+            <p>₹{{ monthly_revenue }}</p>
+            <div class="stat-subtext">Monthly Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Revenue</h3>
+            <p>₹{{ weekly_revenue }}</p>
+            <div class="stat-subtext">Weekly Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Today Revenue</h3>
+            <p>₹{{ today_revenue }}</p>
+            <div class="stat-subtext">Today Revenue</div>
+        </div>
+        <div class="stat-icon bg-green-light">₹</div>
+    </div>
+
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Weekly Bookings</h3>
+            <p>{{ weekly_bookings }}</p>
+            <div class="stat-subtext">Last 7 Days</div>
+        </div>
+        <div class="stat-icon bg-blue-light">📅</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Bookings</h3>
+            <p>{{ pending_bookings }}</p>
+            <div class="stat-subtext">Needs Attention</div>
+        </div>
+        <div class="stat-icon bg-yellow-light">⏳</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Guests</h3>
+            <p>{{ total_guests }}</p>
+            <div class="stat-subtext">All Time</div>
+        </div>
+        <div class="stat-icon bg-purple-light">👥</div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+{% comment %} <div class="charts-row">
+    <div class="chart-container">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Booking Trends (Last 6 Months)</h2>
+        <canvas id="bookingsChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Booking Status Distribution</h2>
+        <canvas id="statusChart"></canvas>
+    </div>
+</div> {% endcomment %}
+
+
+<div class="charts-row">
+    <div class="chart-container">
+        <h2>Booking Trends (Last 6 Months)</h2>
+        <canvas id="bookingsChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>Booking Status</h2>
+        <canvas id="statusChart"></canvas>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Bookings</h2>
+        <a href="{% url 'vivaan_admin:booking_list' %}" class="btn-action btn-view">Maange Bookings</a>
+    </div>
+    <div class="table-responsive">
+    <div class="table-container">
+      <table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Guest</th>
+            <th>Check-in</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in recent_bookings %}
+        <tr>
+            <td>#{{ booking.booking_id }}</td>
+            <td>{{ booking.guest_name }}</td>
+            <td>{{ booking.check_in|date:"M d, Y" }}</td>
+            <td>{{ booking.status }}</td>
+            <td>
+                <a href="{% url 'vivaan_admin:booking_edit' booking.id %}">
+                    Edit
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No bookings yet</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    </div>
+</div>
+</div>
+{% comment %} 
+<script>
+const bookingsCtx = document.getElementById("bookingsChart").getContext("2d");
+new Chart(bookingsCtx, {
+    type: "line",
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: "Bookings",
+            data: {{ chart_data|safe }},
+            borderColor: "#8B0000",
+            backgroundColor: "rgba(139,0,0,0.1)",
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+const statusCtx = document.getElementById("statusChart").getContext("2d");
+new Chart(statusCtx, {
+    type: "doughnut",
+    data: {
+        labels: ["Confirmed", "Pending", "Cancelled", "Completed"],
+        datasets: [{
+            data: {{ status_data|safe }},
+            backgroundColor: ["#10b981", "#f59e0b", "#ef4444", "#3b82f6"]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script> {% endcomment %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ---------- BOOKINGS LINE CHART ----------
+    const bookingsCanvas = document.getElementById("bookingsChart");
+    if (bookingsCanvas) {
+        const bookingsCtx = bookingsCanvas.getContext("2d");
+
+        new Chart(bookingsCtx, {
+            type: "line",
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: "Bookings",
+                    data: {{ chart_data|safe }},
+                    borderColor: "#8B0000",
+                    backgroundColor: "rgba(139,0,0,0.15)",
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // ---------- STATUS DOUGHNUT CHART ----------
+    const statusCanvas = document.getElementById("statusChart");
+    if (statusCanvas) {
+        const statusCtx = statusCanvas.getContext("2d");
+
+        new Chart(statusCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["Confirmed", "Pending", "Cancelled", "Completed"],
+                datasets: [{
+                    data: {{ status_data|safe }},
+                    backgroundColor: [
+                        "#10b981",
+                        "#f59e0b",
+                        "#ef4444",
+                        "#3b82f6"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+});
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "adminpanel/base.html" %}
+{% block content %}
+
+<!-- Main Content Area -->
+          
+                <div class="space-y-6 animate-fade-in">
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- Stat Card 1 -->
+                        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500 font-medium">Total Bookings</p>
+                                    <p class="text-3xl font-display font-bold text-gray-900">156</p>
+                                    <p class="text-sm font-medium text-resort-forest">↑ 12% from last month</p>
+                                </div>
+                                <div class="p-3 rounded-xl gradient-primary">
+                                    <i data-lucide="calendar-days" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stat Card 2 -->
+                        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500 font-medium">Active Guests</p>
+                                    <p class="text-3xl font-display font-bold text-gray-900">24</p>
+                                    <p class="text-sm text-gray-500">Currently staying</p>
+                                </div>
+                                <div class="p-3 rounded-xl gradient-accent">
+                                    <i data-lucide="users" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stat Card 3 -->
+                        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500 font-medium">Revenue (Month)</p>
+                                    <p class="text-3xl font-display font-bold text-gray-900">₹4,52,000</p>
+                                    <p class="text-sm font-medium text-resort-forest">↑ 8% from last month</p>
+                                </div>
+                                <div class="p-3 rounded-xl gradient-gold">
+                                    <i data-lucide="indian-rupee" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stat Card 4 -->
+                        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500 font-medium">Occupancy Rate</p>
+                                    <p class="text-3xl font-display font-bold text-gray-900">78%</p>
+                                    <p class="text-sm font-medium text-resort-forest">↑ 5% from last month</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-gray-100">
+                                    <i data-lucide="trending-up" class="w-6 h-6 text-gray-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions & Chart Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Chart Placeholder -->
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+                            <div class="mb-6">
+                                <h3 class="font-display text-lg font-semibold text-gray-900">Occupancy & Revenue</h3>
+                                <p class="text-sm text-gray-500">Last 7 days performance</p>
+                            </div>
+                            <div class="h-64 flex items-end justify-between gap-4 px-4">
+                                <!-- Simple bar chart -->
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 65%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 65%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Mon</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 72%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 72%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Tue</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 80%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 80%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Wed</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 85%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 85%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Thu</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 95%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 95%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Fri</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 100%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 100%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Sat</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-resort-forest/20 rounded-t-lg relative" style="height: 90%">
+                                        <div class="absolute bottom-0 w-full bg-resort-forest rounded-t-lg" style="height: 90%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Sun</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center gap-6 mt-6">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-resort-forest"></div>
+                                    <span class="text-sm text-gray-500">Occupancy %</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                            <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="h-auto py-4 flex flex-col items-center gap-2 rounded-lg gradient-primary text-white font-medium hover:opacity-90 transition-opacity">
+                                    <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+                                    <span class="text-sm">New Booking</span>
+                                </button>
+                                <button class="h-auto py-4 flex flex-col items-center gap-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                    <span class="text-sm">Add Room</span>
+                                </button>
+                                <button class="h-auto py-4 flex flex-col items-center gap-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="image-plus" class="w-5 h-5"></i>
+                                    <span class="text-sm">Add Gallery</span>
+                                </button>
+                                <button class="h-auto py-4 flex flex-col items-center gap-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="tag" class="w-5 h-5"></i>
+                                    <span class="text-sm">Create Offer</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Bookings Table -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-display text-xl font-semibold text-gray-900">Recent Bookings</h2>
+                            <a href="#" class="text-sm text-resort-forest hover:underline">View All</a>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Booking ID</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Guest</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Check In/Out</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Guests</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Amount</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Status</th>
+                                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-900">Payment</th>
+                                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-900">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="table-row border-b border-gray-100">
+                                            <td class="py-4 px-6">
+                                                <span class="font-mono text-sm font-medium text-resort-forest">SKR12345678</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-medium text-gray-900">Rahul Sharma</p>
+                                                    <p class="text-sm text-gray-500">rahul@example.com</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="text-sm">
+                                                    <p class="text-gray-900">2024-12-26</p>
+                                                    <p class="text-gray-500">to 2024-12-28</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-gray-900">4</td>
+                                            <td class="py-4 px-6">
+                                                <span class="font-semibold text-gray-900">₹35,000</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-confirmed">Confirmed</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-paid">Paid</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="more-horizontal" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-row border-b border-gray-100">
+                                            <td class="py-4 px-6">
+                                                <span class="font-mono text-sm font-medium text-resort-forest">SKR12345679</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-medium text-gray-900">Priya Patel</p>
+                                                    <p class="text-sm text-gray-500">priya@example.com</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="text-sm">
+                                                    <p class="text-gray-900">2024-12-27</p>
+                                                    <p class="text-gray-500">to 2024-12-30</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-gray-900">6</td>
+                                            <td class="py-4 px-6">
+                                                <span class="font-semibold text-gray-900">₹52,000</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-pending">Pending</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-partial">Partial</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="more-horizontal" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-row border-b border-gray-100">
+                                            <td class="py-4 px-6">
+                                                <span class="font-mono text-sm font-medium text-resort-forest">SKR12345680</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-medium text-gray-900">Amit Kumar</p>
+                                                    <p class="text-sm text-gray-500">amit@example.com</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="text-sm">
+                                                    <p class="text-gray-900">2024-12-25</p>
+                                                    <p class="text-gray-500">to 2024-12-26</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-gray-900">2</td>
+                                            <td class="py-4 px-6">
+                                                <span class="font-semibold text-gray-900">₹18,000</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-completed">Completed</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-paid">Paid</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="more-horizontal" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-row">
+                                            <td class="py-4 px-6">
+                                                <span class="font-mono text-sm font-medium text-resort-forest">SKR12345681</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-medium text-gray-900">Sneha Gupta</p>
+                                                    <p class="text-sm text-gray-500">sneha@example.com</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="text-sm">
+                                                    <p class="text-gray-900">2024-12-29</p>
+                                                    <p class="text-gray-500">to 2025-01-02</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6 text-gray-900">8</td>
+                                            <td class="py-4 px-6">
+                                                <span class="font-semibold text-gray-900">₹75,000</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-confirmed">Confirmed</span>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <span class="badge badge-pending">Pending</span>
+                                            </td>
+                                            <td class="py-4 px-6 text-right">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="more-horizontal" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Room Categories & Messages -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Room Categories -->
+                        <div class="lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="font-display text-xl font-semibold text-gray-900">Room Categories</h2>
+                                <a href="#" class="text-sm text-resort-forest hover:underline">Manage Rooms</a>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                
+                                <!-- Room Card 1 -->
+                                <div class="room-card bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                    <div class="relative h-40 bg-gray-100 overflow-hidden">
+                                        <div class="room-image w-full h-full bg-gradient-to-br from-resort-sage/30 to-resort-forest/20 flex items-center justify-center">
+                                            <i data-lucide="bed" class="w-12 h-12 text-gray-400"></i>
+                                        </div>
+                                        <div class="absolute top-3 right-3">
+                                            <span class="badge bg-blue-100 text-blue-700">Valley View</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-5 space-y-4">
+                                        <div>
+                                            <h3 class="font-display text-lg font-semibold text-gray-900">Deluxe Suite</h3>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">Spacious suite with panoramic valley views, king-size bed, and private balcony.</p>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="square" class="w-3 h-3"></i>
+                                                <span>450 sqft</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>4 guests</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="bed" class="w-3 h-3"></i>
+                                                <span>3/4</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="text-xs px-2 py-1 rounded-full bg-resort-sage/30 text-resort-forest">Balcony</span>
+                                            <span class="text-xs px-2 py-1 rounded-full bg-resort-sage/30 text-resort-forest">Bathtub</span>
+                                        </div>
+                                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                            <div>
+                                                <span class="text-xl font-display font-bold text-gray-900">₹8,500</span>
+                                                <span class="text-sm text-gray-500">/night</span>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="edit" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Room Card 2 -->
+                                <div class="room-card bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                    <div class="relative h-40 bg-gray-100 overflow-hidden">
+                                        <div class="room-image w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                                            <i data-lucide="bed" class="w-12 h-12 text-gray-400"></i>
+                                        </div>
+                                        <div class="absolute top-3 right-3">
+                                            <span class="badge bg-emerald-100 text-emerald-700">Garden View</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-5 space-y-4">
+                                        <div>
+                                            <h3 class="font-display text-lg font-semibold text-gray-900">Garden Room</h3>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">Cozy room overlooking our beautiful garden with modern amenities.</p>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="square" class="w-3 h-3"></i>
+                                                <span>320 sqft</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>2 guests</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="bed" class="w-3 h-3"></i>
+                                                <span>2/3</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                            <div>
+                                                <span class="text-xl font-display font-bold text-gray-900">₹5,500</span>
+                                                <span class="text-sm text-gray-500">/night</span>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="edit" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Room Card 3 -->
+                                <div class="room-card bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                    <div class="relative h-40 bg-gray-100 overflow-hidden">
+                                        <div class="room-image w-full h-full bg-gradient-to-br from-cyan-100 to-cyan-200 flex items-center justify-center">
+                                            <i data-lucide="bed" class="w-12 h-12 text-gray-400"></i>
+                                        </div>
+                                        <div class="absolute top-3 right-3">
+                                            <span class="badge bg-cyan-100 text-cyan-700">Pool View</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-5 space-y-4">
+                                        <div>
+                                            <h3 class="font-display text-lg font-semibold text-gray-900">Pool Villa</h3>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">Private villa with direct pool access, perfect for families.</p>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="square" class="w-3 h-3"></i>
+                                                <span>600 sqft</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>6 guests</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                <i data-lucide="bed" class="w-3 h-3"></i>
+                                                <span>1/2</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="text-xs px-2 py-1 rounded-full bg-resort-sage/30 text-resort-forest">Balcony</span>
+                                            <span class="text-xs px-2 py-1 rounded-full bg-resort-sage/30 text-resort-forest">Bathtub</span>
+                                        </div>
+                                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                            <div>
+                                                <span class="text-xl font-display font-bold text-gray-900">₹12,000</span>
+                                                <span class="text-sm text-gray-500">/night</span>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="edit" class="w-4 h-4 text-gray-500"></i>
+                                                </button>
+                                                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Messages -->
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                                <h3 class="font-display text-lg font-semibold text-gray-900">Recent Messages</h3>
+                                <a href="#" class="text-sm text-resort-forest hover:underline">View All</a>
+                            </div>
+                            <div class="divide-y divide-gray-100">
+                                
+                                <!-- Message 1 - Unread -->
+                                <div class="p-5 hover:bg-gray-50/50 transition-colors cursor-pointer bg-resort-forest/5">
+                                    <div class="flex items-start gap-4">
+                                        <div class="p-2 rounded-lg bg-resort-forest/10">
+                                            <i data-lucide="mail" class="w-5 h-5 text-resort-forest"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h4 class="font-semibold text-gray-900 truncate">Vikram Singh</h4>
+                                                <div class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                                    2 hours ago
+                                                </div>
+                                            </div>
+                                            <p class="text-sm font-medium text-gray-700 mt-1">Inquiry about group booking</p>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">Hi, I would like to inquire about booking the entire villa for a corporate retreat...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Message 2 - Unread -->
+                                <div class="p-5 hover:bg-gray-50/50 transition-colors cursor-pointer bg-resort-forest/5">
+                                    <div class="flex items-start gap-4">
+                                        <div class="p-2 rounded-lg bg-resort-forest/10">
+                                            <i data-lucide="mail" class="w-5 h-5 text-resort-forest"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h4 class="font-semibold text-gray-900 truncate">Anita Desai</h4>
+                                                <div class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                                    5 hours ago
+                                                </div>
+                                            </div>
+                                            <p class="text-sm font-medium text-gray-700 mt-1">Special dietary requirements</p>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">We have some guests with specific dietary needs. Can you accommodate vegan options?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Message 3 - Read -->
+                                <div class="p-5 hover:bg-gray-50/50 transition-colors cursor-pointer">
+                                    <div class="flex items-start gap-4">
+                                        <div class="p-2 rounded-lg bg-gray-100">
+                                            <i data-lucide="mail-open" class="w-5 h-5 text-gray-500"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h4 class="font-medium text-gray-900 truncate">Rajesh Mehta</h4>
+                                                <div class="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                                    1 day ago
+                                                </div>
+                                            </div>
+                                            <p class="text-sm font-medium text-gray-600 mt-1">Feedback on recent stay</p>
+                                            <p class="text-sm text-gray-500 line-clamp-2 mt-1">Thank you for the wonderful hospitality. The staff was extremely helpful and...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+          
+
+            {% endblock %} {% endcomment %}
