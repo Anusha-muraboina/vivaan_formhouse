@@ -1,4 +1,4 @@
-# 🏨 STRAWBERRY KING RESORT - QUICK START GUIDE
+# 🏨 Vivaan Farmhouse - QUICK START GUIDE
 
 ## ✅ Project Successfully Set Up!
 
@@ -229,6 +229,6 @@ If you need help:
 
 ---
 
-**🎉 Enjoy your Strawberry King Resort booking system!**
+**🎉 Enjoy your Vivaan Farmhouse booking system!**
 
 Made with Django, Tailwind CSS, and ❤️

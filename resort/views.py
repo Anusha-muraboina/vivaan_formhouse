@@ -388,17 +388,27 @@ def room_detail(request, slug):
                     "url": reverse("booking_confirmation", args=[booking.booking_id])
                 })
 
+
+        if payment_method == "partial_razorpay":
+            pay_now = total * Decimal("0.30")
+        elif payment_method == "full_razorpay":
+            pay_now = total
+        else:
+            pay_now = Decimal("0.00")
+            
+            
         # ================= RAZORPAY =================
         request.session["pending_booking"] = {
             "data": request.POST.dict(),
             "base": str(base_amount),
             "discount": str(discount),
             "total": str(total),
+            "pay_now": str(pay_now),
         }
-
+        request.session.modified = True
         return JsonResponse({
             "razorpay": True,
-            "amount": float(total)
+            "amount": float(pay_now)
         })
 
     # ===== NORMAL PAGE LOAD =====
@@ -433,6 +443,52 @@ def create_razorpay_order(request):
         "amount": order["amount"]
     })
 
+# @csrf_exempt
+# def verify_razorpay_payment(request):
+#     try:
+#         razorpay_client.utility.verify_payment_signature({
+#             "razorpay_order_id": request.POST["razorpay_order_id"],
+#             "razorpay_payment_id": request.POST["razorpay_payment_id"],
+#             "razorpay_signature": request.POST["razorpay_signature"],
+#         })
+
+#         session = request.session.get("pending_booking")
+#         if not session:
+#             return JsonResponse({"status": "failed", "error": "Session expired"}, status=400)
+
+#         data = session["data"]
+
+#         booking = Booking.objects.create(
+#             guest_name=data["guest_name"],
+#             guest_email=data["guest_email"],
+#             guest_phone=data["guest_phone"],
+#             guest_count=data["guest_count"],
+#             extra_guest_count=data.get("extra_guest_count", 0),
+#             check_in=data["check_in"],
+#             check_out=data["check_out"],
+#             sub_total=session["base"],
+#             disc_price=session["discount"],
+#             total_amount=session["total"],
+#             remaining_amount=0,
+#             payment_method=data["payment_method"],
+#             payment_status="paid",
+#             status="confirmed",
+#             transaction_id=request.POST["razorpay_order_id"],
+#             payment_id=request.POST["razorpay_payment_id"],
+#         )
+
+#         send_email_async(booking)
+
+#         del request.session["pending_booking"]
+
+#         return JsonResponse({
+#             "status": "success",
+#             "booking_id": booking.booking_id
+#         })
+
+#     except Exception as e:
+#         return JsonResponse({"status": "failed", "error": str(e)}, status=400)
+
 @csrf_exempt
 def verify_razorpay_payment(request):
     try:
@@ -448,26 +504,44 @@ def verify_razorpay_payment(request):
 
         data = session["data"]
 
+        total = Decimal(session["total"])
+        pay_now = Decimal(session["pay_now"])
+        payment_method = data["payment_method"]
+
+        # 🔥 CORE LOGIC
+        if payment_method == "partial_razorpay":
+            remaining = total - pay_now
+            payment_status = "partial"
+        else:
+            remaining = Decimal("0.00")
+            payment_status = "paid"
+
         booking = Booking.objects.create(
             guest_name=data["guest_name"],
             guest_email=data["guest_email"],
             guest_phone=data["guest_phone"],
             guest_count=data["guest_count"],
             extra_guest_count=data.get("extra_guest_count", 0),
+
             check_in=data["check_in"],
             check_out=data["check_out"],
+
             sub_total=session["base"],
             disc_price=session["discount"],
-            total_amount=session["total"],
-            remaining_amount=0,
-            payment_method=data["payment_method"],
-            payment_status="paid",
+            total_amount=total,
+            remaining_amount=remaining,
+
+            payment_method=payment_method,
+            payment_status=payment_status,
             status="confirmed",
+
             transaction_id=request.POST["razorpay_order_id"],
             payment_id=request.POST["razorpay_payment_id"],
         )
 
         send_email_async(booking)
+        request.session["confirmed_booking_id"] = booking.booking_id
+        request.session.modified = True
 
         del request.session["pending_booking"]
 
@@ -477,8 +551,8 @@ def verify_razorpay_payment(request):
         })
 
     except Exception as e:
+        print("VERIFY ERROR:", str(e))  # 🔴 DEBUG
         return JsonResponse({"status": "failed", "error": str(e)}, status=400)
-
 
 
 
@@ -576,21 +650,38 @@ def payment_processing(request):
     return render(request, "resort/payment_processing.html")
 
 
+# def check_booking_status(request):
+#     order_id = request.GET.get("order_id")
+
+#     booking = Booking.objects.filter(
+#         transaction_id=order_id,
+#         payment_status="paid"
+#     ).first()
+
+#     if booking:
+#         return JsonResponse({
+#             "ready": True,
+#             "booking_id": booking.booking_id
+#         })
+
+#     return JsonResponse({"ready": False})
+
+
+
+
 def check_booking_status(request):
-    order_id = request.GET.get("order_id")
+    booking_id = request.session.get("confirmed_booking_id")
 
-    booking = Booking.objects.filter(
-        transaction_id=order_id,
-        payment_status="paid"
-    ).first()
-
-    if booking:
+    if booking_id:
         return JsonResponse({
             "ready": True,
-            "booking_id": booking.booking_id
+            "booking_id": booking_id
         })
 
     return JsonResponse({"ready": False})
+
+
+
 
 
 def validate_coupon(request):

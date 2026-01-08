@@ -209,6 +209,9 @@ class Booking(models.Model):
     @property
     def final_total(self):
         return (self.sub_total or 0) - (self.disc_price or 0)
+    @property
+    def advance_paid(self):
+        return self.total_amount - self.remaining_amount
 
 
 # models.py

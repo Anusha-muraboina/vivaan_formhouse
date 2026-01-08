@@ -7,7 +7,7 @@ from resort.models import (
 
 
 class Command(BaseCommand):
-    help = 'Populate database with dummy data for Strawberry King Resort'
+    help = 'Populate database with dummy data for Vivaan Farmhouse'
 
     def handle(self, *args, **kwargs):
         self.stdout.write('Starting to populate database...')
@@ -185,7 +185,7 @@ class Command(BaseCommand):
             },
             {
                 'title': 'Last Minute Offer',
-                'description': 'Need a spontaneous trip? Book your stay just 1 day before check-in and still benefit from a 5% discount. Enjoy the convenience of last-minute plans without missing out on great savings at Strawberry King Resort.',
+                'description': 'Need a spontaneous trip? Book your stay just 1 day before check-in and still benefit from a 5% discount. Enjoy the convenience of last-minute plans without missing out on great savings at Vivaan Farmhouse.',
                 'discount_percentage': 5,
                 'terms': 'Valid for bookings made within 24 hours of check-in. Subject to availability.',
                 'valid_from': today,

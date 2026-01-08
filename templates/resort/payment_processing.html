@@ -13,7 +13,7 @@
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700"></div>
 </div>
 
-<script>
+{% comment %} <script>
 const orderId = localStorage.getItem("rzp_order_id");
 
 const timer = setInterval(() => {
@@ -26,6 +26,42 @@ const timer = setInterval(() => {
             }
         });
 }, 1500);
+</script> {% endcomment %}
+
+
+
+
+
+
+<div class="text-center p-10">
+    <h2 class="text-2xl font-bold text-emerald-700">
+        Processing your payment…
+    </h2>
+    <p class="text-gray-600 mt-2">
+        Please do not refresh this page
+    </p>
+</div>
+
+<script>
+function pollBooking() {
+    fetch("/check-booking-status/")
+        .then(res => res.json())
+        .then(data => {
+            if (data.ready) {
+                window.location.href =
+                    `/booking/${data.booking_id}/`;
+            } else {
+                setTimeout(pollBooking, 2000);
+            }
+        });
+}
+
+pollBooking();
 </script>
+
+
+
+
+
 
 {% endblock %}
