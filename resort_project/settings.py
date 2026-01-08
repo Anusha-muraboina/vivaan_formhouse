@@ -15,7 +15,13 @@ SECRET_KEY = 'django-insecure-strawberry-king-resort-secret-key-change-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    
+    '3.111.58.197',
+        'localhost',
+    '127.0.0.1',
+    
+    ]
 
 
 # ALLOWED_HOSTS = [
@@ -151,14 +157,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-
-
-
-
-
-# settings.py
-# RAZORPAY_KEY_ID = "rzp_live_RuxBrSrr1POPha"
-# RAZORPAY_KEY_SECRET = "PFH3WSOIA47pFs9ts3fVY67Q"
+#razorpay 
 
 RAZORPAY_KEY_ID = "rzp_test_Rv2abPyaI8rKSP"
 RAZORPAY_KEY_SECRET = "cOuReUYXYcYBWeNUg3LSYkmB"
@@ -233,12 +232,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://2d5698be9733.ngrok-free.app",
+    "3.111.58.197",
 ]
 
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://2d5698be9733.ngrok-free.app",
+    "3.111.58.197",
     # "https://e23d39b29fc8.ngrok-free.app/",
 ]
