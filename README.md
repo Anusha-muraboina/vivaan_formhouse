@@ -1,4 +1,4 @@
-# Strawberry King Resort - Django Booking System
+# Vivaan Farmhouse - Django Booking System
 
 A complete Django-based resort booking website inspired by Strawberry King Resort, Mahabaleshwar. Features a beautiful, responsive design with Tailwind CSS.
 
