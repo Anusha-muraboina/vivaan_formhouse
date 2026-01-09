@@ -231,13 +231,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "3.111.58.197",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "3.111.58.197",
+# ]
 
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "3.111.58.197",
-    # "https://e23d39b29fc8.ngrok-free.app/",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "3.111.58.197",
+#     # "https://e23d39b29fc8.ngrok-free.app/",
+# ]

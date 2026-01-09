@@ -210,7 +210,14 @@ class Booking(models.Model):
     def final_total(self):
         return (self.sub_total or 0) - (self.disc_price or 0)
     @property
+    # def advance_paid(self):
+    #     return self.total_amount - self.remaining_amount
+
     def advance_paid(self):
+    # Cash payment → no advance
+        if self.payment_method == "farmhouse":
+            return 0
+
         return self.total_amount - self.remaining_amount
 
 
