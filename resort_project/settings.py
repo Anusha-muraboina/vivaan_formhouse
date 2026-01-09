@@ -16,9 +16,10 @@ SECRET_KEY = 'django-insecure-strawberry-king-resort-secret-key-change-in-produc
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    
+    "vivaanfarmhouse.com",
+    "www.vivaanfarmhouse.com",
     '3.111.58.197',
-        'localhost',
+    'localhost',
     '127.0.0.1',
     
     ]
@@ -159,8 +160,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 #razorpay 
 
-RAZORPAY_KEY_ID = "rzp_test_Rv2abPyaI8rKSP"
-RAZORPAY_KEY_SECRET = "cOuReUYXYcYBWeNUg3LSYkmB"
+RAZORPAY_KEY_ID = "rzp_live_S1nrNOPM5cqDLt"
+RAZORPAY_KEY_SECRET = "iF3FGjKTlinQO0N2xbiKDGrG"
 RAZORPAY_WEBHOOK_SECRET = "kdfwfbsdhfwberfdlnsrojofdiwer4y59ujdnf94yu5u#28nf"
 
 

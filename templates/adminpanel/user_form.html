@@ -48,7 +48,7 @@
 </style>
 
 <div class="form-card">
-    <div class="form-header">
+    <div class="form-header bg-green-900 text-white md:p-2 p-1 rounded">
         <h2>{% if edit_user %}Edit{% else %}Create{% endif %} User</h2>
     </div>
 
@@ -67,10 +67,33 @@
                    value="{{ edit_user.email|default:'' }}">
         </div>
 
-        <div class="form-group">
+        {% comment %} <div class="form-group">
             <label>Password {% if edit_user %}(leave blank to keep same){% endif %}</label>
             <input type="password" name="password" class="form-input">
-        </div>
+        </div> {% endcomment %}
+<div class="form-group">
+    <label>Password {% if edit_user %}(leave blank to keep same){% endif %}</label>
+
+    <div style="position: relative;">
+        <input type="password" name="password" id="passwordField" class="form-input pr-12">
+
+        <button type="button"
+                onclick="togglePassword()"
+                style="
+                    position: absolute;
+                    right: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    color: #065f46;
+                ">
+            <span id="toggleText">Show</span>
+        </button>
+    </div>
+</div>
 
         <div class="form-group">
             <label>Role</label>
@@ -92,4 +115,20 @@
         </div>
     </form>
 </div>
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById("passwordField");
+    const toggleText = document.getElementById("toggleText");
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleText.textContent = "Hide";
+    } else {
+        passwordField.type = "password";
+        toggleText.textContent = "Show";
+    }
+}
+</script>
+
 {% endblock %}
