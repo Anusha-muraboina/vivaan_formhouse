@@ -176,7 +176,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 RAZORPAY_KEY_ID = "rzp_live_S1nrNOPM5cqDLt"
 RAZORPAY_KEY_SECRET = "iF3FGjKTlinQO0N2xbiKDGrG"
-RAZORPAY_WEBHOOK_SECRET = "kdfwfbsdhfwberfdlnsrojofdiwer4y59ujdnf94yu5u#28nf"
+RAZORPAY_WEBHOOK_SECRET = "dajnf2h9hfkjbary23u38547y3shdgkjhiuhtnsdty43oh9@$($^"
 
 
 
