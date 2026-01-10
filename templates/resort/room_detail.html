@@ -1033,7 +1033,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    function openRazorpay(amount) {
+    {% comment %} function openRazorpay(amount) {
 
         fetch("/create-razorpay-order/", {
             method: "POST",
@@ -1102,8 +1102,70 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Razorpay error:", err);
                 alert("Payment initialization failed");
             });
-    }
+    } {% endcomment %}
+function openRazorpay(amount) {
 
+    // 1️⃣ Create Razorpay Order (booking already created on backend)
+    fetch("/create-razorpay-order/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `amount=${amount}`
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.order_id) {
+            alert("Unable to initiate payment. Please try again.");
+            return;
+        }
+
+        // 2️⃣ Razorpay Checkout Options
+        const options = {
+            key: data.key,                 // LIVE KEY
+            amount: data.amount,           // Amount in paise
+            currency: "INR",
+            name: "Vivaan Farmhouse",
+            description: "Villa Booking Payment",
+            order_id: data.order_id,
+
+            // ✅ SUCCESS CALLBACK (DO NOT VERIFY HERE)
+            handler: function (response) {
+
+                // Payment ID exists → Razorpay accepted payment
+                if (!response.razorpay_payment_id) {
+                    alert("Payment not completed.");
+                    return;
+                }
+
+                // 🚀 FAST UX: redirect immediately
+                window.location.href = "/payment-processing/";
+                // 🔥 Webhook will update booking status in background
+            },
+
+            // ❌ User closed popup
+            modal: {
+                ondismiss: function () {
+                    alert("Payment cancelled.");
+                }
+            },
+
+            theme: {
+                color: "#047857"
+            }
+        };
+
+        // 3️⃣ Open Razorpay Checkout
+        const rzp = new Razorpay(options);
+        rzp.open();
+    })
+    .catch(error => {
+        console.error("Razorpay Init Error:", error);
+        alert("Payment initialization failed. Please try again.");
+    });
+}
 
 </script>
 

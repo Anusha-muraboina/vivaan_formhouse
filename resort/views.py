@@ -41,7 +41,13 @@ from django.conf import settings
 
 from .forms import ContactForm
 
-
+import json
+import hmac
+import hashlib
+# from django.conf import settings
+from django.http import JsonResponse, HttpResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from decimal import Decimal
 
 
 def home(request):
@@ -423,20 +429,67 @@ def room_detail(request, slug):
 
 
     
+# @csrf_exempt
+# def create_razorpay_order(request):
+#     amount = request.POST.get("amount")
+#     if not amount:
+#         return JsonResponse({"error": "Amount missing"}, status=400)
+
+#     order = razorpay_client.order.create({
+#         "amount": int(float(amount) * 100),
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+#     # store order id in session
+#     # request.session["razorpay_order_id"] = order["id"]
+#     # request.session.modified = True
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": order["amount"]
+#     })
+
+
 @csrf_exempt
 def create_razorpay_order(request):
-    amount = request.POST.get("amount")
-    if not amount:
-        return JsonResponse({"error": "Amount missing"}, status=400)
+    session = request.session.get("pending_booking")
+    if not session:
+        return JsonResponse({"error": "Session expired"}, status=400)
 
+    amount = Decimal(session["pay_now"])
+
+    # Create Razorpay order
     order = razorpay_client.order.create({
-        "amount": int(float(amount) * 100),
+        "amount": int(amount * 100),
         "currency": "INR",
         "payment_capture": 1
     })
-    # store order id in session
-    # request.session["razorpay_order_id"] = order["id"]
-    # request.session.modified = True
+
+    data = session["data"]
+
+    # 🔥 CREATE BOOKING BEFORE PAYMENT
+    Booking.objects.create(
+        guest_name=data["guest_name"],
+        guest_email=data["guest_email"],
+        guest_phone=data["guest_phone"],
+        guest_count=data["guest_count"],
+        extra_guest_count=data.get("extra_guest_count", 0),
+
+        check_in=data["check_in"],
+        check_out=data["check_out"],
+
+        sub_total=Decimal(session["base"]),
+        disc_price=Decimal(session["discount"]),
+        total_amount=Decimal(session["total"]),
+        remaining_amount=Decimal(session["total"]),
+
+        payment_method=data["payment_method"],
+        payment_status="pending",
+        status="pending",
+
+        transaction_id=order["id"],  # 🔑 CRITICAL
+    )
+
     return JsonResponse({
         "order_id": order["id"],
         "key": settings.RAZORPAY_KEY_ID,
@@ -458,26 +511,44 @@ def create_razorpay_order(request):
 
 #         data = session["data"]
 
+#         total = Decimal(session["total"])
+#         pay_now = Decimal(session["pay_now"])
+#         payment_method = data["payment_method"]
+
+#         # 🔥 CORE LOGIC
+#         if payment_method == "partial_razorpay":
+#             remaining = total - pay_now
+#             payment_status = "partial"
+#         else:
+#             remaining = Decimal("0.00")
+#             payment_status = "paid"
+
 #         booking = Booking.objects.create(
 #             guest_name=data["guest_name"],
 #             guest_email=data["guest_email"],
 #             guest_phone=data["guest_phone"],
 #             guest_count=data["guest_count"],
 #             extra_guest_count=data.get("extra_guest_count", 0),
+
 #             check_in=data["check_in"],
 #             check_out=data["check_out"],
+
 #             sub_total=session["base"],
 #             disc_price=session["discount"],
-#             total_amount=session["total"],
-#             remaining_amount=0,
-#             payment_method=data["payment_method"],
-#             payment_status="paid",
+#             total_amount=total,
+#             remaining_amount=remaining,
+
+#             payment_method=payment_method,
+#             payment_status=payment_status,
 #             status="confirmed",
+
 #             transaction_id=request.POST["razorpay_order_id"],
 #             payment_id=request.POST["razorpay_payment_id"],
 #         )
 
 #         send_email_async(booking)
+#         request.session["confirmed_booking_id"] = booking.booking_id
+#         request.session.modified = True
 
 #         del request.session["pending_booking"]
 
@@ -487,162 +558,140 @@ def create_razorpay_order(request):
 #         })
 
 #     except Exception as e:
+#         print("VERIFY ERROR:", str(e))  # 🔴 DEBUG
 #         return JsonResponse({"status": "failed", "error": str(e)}, status=400)
 
-@csrf_exempt
-def verify_razorpay_payment(request):
-    try:
-        razorpay_client.utility.verify_payment_signature({
-            "razorpay_order_id": request.POST["razorpay_order_id"],
-            "razorpay_payment_id": request.POST["razorpay_payment_id"],
-            "razorpay_signature": request.POST["razorpay_signature"],
-        })
-
-        session = request.session.get("pending_booking")
-        if not session:
-            return JsonResponse({"status": "failed", "error": "Session expired"}, status=400)
-
-        data = session["data"]
-
-        total = Decimal(session["total"])
-        pay_now = Decimal(session["pay_now"])
-        payment_method = data["payment_method"]
-
-        # 🔥 CORE LOGIC
-        if payment_method == "partial_razorpay":
-            remaining = total - pay_now
-            payment_status = "partial"
-        else:
-            remaining = Decimal("0.00")
-            payment_status = "paid"
-
-        booking = Booking.objects.create(
-            guest_name=data["guest_name"],
-            guest_email=data["guest_email"],
-            guest_phone=data["guest_phone"],
-            guest_count=data["guest_count"],
-            extra_guest_count=data.get("extra_guest_count", 0),
-
-            check_in=data["check_in"],
-            check_out=data["check_out"],
-
-            sub_total=session["base"],
-            disc_price=session["discount"],
-            total_amount=total,
-            remaining_amount=remaining,
-
-            payment_method=payment_method,
-            payment_status=payment_status,
-            status="confirmed",
-
-            transaction_id=request.POST["razorpay_order_id"],
-            payment_id=request.POST["razorpay_payment_id"],
-        )
-
-        send_email_async(booking)
-        request.session["confirmed_booking_id"] = booking.booking_id
-        request.session.modified = True
-
-        del request.session["pending_booking"]
-
-        return JsonResponse({
-            "status": "success",
-            "booking_id": booking.booking_id
-        })
-
-    except Exception as e:
-        print("VERIFY ERROR:", str(e))  # 🔴 DEBUG
-        return JsonResponse({"status": "failed", "error": str(e)}, status=400)
 
 
 
-import json
-import hmac
-import hashlib
-from django.conf import settings
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from decimal import Decimal
+
+# @csrf_exempt
+# def razorpay_webhook(request):
+#     """
+#     Razorpay Webhook Handler
+#     Handles:
+#     - payment.captured
+#     - payment.failed
+#     """
+
+#     webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
+#     received_signature = request.headers.get("X-Razorpay-Signature")
+
+#     payload = request.body
+
+#     # 🔐 VERIFY SIGNATURE
+#     expected_signature = hmac.new(
+#         bytes(webhook_secret, "utf-8"),
+#         payload,
+#         hashlib.sha256
+#     ).hexdigest()
+
+#     if not hmac.compare_digest(expected_signature, received_signature):
+#         return HttpResponse("Invalid signature", status=400)
+
+#     # ✅ Parse JSON
+#     data = json.loads(payload)
+#     event = data.get("event")
+
+#     # ===============================
+#     # PAYMENT CAPTURED
+#     # ===============================
+#     if event == "payment.captured":
+#         payment = data["payload"]["payment"]["entity"]
+
+#         payment_id = payment["id"]
+#         order_id = payment["order_id"]
+#         amount = Decimal(payment["amount"]) / 100  # paise → rupees
+#         email = payment.get("email")
+
+#         try:
+#             booking = Booking.objects.get(
+#                 transaction_id=order_id,
+#                 payment_status="pending"
+#             )
+
+#             booking.payment_status = "paid"
+#             booking.status = "confirmed"
+#             booking.payment_id = payment_id
+#             booking.remaining_amount = Decimal("0.00")
+#             booking.total_amount = amount
+#             booking.save()
+
+#             # 📧 Send confirmation emails
+#             send_email_async(booking)
+
+#             return JsonResponse({"status": "payment captured"})
+
+#         except Booking.DoesNotExist:
+#             return JsonResponse({"error": "Booking not found"}, status=404)
+
+#     # ===============================
+#     # PAYMENT FAILED
+#     # ===============================
+#     if event == "payment.failed":
+#         payment = data["payload"]["payment"]["entity"]
+
+#         order_id = payment["order_id"]
+
+#         Booking.objects.filter(
+#             transaction_id=order_id
+#         ).update(
+#             payment_status="failed",
+#             status="cancelled"
+#         )
+
+#         return JsonResponse({"status": "payment failed handled"})
+
+#     return JsonResponse({"status": "event ignored"})
 
 @csrf_exempt
 def razorpay_webhook(request):
-    """
-    Razorpay Webhook Handler
-    Handles:
-    - payment.captured
-    - payment.failed
-    """
+    try:
+        secret = settings.RAZORPAY_WEBHOOK_SECRET
+        signature = request.headers.get("X-Razorpay-Signature")
 
-    webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
-    received_signature = request.headers.get("X-Razorpay-Signature")
+        if not request.body or not signature:
+            return HttpResponse("OK", status=200)
 
-    payload = request.body
+        expected = hmac.new(
+            secret.encode(),
+            request.body,
+            hashlib.sha256
+        ).hexdigest()
 
-    # 🔐 VERIFY SIGNATURE
-    expected_signature = hmac.new(
-        bytes(webhook_secret, "utf-8"),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
+        if not hmac.compare_digest(expected, signature):
+            return HttpResponse("OK", status=200)
 
-    if not hmac.compare_digest(expected_signature, received_signature):
-        return HttpResponse("Invalid signature", status=400)
+        payload = json.loads(request.body.decode())
+        event = payload.get("event")
 
-    # ✅ Parse JSON
-    data = json.loads(payload)
-    event = data.get("event")
+        if event == "payment.captured":
+            payment = payload["payload"]["payment"]["entity"]
 
-    # ===============================
-    # PAYMENT CAPTURED
-    # ===============================
-    if event == "payment.captured":
-        payment = data["payload"]["payment"]["entity"]
-
-        payment_id = payment["id"]
-        order_id = payment["order_id"]
-        amount = Decimal(payment["amount"]) / 100  # paise → rupees
-        email = payment.get("email")
-
-        try:
-            booking = Booking.objects.get(
-                transaction_id=order_id,
-                payment_status="pending"
+            Booking.objects.filter(
+                transaction_id=payment["order_id"]
+            ).update(
+                payment_status="paid",
+                status="confirmed",
+                payment_id=payment["id"],
+                remaining_amount=Decimal("0.00"),
+                total_amount=Decimal(payment["amount"]) / 100
             )
 
-            booking.payment_status = "paid"
-            booking.status = "confirmed"
-            booking.payment_id = payment_id
-            booking.remaining_amount = Decimal("0.00")
-            booking.total_amount = amount
-            booking.save()
+        elif event == "payment.failed":
+            payment = payload["payload"]["payment"]["entity"]
 
-            # 📧 Send confirmation emails
-            send_email_async(booking)
+            Booking.objects.filter(
+                transaction_id=payment["order_id"]
+            ).update(
+                payment_status="failed",
+                status="cancelled"
+            )
 
-            return JsonResponse({"status": "payment captured"})
+    except Exception:
+        pass  # NEVER FAIL WEBHOOK
 
-        except Booking.DoesNotExist:
-            return JsonResponse({"error": "Booking not found"}, status=404)
-
-    # ===============================
-    # PAYMENT FAILED
-    # ===============================
-    if event == "payment.failed":
-        payment = data["payload"]["payment"]["entity"]
-
-        order_id = payment["order_id"]
-
-        Booking.objects.filter(
-            transaction_id=order_id
-        ).update(
-            payment_status="failed",
-            status="cancelled"
-        )
-
-        return JsonResponse({"status": "payment failed handled"})
-
-    return JsonResponse({"status": "event ignored"})
-
+    return HttpResponse("OK", status=200)
 
 
 
