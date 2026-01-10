@@ -20,6 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('vivvan_admin/', include('vivaan_admin.urls')),
     path('', include('resort.urls')),
+    path('blog/', include('blog.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path(
         'sitemap.xml',

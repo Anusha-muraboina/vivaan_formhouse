@@ -12,7 +12,7 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     # path('about/', views.about, name='about'),
     path('cancel-booking/', views.cancel_booking, name='cancel_booking'),
-    # path('reviews/', views.leave_review, name='leave_review'),
+    path('reviews/', views.leave_review, name='leave_review'),
     path("invoice/<booking_id>/", views.view_invoice, name="view_invoice"),
     path("validate-coupon/", views.validate_coupon, name="validate_coupon"),
     

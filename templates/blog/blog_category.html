@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} – Vivaan Farmhouse Blog{% endblock %}
+
+{% block content %}
+<section class="container mx-auto py-12">
+    <h1 class="text-3xl font-bold mb-6">{{ category.name }}</h1>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        {% for blog in blogs %}
+        <div class="border rounded-lg p-6">
+            <h2 class="text-xl font-semibold">
+                <a href="{% url 'blog:blog_detail' blog.slug %}">
+                    {{ blog.title }}
+                </a>
+            </h2>
+            <p class="mt-2 text-gray-600">
+                {{ blog.short_description|truncatewords:30 }}
+            </p>
+        </div>
+        {% empty %}
+        <p>No posts in this category.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

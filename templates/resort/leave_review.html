@@ -1,4 +1,4 @@
-{% comment %} {% extends 'resort/base.html' %}
+{% extends 'resort/base.html' %}
 
 {% block title %}Guest Reviews - Vivaan Farmhouse{% endblock %}
 
@@ -62,7 +62,7 @@
                     </div>
                     {% endif %}
 
-                    <button type="submit" class="w-full bg-red-900 text-white py-4 rounded-lg font-bold text-lg">
+                    <button type="submit" class="w-full bg-green-900 text-white py-4 rounded-lg font-bold text-lg">
                         <i class="fas fa-paper-plane mr-2"></i>Submit Review
                     </button>
                 </form>
@@ -79,8 +79,8 @@
                         <div>
                             <h3 class="text-xl font-bold text-gray-800">{{ review.guest_name }}</h3>
                             {% if review.guest_location %}
-                            <p class="text-gray-500 text-sm"><i class="fas fa-map-marker-alt mr-1"></i> {{
-                                review.guest_location }}</p>
+                            <p class="text-gray-500 text-sm"><i class="fas fa-map-marker-alt mr-1"></i>
+                                 {{  review.guest_location }}</p>
                             {% endif %}
                         </div>
                         <div class="flex text-amber-400">
@@ -110,4 +110,3 @@
     
 </section>
 {% endblock %}
- {% endcomment %}
