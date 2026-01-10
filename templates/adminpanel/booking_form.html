@@ -365,8 +365,8 @@
 {{ booked_dates|json_script:"booked-dates" }}
 {{ blocked_dates|json_script:"blocked-dates" }}
 <script>
-const startHour = 7;   // 7 AM
-const endHour = 22;    // 10 PM
+const startHours = 7;   // 7 AM
+const endHours = 22;    // 10 PM
 
 function formatHour(h) {
     const suffix = h >= 12 ? "PM" : "AM";
@@ -378,7 +378,7 @@ function buildDropdown(listId, inputId, button) {
     const list = document.getElementById(listId);
     list.innerHTML = "";
 
-    for (let h = startHour; h < endHour; h++) {
+    for (let h = startHours; h < endHours; h++) {
         const label = formatHour(h);
         const div = document.createElement("div");
         div.className = "time-option";

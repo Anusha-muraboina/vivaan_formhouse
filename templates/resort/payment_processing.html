@@ -43,7 +43,7 @@ const timer = setInterval(() => {
 </div>
 
 <script>
-function pollBooking() {
+{% comment %} function pollBooking() {
     fetch("/check-booking-status/")
         .then(res => res.json())
         .then(data => {
@@ -56,7 +56,26 @@ function pollBooking() {
         });
 }
 
-pollBooking();
+pollBooking(); {% endcomment %}
+
+<script>
+const orderId = localStorage.getItem("rzp_order_id");
+
+const timer = setInterval(() => {
+    fetch(`/check-booking-status/?order_id=${orderId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.ready) {
+                clearInterval(timer);
+                localStorage.removeItem("rzp_order_id");
+                window.location.href =
+                    `/booking-confirmation/${data.booking_id}/`;
+            }
+        });
+}, 3000);
+</script>
+
+
 </script>
 
 

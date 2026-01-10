@@ -449,26 +449,22 @@ def room_detail(request, slug):
 #         "amount": order["amount"]
 #     })
 
-
 @csrf_exempt
 def create_razorpay_order(request):
     session = request.session.get("pending_booking")
     if not session:
         return JsonResponse({"error": "Session expired"}, status=400)
 
-    amount = Decimal(session["pay_now"])
+    pay_now = Decimal(session["pay_now"])
+    data = session["data"]
 
-    # Create Razorpay order
     order = razorpay_client.order.create({
-        "amount": int(amount * 100),
+        "amount": int(pay_now * 100),
         "currency": "INR",
         "payment_capture": 1
     })
 
-    data = session["data"]
-
-    # 🔥 CREATE BOOKING BEFORE PAYMENT
-    Booking.objects.create(
+    booking = Booking.objects.create(
         guest_name=data["guest_name"],
         guest_email=data["guest_email"],
         guest_phone=data["guest_phone"],
@@ -487,7 +483,7 @@ def create_razorpay_order(request):
         payment_status="pending",
         status="pending",
 
-        transaction_id=order["id"],  # 🔑 CRITICAL
+        transaction_id=order["id"]
     )
 
     return JsonResponse({
@@ -495,6 +491,7 @@ def create_razorpay_order(request):
         "key": settings.RAZORPAY_KEY_ID,
         "amount": order["amount"]
     })
+
 
 # @csrf_exempt
 # def verify_razorpay_payment(request):
@@ -643,18 +640,15 @@ def create_razorpay_order(request):
 #         return JsonResponse({"status": "payment failed handled"})
 
 #     return JsonResponse({"status": "event ignored"})
-
 @csrf_exempt
 def razorpay_webhook(request):
     try:
-        secret = settings.RAZORPAY_WEBHOOK_SECRET
         signature = request.headers.get("X-Razorpay-Signature")
-
-        if not request.body or not signature:
+        if not signature:
             return HttpResponse("OK", status=200)
 
         expected = hmac.new(
-            secret.encode(),
+            settings.RAZORPAY_WEBHOOK_SECRET.encode(),
             request.body,
             hashlib.sha256
         ).hexdigest()
@@ -662,7 +656,7 @@ def razorpay_webhook(request):
         if not hmac.compare_digest(expected, signature):
             return HttpResponse("OK", status=200)
 
-        payload = json.loads(request.body.decode())
+        payload = json.loads(request.body)
         event = payload.get("event")
 
         if event == "payment.captured":
@@ -674,8 +668,7 @@ def razorpay_webhook(request):
                 payment_status="paid",
                 status="confirmed",
                 payment_id=payment["id"],
-                remaining_amount=Decimal("0.00"),
-                total_amount=Decimal(payment["amount"]) / 100
+                remaining_amount=Decimal("0.00")
             )
 
         elif event == "payment.failed":
@@ -689,7 +682,7 @@ def razorpay_webhook(request):
             )
 
     except Exception:
-        pass  # NEVER FAIL WEBHOOK
+        pass
 
     return HttpResponse("OK", status=200)
 
@@ -718,18 +711,35 @@ def payment_processing(request):
 
 
 
-def check_booking_status(request):
-    booking_id = request.session.get("confirmed_booking_id")
+# def check_booking_status(request):
+#     booking_id = request.session.get("confirmed_booking_id")
 
-    if booking_id:
+#     if booking_id:
+#         return JsonResponse({
+#             "ready": True,
+#             "booking_id": booking_id
+#         })
+
+#     return JsonResponse({"ready": False})
+
+
+def check_booking_status(request):
+    order_id = request.GET.get("order_id")
+    if not order_id:
+        return JsonResponse({"ready": False})
+
+    booking = Booking.objects.filter(
+        transaction_id=order_id,
+        payment_status="paid"
+    ).first()
+
+    if booking:
         return JsonResponse({
             "ready": True,
-            "booking_id": booking_id
+            "booking_id": booking.booking_id
         })
 
     return JsonResponse({"ready": False})
-
-
 
 
 

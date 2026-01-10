@@ -121,8 +121,7 @@
 </style>
 
 <div class="fixed inset-0 -z-10">
-    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static " images/vihan-group1.webp"
-        %}');">
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static 'images/vihan-group1.webp' %}');">
     </div>
     <div class="absolute inset-0 bg-white/90"></div>
 </div>
@@ -407,8 +406,7 @@
 
 
 
-
-                        <div class="flex justify-between pt-4">
+<div class="flex justify-between pt-4">
     <button type="button"
         onclick="toggleCollapse('step1')"
         class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
@@ -421,6 +419,20 @@
         Next →
     </button>
 </div>
+
+                        <!-- <div class="flex justify-between pt-4">
+    <button type="button"
+        onclick="toggleCollapse('step1')"
+        class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+        ← Previous
+    </button>
+
+    <button type="button"
+        onclick="validateStep2()"
+        class="bg-emerald-900 text-white px-6 py-2 rounded-lg font-semibold">
+        Next →
+    </button>
+</div> -->
 </div>
 
 
@@ -431,15 +443,219 @@
 <!-- ========================================= -->
 
 
+
+
+
+
+
+
+
+<!-- ========================== -->
+<!-- ========================== -->
+<!-- <div class="border rounded-2xl shadow-sm bg-white">
+   
+    <div class="collapse-header flex items-center justify-between px-6 py-4" onclick="toggleCollapse('step3')">
+        <div class="flex items-center gap-3 " >
+            {% comment %} <span class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                3
+            </span> {% endcomment %}
+            <span class="text-lg font-semibold">
+              3.  Review Your Booking
+            </span>
+        </div>
+    </div>
+
+    
+    <div id="step3" class="collapse-body hidden px-6 pb-6 space-y-6">
+
+       
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 text-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+               
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700 border-b pb-1">
+                        Stay Details
+                    </h4>
+                    <p><span class="text-gray-500">Check-in:</span> <strong id="reviewCheckIn"></strong></p>
+                    <p><span class="text-gray-500">Check-out:</span> <strong id="reviewCheckOut"></strong></p>
+                    <p><span class="text-gray-500">Check-in Time:</span> <strong id="reviewCheckInTime"></strong></p>
+                    <p><span class="text-gray-500">Check-out Time:</span> <strong id="reviewCheckOutTime"></strong></p>
+                </div>
+
+               
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700 border-b pb-1">
+                        Guest Details
+                    </h4>
+                    <p><span class="text-gray-500">Name:</span> <strong id="reviewName"></strong></p>
+                    <p><span class="text-gray-500">Phone:</span> <strong id="reviewPhone"></strong></p>
+                    <p><span class="text-gray-500">Email:</span> <strong id="reviewEmail"></strong></p>
+                </div>
+
+               
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700 border-b pb-1">
+                        Occupancy
+                    </h4>
+                    <p><span class="text-gray-500">Guests:</span> <strong id="reviewGuests"></strong></p>
+                    <p><span class="text-gray-500">Extra Guests:</span> <strong id="reviewExtraGuests"></strong></p>
+                </div>
+
+               
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700 border-b pb-1">
+                        Offers
+                    </h4>
+                    <p>
+                        <span class="text-gray-500">Coupon Applied:</span>
+                        <strong id="reviewCoupon">—</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+       
+        <div class="flex flex-col sm:flex-row justify-between gap-4 pt-4">
+            <button
+                type="button"
+                onclick="toggleCollapse('step2')"
+                class="border border-emerald-900 text-emerald-900 px-6 py-3 rounded-lg font-medium hover:bg-emerald-50 transition">
+                ← Previous
+            </button>
+
+            <button
+                type="button"
+                onclick="toggleCollapse('step4')"
+                class="bg-emerald-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
+                Next →
+            </button>
+        </div>
+
+    </div>
+</div>
+ -->
+
+
+ <div class="border rounded-2xl shadow-md bg-white overflow-hidden">
+
+    <!-- Header -->
+    <div
+        class="collapse-header flex items-center justify-between px-6 py-5 cursor-pointer"
+        onclick="toggleCollapse('step3')"
+    >
+        <div class="flex items-center gap-3">
+            <span class="w-10 h-10 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                3
+            </span>
+            <div>
+                <p class="text-lg font-semibold text-gray-800">
+                    Review Your Booking
+                </p>
+                <p class="text-sm text-gray-500">
+                    Please verify details before payment
+                </p>
+            </div>
+        </div>
+
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </div>
+
+    <!-- Body -->
+    <div id="step3" class="collapse-body hidden px-6 pb-6 space-y-6">
+
+        <!-- Review Card -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+
+                <!-- Stay Details -->
+                <div>
+                    <h4 class="flex items-center gap-2 font-semibold text-gray-700 mb-3">
+                        🏡 Stay Details
+                    </h4>
+                    <div class="space-y-2 text-gray-600">
+                        <p><strong class="text-gray-800">Check-in:</strong> <span id="reviewCheckIn"></span></p>
+                        <p><strong class="text-gray-800">Check-out:</strong> <span id="reviewCheckOut"></span></p>
+                        <p><strong class="text-gray-800">Check-in Time:</strong> <span id="reviewCheckInTime"></span></p>
+                        <p><strong class="text-gray-800">Check-out Time:</strong> <span id="reviewCheckOutTime"></span></p>
+                    </div>
+                </div>
+
+                <!-- Guest Details -->
+                <div>
+                    <h4 class="flex items-center gap-2 font-semibold text-gray-700 mb-3">
+                        👤 Guest Details
+                    </h4>
+                    <div class="space-y-2 text-gray-600">
+                        <p><strong class="text-gray-800">Name:</strong> <span id="reviewName"></span></p>
+                        <p><strong class="text-gray-800">Phone:</strong> <span id="reviewPhone"></span></p>
+                        <p><strong class="text-gray-800">Email:</strong> <span id="reviewEmail"></span></p>
+                    </div>
+                </div>
+
+                <!-- Occupancy -->
+                <div>
+                    <h4 class="flex items-center gap-2 font-semibold text-gray-700 mb-3">
+                        👥 Occupancy
+                    </h4>
+                    <div class="space-y-2 text-gray-600">
+                        <p><strong class="text-gray-800">Guests:</strong> <span id="reviewGuests"></span></p>
+                        <p><strong class="text-gray-800">Extra Guests:</strong> <span id="reviewExtraGuests"></span></p>
+                    </div>
+                </div>
+
+                <!-- Offers -->
+                <div>
+                    <h4 class="flex items-center gap-2 font-semibold text-gray-700 mb-3">
+                        🎁 Offers
+                    </h4>
+                    <div class="space-y-2 text-gray-600">
+                        <p>
+                            <strong class="text-gray-800">Coupon:</strong>
+                            <span id="reviewCoupon">—</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-between gap-4 pt-2">
+            <button
+                type="button"
+                onclick="toggleCollapse('step2')"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-emerald-800 text-emerald-800 font-medium hover:bg-emerald-50 transition"
+            >
+                ← Previous
+            </button>
+
+            <button
+                type="button"
+                onclick="toggleCollapse('step4')"
+                class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-emerald-900 text-white font-semibold hover:bg-emerald-700 transition shadow-md"
+            >
+                Proceed to Payment →
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
 <!-- ========================== -->
 
 
 <div class="border rounded-xl">
-    <div class="collapse-header" onclick="toggleCollapse('step3')">
-        3️. Payment Method & Summary
+    <div class="collapse-header mb-4" onclick="toggleCollapse('step4')">
+        4. Payment Method & Summary
     </div>
 
-  <div  id="step3" class="collapse-body hidden p-6 space-y-4">
+  <div  id="step4" class="collapse-body hidden p-6 space-y-4">
 
                         <div>
                             <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
@@ -507,18 +723,23 @@
 
                         </div>
                  
-<div class="flex justify-start pt-2">
+<!-- <div class="flex justify-start pt-2">
     <button type="button"
         onclick="toggleCollapse('step2')"
         class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
         ← Previous
     </button>
+</div> -->
+
+        <div class="flex justify-between pt-4">
+            <button type="button"
+                onclick="toggleCollapse('step3')"
+                class="border border-emerald-900 text-emerald-900 px-6 py-2 rounded-lg">
+                ← Previous
+            </button>
+
 </div>
-
-
-
 </div>
-
 
 </div>
 
@@ -550,7 +771,7 @@
 
 
 
-
+<!-- ====================================================== -->
 
 
             <!-- Room Information -->
@@ -653,7 +874,40 @@ function toggleCollapse(id) {
 </script>
 
 
+<script>
+    function populateReview() {
+    document.getElementById("reviewCheckIn").innerText =
+        document.querySelector("input[name='check_in']").value;
 
+    document.getElementById("reviewCheckOut").innerText =
+        document.querySelector("input[name='check_out']").value;
+
+    document.getElementById("reviewGuests").innerText =
+        document.querySelector("input[name='guest_count']").value;
+
+    document.getElementById("reviewExtraGuests").innerText =
+        document.querySelector("input[name='extra_guest_count']").value || "0";
+
+    document.getElementById("reviewCheckInTime").innerText =
+        document.getElementById("checkInTime").value;
+
+    document.getElementById("reviewCheckOutTime").innerText =
+        document.getElementById("checkOutTime").value;
+
+    document.getElementById("reviewName").innerText =
+        document.querySelector("input[name='guest_name']").value;
+
+    document.getElementById("reviewPhone").innerText =
+        document.querySelector("input[name='guest_phone']").value;
+
+    document.getElementById("reviewEmail").innerText =
+        document.querySelector("input[name='guest_email']").value;
+
+    document.getElementById("reviewCoupon").innerText =
+        document.querySelector("input[name='coupon_code']").value || "—";
+}
+
+</script>
  <script>
 const startHour = 7;   // 7 AM
 const endHour = 22;    // 10 PM
@@ -793,7 +1047,8 @@ function validateStep2() {
     }
 
     // ✅ STEP-2 COMPLETED → OPEN STEP-3
-    toggleCollapse("step3");
+    populateReview();          // 🔥 REQUIRED
+    toggleCollapse("step3");   // 🔥 REVIEW STEP
 }
 
 /* =========================
@@ -1103,7 +1358,46 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Payment initialization failed");
             });
     } {% endcomment %}
-function openRazorpay(amount) {
+
+
+    function openRazorpay() {
+
+    fetch("/create-razorpay-order/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        const options = {
+            key: data.key,
+            amount: data.amount,
+            currency: "INR",
+            name: "Vivaan Farmhouse",
+            order_id: data.order_id,
+
+            handler: function (response) {
+                localStorage.setItem(
+                    "rzp_order_id",
+                    response.razorpay_order_id
+                );
+                window.location.href = "/payment-processing/";
+            },
+
+            modal: {
+                ondismiss: function () {
+                    alert("Payment cancelled");
+                }
+            }
+        };
+
+        new Razorpay(options).open();
+    });
+}
+
+{% comment %} function openRazorpay(amount) {
 
     // 1️⃣ Create Razorpay Order (booking already created on backend)
     fetch("/create-razorpay-order/", {
@@ -1139,9 +1433,12 @@ function openRazorpay(amount) {
                     alert("Payment not completed.");
                     return;
                 }
+            // ✅ STORE ORDER ID (CRITICAL)
+            localStorage.setItem("rzp_order_id", response.razorpay_order_id);
 
+            // 🚀 Redirect immediately
+            window.location.href = "/payment-processing/";
                 // 🚀 FAST UX: redirect immediately
-                window.location.href = "/payment-processing/";
                 // 🔥 Webhook will update booking status in background
             },
 
@@ -1165,7 +1462,7 @@ function openRazorpay(amount) {
         console.error("Razorpay Init Error:", error);
         alert("Payment initialization failed. Please try again.");
     });
-}
+} {% endcomment %}
 
 </script>
 
