@@ -14,8 +14,11 @@ from django.db.models import Q, F
 from .models import Blog, BlogCategory, BlogTag, BlogComment
 
 
+
 def blog_list(request):
-    blogs = Blog.objects.filter(status="published").select_related("category")
+    blogs = Blog.objects.filter(status="published")\
+        .select_related("category")\
+        .prefetch_related("tags")
 
     # Search
     q = request.GET.get("q")
@@ -31,18 +34,51 @@ def blog_list(request):
     if category_slug:
         blogs = blogs.filter(category__slug=category_slug)
 
-    # Tag filter
+    # Tag filter ✅
     tag_slug = request.GET.get("tag")
     if tag_slug:
-        blogs = blogs.filter(tags__slug=tag_slug)
+        blogs = blogs.filter(tags__slug=tag_slug).distinct()
 
     context = {
         "blogs": blogs,
         "categories": BlogCategory.objects.all(),
         "tags": BlogTag.objects.all(),
-        "recent_comments": BlogComment.objects.filter(is_approved=True).order_by("-created_at")[:5],
+        "active_tag": tag_slug,  # ⭐ needed for UI highlight
+        "recent_comments": BlogComment.objects.filter(
+            is_approved=True
+        ).order_by("-created_at")[:5],
     }
     return render(request, "blog/blog_list.html", context)
+
+# def blog_list(request):
+#     blogs = Blog.objects.filter(status="published").select_related("category")
+
+#     # Search
+#     q = request.GET.get("q")
+#     if q:
+#         blogs = blogs.filter(
+#             Q(title__icontains=q) |
+#             Q(short_description__icontains=q) |
+#             Q(content__icontains=q)
+#         )
+
+#     # Category filter
+#     category_slug = request.GET.get("category")
+#     if category_slug:
+#         blogs = blogs.filter(category__slug=category_slug)
+
+#     # Tag filter
+#     tag_slug = request.GET.get("tag")
+#     if tag_slug:
+#         blogs = blogs.filter(tags__slug=tag_slug)
+
+#     context = {
+#         "blogs": blogs,
+#         "categories": BlogCategory.objects.all(),
+#         "tags": BlogTag.objects.all(),
+#         "recent_comments": BlogComment.objects.filter(is_approved=True).order_by("-created_at")[:5],
+#     }
+#     return render(request, "blog/blog_list.html", context)
 
 def blog_category(request, slug):
     category = get_object_or_404(BlogCategory, slug=slug)

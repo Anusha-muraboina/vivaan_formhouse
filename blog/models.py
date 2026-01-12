@@ -50,7 +50,11 @@ class Blog(models.Model):
         null=True,
         related_name="blogs"
     )
-
+    tags = models.ManyToManyField(
+        "BlogTag",
+        related_name="blogs",
+        blank=True ,null=True
+    )
     short_description = models.TextField(
         help_text="Short summary for listing & SEO"
     )

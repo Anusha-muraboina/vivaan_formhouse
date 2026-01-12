@@ -168,7 +168,7 @@
           {% for tag in tags %}
           <a 
             href="{% url 'blog:blog_list' %}?tag={{ tag.slug }}"
-            class="px-3 py-1.5 text-sm rounded-full border border-gray-200 bg-white text-gray-500 transition-all hover:border-green-700 hover:text-green-700 {% if request.GET.tag == tag.slug %}bg-green-700 text-white border-green-700{% endif %}"
+            class="px-3 py-1.5 text-sm rounded-full border border-gray-200 bg-white text-gray-500 transition-all hover:border-green-700 hover:text-green-700 {% if request.GET.tag == tag.slug %}bg-green-700 text-green-900 border-green-700{% endif %}"
           >
             {{ tag.name }}
           </a>

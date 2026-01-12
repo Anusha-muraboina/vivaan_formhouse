@@ -1359,9 +1359,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     } {% endcomment %}
 
+    let rzpStarted = false;
 
     function openRazorpay() {
-
+    if (rzpStarted) return;
+    rzpStarted = true;
     fetch("/create-razorpay-order/", {
         method: "POST",
         headers: {

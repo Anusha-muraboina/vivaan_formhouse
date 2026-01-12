@@ -449,6 +449,50 @@ def room_detail(request, slug):
 #         "amount": order["amount"]
 #     })
 
+# @csrf_exempt
+# def create_razorpay_order(request):
+#     session = request.session.get("pending_booking")
+#     if not session:
+#         return JsonResponse({"error": "Session expired"}, status=400)
+
+#     pay_now = Decimal(session["pay_now"])
+#     data = session["data"]
+
+#     order = razorpay_client.order.create({
+#         "amount": int(pay_now * 100),
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+
+#     booking = Booking.objects.create(
+#         guest_name=data["guest_name"],
+#         guest_email=data["guest_email"],
+#         guest_phone=data["guest_phone"],
+#         guest_count=data["guest_count"],
+#         extra_guest_count=data.get("extra_guest_count", 0),
+
+#         check_in=data["check_in"],
+#         check_out=data["check_out"],
+
+#         sub_total=Decimal(session["base"]),
+#         disc_price=Decimal(session["discount"]),
+#         total_amount=Decimal(session["total"]),
+#         remaining_amount=Decimal(session["total"]),
+
+#         payment_method=data["payment_method"],
+#         payment_status="pending",
+#         status="pending",
+
+#         transaction_id=order["id"]
+#     )
+
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": order["amount"]
+#     })
+
+
 @csrf_exempt
 def create_razorpay_order(request):
     session = request.session.get("pending_booking")
@@ -458,33 +502,51 @@ def create_razorpay_order(request):
     pay_now = Decimal(session["pay_now"])
     data = session["data"]
 
+    # 1️⃣ Create Razorpay Order (this is safe to repeat)
     order = razorpay_client.order.create({
         "amount": int(pay_now * 100),
         "currency": "INR",
         "payment_capture": 1
     })
 
-    booking = Booking.objects.create(
-        guest_name=data["guest_name"],
-        guest_email=data["guest_email"],
-        guest_phone=data["guest_phone"],
-        guest_count=data["guest_count"],
-        extra_guest_count=data.get("extra_guest_count", 0),
+    # 2️⃣ CREATE OR REUSE BOOKING (CRITICAL FIX)
+    try:
+        with transaction.atomic():
+            booking, created = Booking.objects.get_or_create(
+                guest_email=data["guest_email"],
+                check_in=data["check_in"],
+                check_out=data["check_out"],
+                payment_method=data["payment_method"],   # 🔑 part of UNIQUE key
+                defaults={
+                    "guest_name": data["guest_name"],
+                    "guest_phone": data["guest_phone"],
+                    "guest_count": data["guest_count"],
+                    "extra_guest_count": data.get("extra_guest_count", 0),
 
-        check_in=data["check_in"],
-        check_out=data["check_out"],
+                    "sub_total": Decimal(session["base"]),
+                    "disc_price": Decimal(session["discount"]),
+                    "total_amount": Decimal(session["total"]),
+                    "remaining_amount": Decimal(session["total"]),
 
-        sub_total=Decimal(session["base"]),
-        disc_price=Decimal(session["discount"]),
-        total_amount=Decimal(session["total"]),
-        remaining_amount=Decimal(session["total"]),
+                    "payment_status": "pending",
+                    "status": "pending",
+                    "transaction_id": order["id"],
+                }
+            )
 
-        payment_method=data["payment_method"],
-        payment_status="pending",
-        status="pending",
+            # ⚠️ If booking already existed, just update Razorpay order id
+            if not created:
+                booking.transaction_id = order["id"]
+                booking.save(update_fields=["transaction_id"])
 
-        transaction_id=order["id"]
-    )
+    except IntegrityError:
+        # FINAL SAFETY NET (should rarely hit now)
+        booking = Booking.objects.get(
+            guest_email=data["guest_email"],
+            check_in=data["check_in"],
+            check_out=data["check_out"],
+            payment_method=data["payment_method"],
+        )
 
     return JsonResponse({
         "order_id": order["id"],
