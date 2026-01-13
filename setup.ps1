@@ -1,7 +1,7 @@
-# Strawberry King Resort - Quick Setup Script
+# Vivaan Farmhouse - Quick Setup Script
 # Run this script to set up the project automatically
 
-Write-Host "=== Strawberry King Resort - Setup Script ===" -ForegroundColor Cyan
+Write-Host "=== Vivaan Farmhouse - Setup Script ===" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if virtual environment exists

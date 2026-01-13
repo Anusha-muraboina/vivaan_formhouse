@@ -1,0 +1,131 @@
+{% extends 'adminpanel/base.html' %}
+{% block header %}Rooms & Pricing{% endblock %}
+
+{% block content %}
+
+<style>
+.price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.price-card {
+    background: #fff;
+    padding: 1.25rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.price-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #065f46;
+}
+
+.table-actions a {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.table-actions .edit {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.table-actions .delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+</style>
+
+<!-- ================= VILLA PRICING ================= -->
+<div class="card">
+    <div class="card-header flex-between">
+        <h2>Villa Pricing</h2>
+        <a href="{% url 'vivaan_admin:pricing_add_edit' %}" class="btn-action btn-view">
+            {% if pricing %}Edit Pricing{% else %}+ Add Pricing{% endif %}
+        </a>
+    </div>
+
+    {% if pricing %}
+    <div class="price-grid">
+        <div class="price-card">
+            <small>Weekday</small>
+            <div class="price-value">₹{{ pricing.weekday_price }}</div>
+        </div>
+        <div class="price-card">
+            <small>Weekend</small>
+            <div class="price-value">₹{{ pricing.weekend_price }}</div>
+        </div>
+        <div class="price-card">
+            <small>Extra Guest</small>
+            <div class="price-value">₹{{ pricing.extra_guest_price }}</div>
+        </div>
+    </div>
+    {% else %}
+        <p style="color:#6b7280;">No pricing configured yet.</p>
+    {% endif %}
+</div>
+
+<!-- ================= ROOM CATEGORIES (ROW BASED) ================= -->
+<div class="card">
+    <div class="card-header flex-between">
+        <h2>Room Categories</h2>
+        {% comment %} <a href="{% url 'vivaan_admin:category_add' %}" class="btn-action btn-add">
+            + Add Category
+        </a> {% endcomment %}
+
+            <!-- ADD CATEGORY BUTTON -->
+    <a href="{% url 'vivaan_admin:category_add' %}"
+       class="btn-action btn-add  " 
+       style="padding:8px 14px;font-weight:600; color:#6b7280;"  >
+        + Add Category
+    </a>
+    </div>
+<div class="table-responsive">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Base Price</th>
+                    <th>Max Guests</th>
+                    <th>View Type</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for c in room_categories %}
+                <tr>
+                    <td style="font-weight:600;">{{ c.name }}</td>
+                    <td>₹{{ c.base_price }}</td>
+                    <td>{{ c.max_occupancy }}</td>
+                    <td>{{ c.view_type|title }}</td>
+                    <td class="table-actions" style="text-align:center;">
+                        <a href="{% url 'vivaan_admin:category_edit' c.id %}" class="edit">
+                            Edit
+                        </a>
+                        <a href="{% url 'vivaan_admin:category_delete' c.id %}"
+                           class="delete"
+                           onclick="return confirm('Delete this category?')">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;color:#6b7280;">
+                        No room categories added yet.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+{% endblock %}

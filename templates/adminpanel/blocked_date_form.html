@@ -1,0 +1,242 @@
+{% extends "adminpanel/base.html" %}
+{% load static %}
+{% block title %}Block Dates{% endblock %}
+{% block header %}Block Dates{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="blocked-wrapper">
+    <div class="blocked-card">
+
+        <div class="blocked-header">
+            <h2>Block Dates</h2>
+            <p>Select start & end date using inputs</p>
+        </div>
+
+        <form method="POST" class="blocked-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Start Date</label>
+                {{ form.start_date }}
+            </div>
+
+            <div class="form-group">
+                <label>End Date</label>
+                {{ form.end_date }}
+            </div>
+
+            <div class="form-group">
+                <label>Reason</label>
+                {{ form.reason }}
+            </div>
+
+            <button class="btn-primary">Block Dates</button>
+        </form>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <span><span class="dot booked"></span> Booked</span>
+            <span><span class="dot blocked"></span> Blocked</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- DATA -->
+{{ booked_dates|json_script:"booked-data" }}
+{{ blocked_dates|json_script:"blocked-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+{% comment %} <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-data").textContent
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-data").textContent
+    );
+
+    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+    function decorate(dayElem) {
+        const d = dayElem.dateObj.toISOString().split("T")[0];
+
+        if (bookedDates.includes(d)) {
+            dayElem.classList.add("admin-booked");
+        }
+
+        if (blockedDates.includes(d)) {
+            dayElem.classList.add("admin-blocked");
+        }
+    }
+
+    const startPicker = flatpickr("[name='start_date']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: false,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorate(dayElem);
+        },
+
+        onChange(selectedDates) {
+            if (selectedDates.length) {
+                endPicker.set("minDate", selectedDates[0]);
+            }
+        }
+    });
+
+    const endPicker = flatpickr("[name='end_date']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        allowInput: false,
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorate(dayElem);
+        }
+    });
+
+});
+</script> {% endcomment %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-data").textContent
+    );
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-data").textContent
+    );
+
+    const disabledDates = [...new Set([...bookedDates, ...blockedDates])];
+
+    function formatLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+
+    function decorate(dayElem) {
+        const d = formatLocal(dayElem.dateObj);
+        if (bookedDates.includes(d)) dayElem.classList.add("admin-booked");
+        if (blockedDates.includes(d)) dayElem.classList.add("admin-blocked");
+    }
+
+    const startPicker = flatpickr("[name='start_date']", {
+        dateFormat: "Y-m-d",
+        disable: disabledDates,
+        disableMobile: true,
+        onDayCreate(_, __, ___, dayElem) {
+            decorate(dayElem);
+        },
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+            endPicker.set("minDate", selectedDates[0]);
+            endPicker.clear();
+        }
+    });
+
+    const endPicker = flatpickr("[name='end_date']", {
+        dateFormat: "Y-m-d",
+        disable: disabledDates,
+        disableMobile: true,
+        onDayCreate(_, __, ___, dayElem) {
+            decorate(dayElem);
+        }
+    });
+
+});
+</script>
+
+<style>
+.blocked-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.blocked-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+}
+
+.blocked-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.blocked-form {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+}
+
+.btn-primary {
+    width: 100%;
+    background: #ef4444;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+}
+
+/* BOOKED */
+.flatpickr-day.admin-booked {
+    background: #22c55e !important;
+    color: white !important;
+    cursor: not-allowed;
+}
+
+/* BLOCKED */
+.flatpickr-day.admin-blocked {
+    background: #ef4444 !important;
+    color: white !important;
+    cursor: not-allowed;
+}
+
+.flatpickr-day.flatpickr-disabled {
+    opacity: 1 !important;
+}
+
+/* LEGEND */
+.legend {
+    display: flex;
+    gap: 20px;
+    padding: 16px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dot.booked { background: #22c55e; }
+.dot.blocked { background: #ef4444; }
+</style>
+
+
+{% endblock %}

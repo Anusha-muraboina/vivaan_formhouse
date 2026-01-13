@@ -1,0 +1,89 @@
+{% extends 'adminpanel/base.html' %}
+{% block title %}Gallery | Vivaan Admin{% endblock %}
+{% block header %}Gallery{% endblock %}
+
+
+{% block content %}
+
+<style>
+    .btn-sm {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-view {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.btn-view:hover {
+    background: #c7d2fe;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+}
+
+</style>
+<div class="card">
+    <div class="card-header">
+        <h2>Photo Gallery</h2>
+        <a href="{% url 'vivaan_admin:gallery_create' %}" class="btn-action btn-view"><i class="fa-solid fa-plus"></i>
+            Add Photo</a>
+    </div>
+    <div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Slot position</th>
+                <th>Featured</th>
+                
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for photo in photos %}
+            <tr>
+                <td><img src="{{ photo.image.url }}" style="height:50px; border-radius:4px;"></td>
+                <td>{{ photo.title }}</td>
+                 <td>{{ photo.slot_position }}</td>
+<td>{{ photo.is_featured }}</td>
+                <td style="text-transform:capitalize;">{{ photo.category }}</td>
+                 
+                <td>
+                    <div class="gallery-actions">
+    <a href="{% url 'vivaan_admin:gallery_edit' photo.id %}" class="btn-view btn-sm">
+        Edit
+    </a>
+
+    <a href="{% url 'vivaan_admin:gallery_delete' photo.id %}"
+       class="btn-delete btn-sm"
+       onclick="return confirm('Delete this photo?');">
+        Delete
+    </a>
+</div>
+
+                    {% comment %} <a href="{% url 'vivaan_admin:gallery_delete' photo.id %}" class="btn-action btn-delete"
+                        onclick="return confirm('Delete?');">Delete</a>
+                    
+                    </td> {% endcomment %}
+            </tr>
+            {% empty %}<tr>
+                <td colspan="4">No photos found.</td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Block admin & sensitive pages
+Disallow: /vivvan_admin/
+Disallow: /admin/
+
+# Block payment & invoice pages
+Disallow: /invoice/
+Disallow: /payment-processing/
+Disallow: /check-booking-status/
+Disallow: /create-razorpay-order/
+Disallow: /verify-payment/
+Disallow: /razorpay/
+
+# Sitemap
+Sitemap: http://127.0.0.1:8000/sitemap.xml

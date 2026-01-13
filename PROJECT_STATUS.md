@@ -1,4 +1,4 @@
-# 🎉 STRAWBERRY KING RESORT - PROJECT COMPLETE!
+# 🎉 Vivaan Farmhouse - PROJECT COMPLETE!
 
 ## ✅ ISSUE FIXED
 
@@ -342,4 +342,4 @@ The template error has been fixed. You can now:
 2. Book any room category
 3. Manage everything via admin panel
 
-**Enjoy your Strawberry King Resort booking system!** 🏨
+**Enjoy your Vivaan Farmhouse booking system!** 🏨
