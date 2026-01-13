@@ -294,8 +294,14 @@ def room_detail(request, slug):
 
     # ===== BOOKED DATES =====
     booked_dates = []
+    # bookings = Booking.objects.filter(
+    #     status__in=["confirmed", "pending"],
+    #     check_out__gt=datetime.now().date()
+    # )
     bookings = Booking.objects.filter(
-        status__in=["confirmed", "pending"],
+        status="confirmed",
+        payment_method__in=["partial_razorpay", "full_razorpay"],
+        payment_status__in=["paid", "partial"],
         check_out__gt=datetime.now().date()
     )
 
@@ -304,6 +310,14 @@ def room_detail(request, slug):
         while d < b.check_out:
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
+            
+            
+            
+        # d = b.check_in + timedelta(days=1)
+        # while d < b.check_out:
+        #     booked_dates.append(d.strftime("%Y-%m-%d"))
+        #     d += timedelta(days=1)
+
     # ===== BLOCKED DATES (ADMIN) =====
     # blocked_dates = []
     # blocks = BlockedDate.objects.all()
@@ -333,7 +347,12 @@ def room_detail(request, slug):
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         form = BookingForm(request.POST)
         if not form.is_valid():
-            return JsonResponse({"error": "Invalid form"}, status=400)
+            print("FORM ERRORS 👉", form.errors)   # 👈 IMPORTANT
+            return JsonResponse({
+                "error": "Invalid form",
+                "details": form.errors
+            }, status=400)
+            # return JsonResponse({"error": "Invalid form"}, status=400)
 
         payment_method = request.POST.get("payment_method")
 
@@ -361,15 +380,20 @@ def room_detail(request, slug):
             try:
                 with transaction.atomic():
                     booking = form.save(commit=False)
-                    booking.check_in_time = form.cleaned_data.get("check_in_time")
-                    booking.check_out_time = form.cleaned_data.get("check_out_time")
+                    # booking.check_in_time = form.cleaned_data.get("check_in_time")
+                    # booking.check_out_time = form.cleaned_data.get("check_out_time")
 
                     booking.sub_total = base_amount
                     booking.disc_price = discount
                     booking.total_amount = 0
                     booking.remaining_amount = total
-                    booking.payment_status = "pending"
-                    booking.status = "confirmed"
+                    # booking.payment_status = "pending"
+                    # booking.status = "confirmed"
+                    
+                    
+                    booking.payment_method = "farmhouse"
+                    booking.payment_status = "pending"   # 🔥 VERY IMPORTANT
+                    booking.status = "pending"  
                     booking.save()
 
                 # send_email_async(booking)
@@ -396,7 +420,8 @@ def room_detail(request, slug):
 
 
         if payment_method == "partial_razorpay":
-            pay_now = total * Decimal("0.30")
+            # pay_now = total * Decimal("0.30")
+            pay_now = (total * Decimal("0.30")).quantize(Decimal("1"))
         elif payment_method == "full_razorpay":
             pay_now = total
         else:
@@ -702,6 +727,51 @@ def create_razorpay_order(request):
 #         return JsonResponse({"status": "payment failed handled"})
 
 #     return JsonResponse({"status": "event ignored"})
+# @csrf_exempt
+# def razorpay_webhook(request):
+#     try:
+#         signature = request.headers.get("X-Razorpay-Signature")
+#         if not signature:
+#             return HttpResponse("OK", status=200)
+
+#         expected = hmac.new(
+#             settings.RAZORPAY_WEBHOOK_SECRET.encode(),
+#             request.body,
+#             hashlib.sha256
+#         ).hexdigest()
+
+#         if not hmac.compare_digest(expected, signature):
+#             return HttpResponse("OK", status=200)
+
+#         payload = json.loads(request.body)
+#         event = payload.get("event")
+
+#         if event == "payment.captured":
+#             payment = payload["payload"]["payment"]["entity"]
+
+#             Booking.objects.filter(
+#                 transaction_id=payment["order_id"]
+#             ).update(
+#                 payment_status="paid",
+#                 status="confirmed",
+#                 payment_id=payment["id"],
+#                 remaining_amount=Decimal("0.00")
+#             )
+
+#         elif event == "payment.failed":
+#             payment = payload["payload"]["payment"]["entity"]
+
+#             Booking.objects.filter(
+#                 transaction_id=payment["order_id"]
+#             ).update(
+#                 payment_status="failed",
+#                 status="cancelled"
+#             )
+
+#     except Exception:
+#         pass
+
+#     return HttpResponse("OK", status=200)
 @csrf_exempt
 def razorpay_webhook(request):
     try:
@@ -716,35 +786,58 @@ def razorpay_webhook(request):
         ).hexdigest()
 
         if not hmac.compare_digest(expected, signature):
-            return HttpResponse("OK", status=200)
+            return HttpResponse("Invalid signature", status=400)
 
         payload = json.loads(request.body)
         event = payload.get("event")
 
         if event == "payment.captured":
             payment = payload["payload"]["payment"]["entity"]
+            order_id = payment["order_id"]
 
-            Booking.objects.filter(
-                transaction_id=payment["order_id"]
-            ).update(
-                payment_status="paid",
-                status="confirmed",
-                payment_id=payment["id"],
-                remaining_amount=Decimal("0.00")
-            )
+            booking = Booking.objects.filter(
+                transaction_id=order_id
+            ).first()
+
+            if booking:
+                old_status = booking.status
+
+                if booking.payment_method == "full_razorpay":
+                    booking.payment_status = "paid"
+                    booking.remaining_amount = Decimal("0.00")
+
+                elif booking.payment_method == "partial_razorpay":
+                    booking.payment_status = "partial"
+                    booking.remaining_amount = (
+                        booking.total_amount * Decimal("0.70")
+                    )
+                booking.payment_status = "paid"
+                booking.status = "confirmed"
+                booking.payment_id = payment["id"]
+                booking.save()
+
+                # ✅ SEND EMAIL HERE (ONLY HERE)
+                send_email_async(booking, old_status)
 
         elif event == "payment.failed":
             payment = payload["payload"]["payment"]["entity"]
+            order_id = payment["order_id"]
 
-            Booking.objects.filter(
-                transaction_id=payment["order_id"]
-            ).update(
-                payment_status="failed",
-                status="cancelled"
-            )
+            booking = Booking.objects.filter(
+                transaction_id=order_id
+            ).first()
 
-    except Exception:
-        pass
+            if booking:
+                old_status = booking.status
+                booking.payment_status = "failed"
+                booking.status = "cancelled"
+                booking.save()
+
+                # Optional: send failure email
+                send_email_async(booking, old_status)
+
+    except Exception as e:
+        print("Webhook error:", e)
 
     return HttpResponse("OK", status=200)
 

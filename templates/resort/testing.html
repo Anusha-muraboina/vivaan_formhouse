@@ -6,22 +6,7 @@
 {% block content %}
 
 
-
 <style>
-
-    /* 📱 Mobile only */
-@media (max-width: 768px) {
-    .step-heading {
-        position: sticky;
-        top: 0;
-        background: #fff;
-        padding: 12px 0;
-        z-index: 10;
-        border-bottom: 1px solid #eee;
-    }
-}
-
-
     /* 🔴 Booked dates */
     .flatpickr-day.booked-date {
         background: #f57e7eff !important;
@@ -175,31 +160,16 @@
                 <div class="bg-white rounded-2xl shadow-xl p-2  md:p-8 sticky top-32">
                     <div class="text-center mb-6">
                         <div class="space-y-2">
-                            <div class="text-2xl font-bold text-gray-800">Entire Farmhouse Booking</div>
-                            <div class="flex justify-between text-sm text-gray-600 ">
+                            <div class="text-2xl font-bold text-gray-800">Entire Villa Booking</div>
+                            <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
                                 <span>Monday-Friday (Week days)</span>
                                 <span class="font-bold text-emerald-600">₹{{ pricing.weekday_price }}</span>
                             </div>
-                            <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
+                            <div class="flex justify-between text-sm text-gray-600">
                                 <span>Saturday-Sunday (Weekends)</span>
                                 <span class="font-bold text-emerald-600">₹{{ pricing.weekend_price }}</span>
                             </div>
-
-
-                            <div class="flex justify-between text-sm text-gray-600 ">
-                                <span>Check-In Time</span>
-                                <span class="font-bold text-emerald-600">12:00 PM</span>
-                            </div>
-                            <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
-                                <span>Check-Out Time</span>
-                                <span class="font-bold text-emerald-600">11:00 AM</span>
-                            </div>
-
-                            
                         </div>
-
-                
-
                     </div>
 
 
@@ -225,7 +195,7 @@
 
 <!-- =========================== -->
 <div class="border rounded-xl">
-    <div class="collapse-header step-heading" onclick="toggleCollapse('step1')">
+    <div class="collapse-header" onclick="toggleCollapse('step1')">
         1. Stay Details & Dates
     </div>
 
@@ -272,7 +242,7 @@
                         </div>
 
 
-                        {% comment %} <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> {% endcomment %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <!-- Check-in Time -->
 {% comment %} <div>
     <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
@@ -304,7 +274,7 @@
 </div> {% endcomment %}
 
 <!-- CHECK-IN TIME -->
-{% comment %} <div>
+<div>
     <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
 
     <input type="hidden" name="check_in_time" id="checkInTime">
@@ -329,7 +299,7 @@
         </button>
         <div id="timeListOut" class="time-list hidden"></div>
     </div>
-</div> {% endcomment %}
+</div>
 
 <!-- <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-In Time</label>
@@ -346,7 +316,7 @@
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Check Out Time">
                             </div> -->
-                        {% comment %} </div> {% endcomment %}
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" >
 
@@ -411,7 +381,7 @@
 
                         
 <div class="border rounded-xl">
-    <div class="collapse-header step-heading" onclick="toggleCollapse('step2')">
+    <div class="collapse-header" onclick="toggleCollapse('step2')">
         2. Guest Information
     </div>
 
@@ -571,7 +541,7 @@
 
     <!-- Header -->
     <div
-        class="collapse-header step-heading flex items-center justify-between px-6 py-5 cursor-pointer"
+        class="collapse-header flex items-center justify-between px-6 py-5 cursor-pointer"
         onclick="toggleCollapse('step3')"
     >
         <div class="flex items-center gap-3">
@@ -610,8 +580,8 @@
                     <div class="space-y-2 text-gray-600">
                         <p><strong class="text-gray-800">Check-in:</strong> <span id="reviewCheckIn"></span></p>
                         <p><strong class="text-gray-800">Check-out:</strong> <span id="reviewCheckOut"></span></p>
-                        {% comment %} <p><strong class="text-gray-800">Check-in Time:</strong> <span id="reviewCheckInTime"></span></p>
-                        <p><strong class="text-gray-800">Check-out Time:</strong> <span id="reviewCheckOutTime"></span></p> {% endcomment %}
+                        <p><strong class="text-gray-800">Check-in Time:</strong> <span id="reviewCheckInTime"></span></p>
+                        <p><strong class="text-gray-800">Check-out Time:</strong> <span id="reviewCheckOutTime"></span></p>
                     </div>
                 </div>
 
@@ -640,7 +610,7 @@
 
                 <!-- Offers -->
                 <div>
-                    <h4 class="flex  items-center gap-2 font-semibold text-gray-700 mb-3">
+                    <h4 class="flex items-center gap-2 font-semibold text-gray-700 mb-3">
                         4. Offers
                     </h4>
                     <div class="space-y-2 text-gray-600">
@@ -681,7 +651,7 @@
 
 
 <div class="border rounded-xl">
-    <div class="collapse-header mb-4 step-heading" onclick="toggleCollapse('step4')">
+    <div class="collapse-header mb-4" onclick="toggleCollapse('step4')">
         4. Payment Method & Summary
     </div>
 
@@ -891,7 +861,7 @@
 
 
 
-{% comment %} <script>
+<script>
 function toggleCollapse(id) {
     document.querySelectorAll('.collapse-body').forEach(el => {
         if (el.id === id) {
@@ -901,35 +871,7 @@ function toggleCollapse(id) {
         }
     });
 }
-</script> {% endcomment %}
-
-
-<script>
-function toggleCollapse(id) {
-    document.querySelectorAll('.collapse-body').forEach(el => {
-        el.classList.add('hidden');
-    });
-
-    const active = document.getElementById(id);
-    if (!active) return;
-
-    active.classList.remove('hidden');
-
-    // ✅ MOBILE ONLY (<= 768px)
-    if (window.innerWidth <= 768) {
-        const heading = active.querySelector(".step-heading");
-
-        setTimeout(() => {
-            (heading || active).scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        }, 50);
-    }
-}
 </script>
-
-
 
 
 <script>
@@ -946,7 +888,11 @@ function toggleCollapse(id) {
     document.getElementById("reviewExtraGuests").innerText =
         document.querySelector("input[name='extra_guest_count']").value || "0";
 
+    document.getElementById("reviewCheckInTime").innerText =
+        document.getElementById("checkInTime").value;
 
+    document.getElementById("reviewCheckOutTime").innerText =
+        document.getElementById("checkOutTime").value;
 
     document.getElementById("reviewName").innerText =
         document.querySelector("input[name='guest_name']").value;
@@ -1039,6 +985,8 @@ document.addEventListener("click", e => {
 function validateStep1() {
     const checkInDate = document.querySelector("input[name='check_in']").value;
     const checkOutDate = document.querySelector("input[name='check_out']").value;
+    const checkInTime = document.querySelector("#checkInTime").value;
+    const checkOutTime = document.querySelector("#checkOutTime").value;
 
     if (!checkInDate) {
         alert("Please select check-in date");
@@ -1050,12 +998,26 @@ function validateStep1() {
         return;
     }
 
-    if (new Date(checkOutDate) <= new Date(checkInDate)) {
-        alert("Check-out must be after check-in");
+    if (!checkInTime) {
+        alert("Please select check-in time");
+        return;
+    }
+
+    if (!checkOutTime) {
+        alert("Please select check-out time");
         return;
     }
 
     // ✅ SAME-DAY TIME VALIDATION
+    if (checkInDate === checkOutDate) {
+        const inHour = parseInt(checkInTime.split(":")[0]);
+        const outHour = parseInt(checkOutTime.split(":")[0]);
+
+        if (outHour <= inHour) {
+            alert("Check-out time must be after check-in time");
+            return;
+        }
+    }
 
     // ✅ MOVE TO STEP-2
     toggleCollapse("step2");

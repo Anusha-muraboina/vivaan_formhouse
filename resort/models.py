@@ -187,12 +187,12 @@ class Booking(models.Model):
     #     ordering = ['-created_at']
     class Meta:
         ordering = ['-created_at']
-        constraints = [
-            models.UniqueConstraint(
-                fields=["guest_email", "check_in", "check_out", "payment_method"],
-                name="unique_booking_guest_dates"
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["guest_email", "check_in", "check_out", "payment_method"],
+        #         name="unique_booking_guest_dates"
+        #     )
+        # ]
     def save(self, *args, **kwargs):
         if not self.booking_id:
             import random
