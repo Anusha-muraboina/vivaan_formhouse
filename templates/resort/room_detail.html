@@ -23,13 +23,13 @@
 
 
     /* 🔴 Booked dates */
-    .flatpickr-day.booked-date {
+  {% comment %} .flatpickr-day.booked-date {
         background: #f57e7eff !important;
-        /* red-500 */   
+       
         color: white !important;
         border: 1px solid #fb8282ff !important;
-        cursor: not-allowed;
-    }
+        cursor: pointer;
+    }  {% endcomment %}
 
     /* 🟠 Admin blocked dates */
     .flatpickr-day.blocked-date {
@@ -57,9 +57,9 @@
     }
 
     /* Disabled look */
-    .flatpickr-day.disabled {
+    {% comment %} .flatpickr-day.disabled {
         opacity: 0.6;
-    }
+    } {% endcomment %}
 </style>
 
 
@@ -180,22 +180,23 @@
                                 <span>Monday-Friday (Week days)</span>
                                 <span class="font-bold text-emerald-600">₹{{ pricing.weekday_price }}</span>
                             </div>
-                            <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
+                            <div class="flex justify-between text-sm text-gray-600  pb-2">
                                 <span>Saturday-Sunday (Weekends)</span>
                                 <span class="font-bold text-emerald-600">₹{{ pricing.weekend_price }}</span>
                             </div>
 
 
-                            <div class="flex justify-between text-sm text-gray-600 ">
+                            {% comment %} <div class="flex justify-between text-sm text-gray-600 ">
                                 <span>Check-In Time</span>
                                 <span class="font-bold text-emerald-600">12:00 PM</span>
                             </div>
                             <div class="flex justify-between text-sm text-gray-600 border-b pb-2">
                                 <span>Check-Out Time</span>
                                 <span class="font-bold text-emerald-600">11:00 AM</span>
-                            </div>
+                            </div> {% endcomment %}
 
-                            
+               
+
                         </div>
 
                 
@@ -234,21 +235,24 @@
 
 
                         <div class="flex flex-wrap gap-4 text-sm mt-3">
-                            <div class="flex items-center gap-2">
+                            {% comment %} <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 bg-green-300 rounded"></span> Selected
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 bg-[#f57e7eff] rounded"></span> Booked
-                            </div>
+                            </div> {% endcomment %}
                             <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 bg-[#f8a970ff] rounded"></span> Blocked by Admin
                             </div>
                         </div>
-
+             <p class="text-sm text-gray-600">
+    Check-In is at <span class="font-bold text-emerald-600">2:00 PM</span>
+    and Check-Out is at <span class="font-bold text-emerald-600">11:00 AM</span>.
+</p>
                         <div class="grid  grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-in Date</label>
-                                <input type="text" name="check_in"      readonly
+                                <input type="text" name="check_in"    id="check_in"  readonly
     inputmode="none"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Date" required>
@@ -256,7 +260,7 @@
 
    <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Check-out Date</label>
-                                <input type="text" name="check_out"      readonly
+                                <input type="text" name="check_out" id="check_out"      readonly
     inputmode="none"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     placeholder="Select Date" required>
@@ -1507,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-<script>
+{% comment %} <script>
     document.addEventListener('DOMContentLoaded', function () {
 
         if (typeof flatpickr === "undefined") {
@@ -1614,15 +1618,128 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("✅ Flatpickr initialized correctly (SINGLE INSTANCE)");
     });
+</script> {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    if (typeof flatpickr === "undefined") {
+        console.error("❌ Flatpickr not loaded");
+        return;
+    }
+
+    // -----------------------------
+    // DATA FROM BACKEND
+    // -----------------------------
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates-data")?.textContent || "[]"
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates-data")?.textContent || "[]"
+    );
+
+    // -----------------------------
+    // UTILS
+    // -----------------------------
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+
+    // ❗ Check-in cannot be booked or blocked
+    const disabledCheckInDates = [
+        ...new Set([...bookedDates, ...blockedDates])
+    ];
+
+    let checkInPicker;
+    let checkOutPicker;
+
+    // =============================
+    // CHECK-IN PICKER
+    // =============================
+    checkInPicker = flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+
+        // ❌ Booked + Blocked dates disabled
+        disable: disabledCheckInDates,
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            checkOutPicker.clear();
+            checkOutPicker.set("minDate", nextDay);
+        }
+    });
+
+    // =============================
+    // CHECK-OUT PICKER
+    // =============================
+    checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+
+        // ❌ Only admin blocked dates disabled
+        disable: blockedDates,
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const checkInDate = checkInPicker.selectedDates[0];
+
+            if (!checkInDate) {
+                alert("⚠️ Please select check-in date first");
+                checkOutPicker.clear();
+                return;
+            }
+
+            let current = new Date(checkInDate);
+            const end = new Date(selectedDates[0]);
+
+            // 🔥 Exclude checkout day (hotel logic)
+            end.setDate(end.getDate() - 1);
+
+            while (current <= end) {
+                const dateStr = formatDate(current);
+
+                // 🚫 Already booked
+                if (bookedDates.includes(dateStr)) {
+                    alert("❌ These dates are already booked. Please select different dates.");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                // 🚫 Admin blocked
+                if (blockedDates.includes(dateStr)) {
+                    alert("❌ These dates are blocked by admin.");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+    });
+
+    console.log("✅ Flatpickr booking rules applied successfully");
+});
 </script>
-
-
-
-
-
-
-
-
 
 
 
