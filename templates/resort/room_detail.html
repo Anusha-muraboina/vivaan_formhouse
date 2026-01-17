@@ -8,6 +8,10 @@
 
 
 <style>
+.step-heading {
+    position: sticky;
+    top: 0;
+}
 
     /* 📱 Mobile only */
 @media (max-width: 768px) {
@@ -15,9 +19,9 @@
         position: sticky;
         top: 0;
         background: #fff;
-        padding: 12px 0;
-        z-index: 10;
-        border-bottom: 1px solid #eee;
+        z-index: 20;
+        padding: 14px;
+        border-bottom: 1px solid #e5e7eb;
     }
 }
 
@@ -225,7 +229,7 @@
 
 
 <!-- =========================== -->
-<div class="border rounded-xl">
+<div class="border rounded-xl" id="step1-wrapper">
     <div class="collapse-header step-heading" onclick="toggleCollapse('step1')">
         1. Stay Details & Dates
     </div>
@@ -414,7 +418,7 @@
                         <!-- ============================= -->
 
                         
-<div class="border rounded-xl">
+<div class="border rounded-xl" id="step2-wrapper">
     <div class="collapse-header step-heading" onclick="toggleCollapse('step2')">
         2. Guest Information
     </div>
@@ -571,7 +575,7 @@
  -->
 
 
- <div class="border rounded-2xl shadow-md bg-white overflow-hidden">
+ <div class="border rounded-2xl shadow-md bg-white overflow-hidden" id="step3-wrapper">
 
     <!-- Header -->
     <div
@@ -684,7 +688,7 @@
 <!-- ========================== -->
 
 
-<div class="border rounded-xl">
+<div class="border rounded-xl" id="step4-wrapper">
     <div class="collapse-header mb-4 step-heading" onclick="toggleCollapse('step4')">
         4. Payment Method & Summary
     </div>
@@ -907,31 +911,40 @@ function toggleCollapse(id) {
 }
 </script> {% endcomment %}
 
-
 <script>
 function toggleCollapse(id) {
+
+    // Close all steps
     document.querySelectorAll('.collapse-body').forEach(el => {
         el.classList.add('hidden');
     });
 
-    const active = document.getElementById(id);
-    if (!active) return;
+    const body = document.getElementById(id);
+    if (!body) return;
 
-    active.classList.remove('hidden');
+    body.classList.remove('hidden');
 
-    // ✅ MOBILE ONLY (<= 768px)
+    // 🔥 MOBILE SCROLL FIX
     if (window.innerWidth <= 768) {
-        const heading = active.querySelector(".step-heading");
+
+        const wrapper = document.getElementById(id + "-wrapper");
+        if (!wrapper) return;
 
         setTimeout(() => {
-            (heading || active).scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+            const y =
+                wrapper.getBoundingClientRect().top +
+                window.pageYOffset -
+                12; // offset for sticky header
+
+            window.scrollTo({
+                top: y,
+                behavior: "smooth"
             });
-        }, 50);
+        }, 200);
     }
 }
 </script>
+
 
 
 
