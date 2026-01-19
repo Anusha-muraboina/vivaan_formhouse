@@ -99,34 +99,34 @@ WSGI_APPLICATION = 'resort_project.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'vivaanfarmhouse',
-        'USER': 'root',
-        'PASSWORD': 'Chinnuyadav9697',
-        'HOST': 'localhost', 
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'vivaan_db',
-#         'USER': 'vivaan_user',
-#         'PASSWORD': 'Vivaanfarmhouse@123',
-#         'HOST': 'localhost',
+#         'NAME': 'vivaanfarmhouse',
+#         'USER': 'root',
+#         'PASSWORD': 'Chinnuyadav9697',
+#         'HOST': 'localhost', 
 #         'PORT': '3306',
 #         'OPTIONS': {
-#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-#         },
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+#         }
 #     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'vivaan_db',
+        'USER': 'vivaan_user',
+        'PASSWORD': 'Vivaanfarmhouse@123',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
 
 
 
