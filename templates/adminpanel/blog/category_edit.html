@@ -1,0 +1,22 @@
+{% extends 'adminpanel/base.html' %}
+{% block content %}
+
+<h4>Edit Blog Category</h4>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input type="text" name="name" value="{{ category.name }}" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea name="description" class="form-control">{{ category.description }}</textarea>
+    </div>
+
+    <button class="btn btn-success">Update</button>
+</form>
+
+{% endblock %}

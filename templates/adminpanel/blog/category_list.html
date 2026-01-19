@@ -1,0 +1,222 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .page-container {
+        max-width: 1150px;
+        margin: auto;
+    }
+
+    /* CARD */
+    .card-box {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 15px 40px rgba(0,0,0,.08);
+        position: relative;
+    }
+
+    /* HEADER */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        margin: -28px -28px 25px -28px;
+        background: linear-gradient(135deg, #022916, #042b01);
+        border-radius: 18px 18px 0 0;
+        color: #fff;
+    }
+
+    .page-header h4 {
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ADD BUTTON */
+    .btn-add {
+        background: #ffffff;
+        color: #224abe;
+        border-radius: 30px;
+        padding: 8px 22px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: .25s;
+    }
+
+    .btn-add:hover {
+        background: #f1f4ff;
+        color: #1b3aa8;
+    }
+
+    /* TABLE */
+    table {
+        margin-top: 10px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    thead {
+        background: #f8f9fc;
+    }
+
+    th {
+        font-weight: 600;
+        color: #4a4a4a;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    td {
+        vertical-align: middle;
+        color: #555;
+    }
+
+    tbody tr:hover {
+        background: #f9fbff;
+    }
+
+    /* SLUG BADGE */
+    .badge-slug {
+        background: #eef2ff;
+        color: #4e73df;
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    /* ACTION BUTTONS — PERFECT EQUAL */
+    .action-btns {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btns a {
+        min-width: 90px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        transition: .2s ease;
+    }
+
+    .action-btns a i {
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+    .action-btns .btn-edit {
+        background: #36b9cc;
+    }
+
+    .action-btns .btn-delete {
+        background: #e74a3b;
+    }
+
+    .action-btns a:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    /* EMPTY */
+    .empty-box {
+        padding: 40px;
+        color: #999;
+        font-size: 15px;
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .action-btns {
+            flex-direction: column;
+        }
+
+        .action-btns a {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="card-box">
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <h4>
+                <i class="fa-solid fa-folder-tree"></i>
+                Blog Categories
+            </h4>
+
+            <a href="{% url 'vivaan_admin:blog_category_add' %}" class="btn btn-add">
+                <i class="fa fa-plus"></i> Add Category
+            </a>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th width="200">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+
+                        <td><strong>{{ cat.name }}</strong></td>
+
+                        <td>
+                            <span class="badge-slug">{{ cat.slug }}</span>
+                        </td>
+
+                        <td class="action-btns">
+                            <a href="{% url 'vivaan_admin:blog_category_edit' cat.id %}"
+                               class="btn-edit">
+                                <i class="fa fa-pen"></i> Edit
+                            </a>
+
+                            <a href="{% url 'vivaan_admin:blog_category_delete' cat.id %}"
+                               onclick="return confirm('Delete this category?')"
+                               class="btn-delete">
+                                <i class="fa fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center empty-box">
+                            <i class="fa-solid fa-folder-open fa-2x mb-2"></i><br>
+                            No blog categories found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

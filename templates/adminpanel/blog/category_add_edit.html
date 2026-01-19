@@ -1,0 +1,105 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .form-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.06);
+    }
+
+    .form-title {
+        font-weight: 600;
+        color: #4e73df;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        height: 46px;
+        background: #f8f9fc;
+    }
+
+    textarea.form-control {
+        height: auto;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 .15rem rgba(78,115,223,.25);
+    }
+
+    .form-footer {
+        text-align: right;
+        margin-top: 25px;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-card">
+
+        <!-- TITLE -->
+        <h4 class="form-title">
+            <i class="fa-solid fa-folder-plus me-2"></i>
+            {% if category %}
+                Edit Blog Category
+            {% else %}
+                Add Blog Category
+            {% endif %}
+        </h4>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- NAME -->
+            <div class="form-group mb-3">
+                <label>Category Name</label>
+                <input type="text"
+                       name="name"
+                       class="form-control"
+                       placeholder="Enter category name"
+                       value="{{ category.name|default:'' }}"
+                       required>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="form-group mb-3">
+                <label>Description</label>
+                <textarea name="description"
+                          rows="4"
+                          class="form-control"
+                          placeholder="Category description">{{ category.description|default:'' }}</textarea>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="form-footer">
+                <a href="{% url 'vivaan_admin:blog_category_list' %}"
+                   class="btn bg-gray-500 p-2 rounded text-white">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn  bg-green-900 p-2 rounded text-white ms-2  ">
+                    {% if category %}Update{% else %}Save{% endif %}
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

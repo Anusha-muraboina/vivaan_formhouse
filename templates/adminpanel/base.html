@@ -706,6 +706,22 @@
                     class="menu-text">Users</span></a>
             <a href="{% url 'vivaan_admin:message_list' %}" class="menu-item"><i class="fa-solid fa-envelope"></i> <span
                     class="menu-text">Messages</span></a>
+
+                    <a href="{% url 'vivaan_admin:blog_list' %}" class="menu-item">
+    <i class="fa-solid fa-blog"></i>
+    <span class="menu-text">Blogs</span>
+</a>
+
+<a href="{% url 'vivaan_admin:blog_category_list' %}" class="menu-item">
+    <i class="fa-solid fa-folder"></i>
+    <span class="menu-text">Blog Categories</span>
+</a>
+
+{% comment %} <a href="{% url 'vivaan_admin:blog_comment_list' %}" class="menu-item">
+    <i class="fa-solid fa-comments"></i>
+    <span class="menu-text">Blog Comments</span>
+</a> {% endcomment %}
+
         </nav>
         <div class="sidebar-footer">
             <a href="{% url 'vivaan_admin:logout' %}" class="menu-item" style="color: rgba(255,255,255,0.7);">

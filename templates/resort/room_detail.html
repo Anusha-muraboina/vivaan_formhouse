@@ -8,10 +8,6 @@
 
 
 <style>
-.step-heading {
-    position: sticky;
-    top: 0;
-}
 
     /* 📱 Mobile only */
 @media (max-width: 768px) {
@@ -22,6 +18,23 @@
         z-index: 20;
         padding: 14px;
         border-bottom: 1px solid #e5e7eb;
+    }
+}
+/* ===============================
+   MOBILE FLATPICKR FIX
+================================ */
+@media (max-width: 768px) {
+
+    .flatpickr-calendar {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+
+        width: 90vw !important;
+        max-width: 360px;
+
+        z-index: 99999 !important;
     }
 }
 
@@ -912,9 +925,13 @@ function toggleCollapse(id) {
 </script> {% endcomment %}
 
 <script>
+
+let checkInPicker = null;
+let checkOutPicker = null;
+
 function toggleCollapse(id) {
 
-    // Close all steps
+    // close all steps
     document.querySelectorAll('.collapse-body').forEach(el => {
         el.classList.add('hidden');
     });
@@ -924,25 +941,32 @@ function toggleCollapse(id) {
 
     body.classList.remove('hidden');
 
-    // 🔥 MOBILE SCROLL FIX
+    // init calendar only once
+    if (id === "step1") {
+        setTimeout(() => {
+            initCalendarIfNeeded();
+        }, 100);
+    }
+
+    // 📱 MOBILE FIX — SHOW HEADING
     if (window.innerWidth <= 768) {
 
         const wrapper = document.getElementById(id + "-wrapper");
-        if (!wrapper) return;
+
+        const headerOffset = 70; // height of sticky heading
+        const elementPosition = wrapper.getBoundingClientRect().top;
+        const offsetPosition =
+            elementPosition + window.pageYOffset - headerOffset;
 
         setTimeout(() => {
-            const y =
-                wrapper.getBoundingClientRect().top +
-                window.pageYOffset -
-                12; // offset for sticky header
-
             window.scrollTo({
-                top: y,
+                top: offsetPosition,
                 behavior: "smooth"
             });
-        }, 200);
+        }, 150);
     }
 }
+
 </script>
 
 
@@ -962,8 +986,6 @@ function toggleCollapse(id) {
 
     document.getElementById("reviewExtraGuests").innerText =
         document.querySelector("input[name='extra_guest_count']").value || "0";
-
-
 
     document.getElementById("reviewName").innerText =
         document.querySelector("input[name='guest_name']").value;
@@ -1157,7 +1179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Loop through each night
             while (date < outDate) {
                 let day = date.getDay();
-                if (day === 5 || day === 6) {
+                if (day === 6 || day === 0) {
                     total += weekend;
                 } else {
                     total += weekday;
@@ -1644,7 +1666,101 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+
+    function initCalendarIfNeeded() {
+
+    // prevent duplicate init
+    if (checkInPicker !== null) return;
+
+    if (typeof flatpickr === "undefined") {
+        console.error("❌ Flatpickr not loaded");
+        return;
+    }
+
+    const bookedDates = JSON.parse(
+        document.getElementById("booked-dates-data")?.textContent || "[]"
+    );
+
+    const blockedDates = JSON.parse(
+        document.getElementById("blocked-dates-data")?.textContent || "[]"
+    );
+
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+
+    const disabledCheckInDates = [
+        ...new Set([...bookedDates, ...blockedDates])
+    ];
+
+    // =============================
+    // CHECK-IN
+    // =============================
+    checkInPicker = flatpickr("input[name='check_in']", {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledCheckInDates,
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            checkOutPicker.clear();
+            checkOutPicker.set("minDate", nextDay);
+        }
+    });
+
+    // =============================
+    // CHECK-OUT
+    // =============================
+    checkOutPicker = flatpickr("input[name='check_out']", {
+        dateFormat: "Y-m-d",
+        disable: blockedDates,
+
+        onChange(selectedDates) {
+            if (!selectedDates.length) return;
+
+            const checkInDate = checkInPicker.selectedDates[0];
+
+            if (!checkInDate) {
+                alert("Please select check-in date first");
+                checkOutPicker.clear();
+                return;
+            }
+
+            let current = new Date(checkInDate);
+            const end = new Date(selectedDates[0]);
+            end.setDate(end.getDate() - 1);
+
+            while (current <= end) {
+                const d = formatDate(current);
+
+                if (bookedDates.includes(d)) {
+                    alert("These dates are already booked");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                if (blockedDates.includes(d)) {
+                    alert("These dates are blocked by admin");
+                    checkOutPicker.clear();
+                    return;
+                }
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+    });
+
+    console.log("✅ Flatpickr initialized correctly");
+}
+
+{% comment %} document.addEventListener('DOMContentLoaded', function () {
 
     if (typeof flatpickr === "undefined") {
         console.error("❌ Flatpickr not loaded");
@@ -1751,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     console.log("✅ Flatpickr booking rules applied successfully");
-});
+}); {% endcomment %}
 </script>
 
 

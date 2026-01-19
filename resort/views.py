@@ -298,13 +298,27 @@ def room_detail(request, slug):
     #     status__in=["confirmed", "pending"],
     #     check_out__gt=datetime.now().date()
     # )
+    # bookings = Booking.objects.filter(
+    #     status="confirmed",
+    #     payment_method__in=["partial_razorpay", "full_razorpay"],
+    #     payment_status__in=["paid", "partial"],
+    #     check_out__gt=datetime.now().date()
+    # )
     bookings = Booking.objects.filter(
-        status="confirmed",
-        payment_method__in=["partial_razorpay", "full_razorpay"],
-        payment_status__in=["paid", "partial"],
         check_out__gt=datetime.now().date()
+    ).filter(
+        Q(
+            payment_method__in=["partial_razorpay", "full_razorpay"],
+            payment_status__in=["paid", "partial"],
+            status="confirmed"
+        )
+        |
+        Q(
+            payment_method="farmhouse",
+            payment_status="paid",
+            status="confirmed"
+        )
     )
-
     for b in bookings:
         d = b.check_in
         while d < b.check_out:

@@ -1,0 +1,93 @@
+{% extends 'adminpanel/base.html' %}
+{% block content %}
+
+<h4>Edit Blog</h4>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="hidden" name="blog_id" value="{{ blog.id }}">
+
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            <label>Title</label>
+            <input type="text" name="title" value="{{ blog.title }}" class="form-control">
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Category</label>
+            <select name="category" class="form-control">
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if blog.category_id == cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label>Tags</label>
+            <select name="tags" class="form-control" multiple>
+                {% for tag in tags %}
+                <option value="{{ tag.id }}" {% if tag in blog.tags.all %}selected{% endif %}>
+                    {{ tag.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label>Short Description</label>
+            <textarea name="short_description" class="form-control">{{ blog.short_description }}</textarea>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label>Content</label>
+            <textarea name="content" class="form-control" rows="6">{{ blog.content }}</textarea>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Featured Image</label>
+            <input type="file" name="featured_image" class="form-control">
+            {% if blog.featured_image %}
+                <img src="{{ blog.featured_image.url }}" width="120" class="mt-2">
+            {% endif %}
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label>Status</label>
+            <select name="status" class="form-control">
+                <option value="draft" {% if blog.status == 'draft' %}selected{% endif %}>Draft</option>
+                <option value="published" {% if blog.status == 'published' %}selected{% endif %}>Published</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3 mt-4">
+            <input type="checkbox" name="is_featured" {% if blog.is_featured %}checked{% endif %}>
+            Featured
+        </div>
+
+        <hr>
+
+        <h6>SEO</h6>
+
+        <div class="col-md-4 mb-3">
+            <input type="text" name="meta_title" value="{{ blog.meta_title }}" class="form-control">
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <input type="text" name="meta_description" value="{{ blog.meta_description }}" class="form-control">
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <input type="text" name="meta_keywords" value="{{ blog.meta_keywords }}" class="form-control">
+        </div>
+
+    </div>
+
+    <button class="btn btn-success">Update Blog</button>
+
+</form>
+
+{% endblock %}

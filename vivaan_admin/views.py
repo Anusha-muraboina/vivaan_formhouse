@@ -1440,3 +1440,195 @@ def user_delete(request, pk):
 # @login_required
 # def messages(request):
 #     return render(request, "vivaan_admin/messages.html")
+
+from blog.models import Blog, BlogCategory, BlogTag, BlogComment
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_category_list(request):
+    categories = BlogCategory.objects.all()
+    return render(request, 'adminpanel/blog/category_list.html', {
+        'categories': categories
+    })
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_category_add(request):
+
+    if request.method == "POST":
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+
+        BlogCategory.objects.create(
+            name=name,
+            slug=slugify(name),
+            description=description
+        )
+
+        messages.success(request, "Blog category added successfully.")
+        return redirect('vivaan_admin:blog_category_list')
+
+    return render(request, 'adminpanel/blog/category_add_edit.html')
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_category_edit(request, pk):
+
+    category = get_object_or_404(BlogCategory, pk=pk)
+
+    if request.method == "POST":
+        category.name = request.POST.get('name')
+        category.slug = slugify(category.name)
+        category.description = request.POST.get('description')
+        category.save()
+
+        messages.success(request, "Blog category updated successfully.")
+        return redirect('vivaan_admin:blog_category_list')
+
+    return render(request, 'adminpanel/blog/category_add_edit.html', {
+        'category': category
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_category_delete(request, pk):
+    get_object_or_404(BlogCategory, pk=pk).delete()
+    messages.success(request, "Blog category deleted.")
+    return redirect('vivaan_admin:blog_category_list')
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_list(request):
+    blogs = Blog.objects.all().order_by('-created_at')
+    return render(request, 'adminpanel/blog/blog_list.html', {
+        'blogs': blogs
+    })
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_add(request):
+
+    categories = BlogCategory.objects.all()
+    tags = BlogTag.objects.all()
+
+    if request.method == "POST":
+
+        title = request.POST.get('title')
+
+        blog = Blog.objects.create(
+            title=title,
+            slug=slugify(title),
+            category_id=request.POST.get('category'),
+            short_description=request.POST.get('short_description'),
+            content=request.POST.get('content'),
+            status=request.POST.get('status'),
+            is_featured=True if request.POST.get('is_featured') else False,
+            meta_title=request.POST.get('meta_title'),
+            meta_description=request.POST.get('meta_description'),
+            meta_keywords=request.POST.get('meta_keywords'),
+            author=request.user
+        )
+
+        # publish date
+        if blog.status == "published":
+            blog.published_date = timezone.now()
+            blog.save()
+
+        # image
+        if request.FILES.get('featured_image'):
+            blog.featured_image = request.FILES.get('featured_image')
+            blog.save()
+
+        # ✅ SINGLE TAG
+        tag_id = request.POST.get('tags')
+        if tag_id:
+            blog.tags.set([tag_id])
+
+        messages.success(request, "Blog created successfully.")
+        return redirect('vivaan_admin:blog_list')
+
+    return render(request, 'adminpanel/blog/blog_form.html', {
+        'categories': categories,
+        'tags': tags
+    })
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_edit(request, pk):
+
+    blog = get_object_or_404(Blog, pk=pk)
+    categories = BlogCategory.objects.all()
+    tags = BlogTag.objects.all()
+
+    if request.method == "POST":
+
+        blog.title = request.POST.get('title')
+        blog.slug = slugify(blog.title)
+        blog.category_id = request.POST.get('category')
+        blog.short_description = request.POST.get('short_description')
+        blog.content = request.POST.get('content')
+        blog.status = request.POST.get('status')
+        blog.is_featured = True if request.POST.get('is_featured') else False
+        blog.meta_title = request.POST.get('meta_title')
+        blog.meta_description = request.POST.get('meta_description')
+        blog.meta_keywords = request.POST.get('meta_keywords')
+
+        # publish date logic
+        if blog.status == "published" and not blog.published_date:
+            blog.published_date = timezone.now()
+
+        # image update
+        if request.FILES.get('featured_image'):
+            blog.featured_image = request.FILES.get('featured_image')
+
+        blog.save()
+
+        # ✅ SINGLE TAG UPDATE
+        tag_id = request.POST.get('tags')
+
+        if tag_id:
+            blog.tags.set([tag_id])
+        else:
+            blog.tags.clear()
+
+        messages.success(request, "Blog updated successfully.")
+        return redirect('vivaan_admin:blog_list')
+
+    return render(request, 'adminpanel/blog/blog_form.html', {
+        'blog': blog,
+        'categories': categories,
+        'tags': tags
+    })
+
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_delete(request, pk):
+    get_object_or_404(Blog, pk=pk).delete()
+    messages.success(request, "Blog deleted.")
+    return redirect('vivaan_admin:blog_list')
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_comment_list(request):
+    comments = BlogComment.objects.select_related('blog').order_by('-created_at')
+    return render(request, 'adminpanel/blog/comment_list.html', {
+        'comments': comments
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_comment_approve(request, pk):
+    comment = get_object_or_404(BlogComment, pk=pk)
+    comment.is_approved = True
+    comment.save()
+    messages.success(request, "Comment approved.")
+    return redirect('vivaan_admin:blog_comment_list')
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def blog_comment_delete(request, pk):
+    get_object_or_404(BlogComment, pk=pk).delete()
+    messages.success(request, "Comment deleted.")
+    return redirect('vivaan_admin:blog_comment_list')
