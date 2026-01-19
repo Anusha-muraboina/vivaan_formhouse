@@ -212,10 +212,12 @@ def send_booking_emails(booking, old_status=None):
     user_subject = None
     user_template = None
 
-    if booking.status == "confirmed":
+    if booking.status == "pending":
+        user_subject = "Booking Received – Vivaan Farmhouse"
+        user_template = "emails/booking_pending_user.html"
+    elif booking.status == "confirmed":
         user_subject = "Booking Confirmed – Vivaan Farmhouse"
         user_template = "emails/user_booking_email.html"
-
     elif booking.status == "completed":
         user_subject = "Stay Completed – Vivaan Farmhouse"
         user_template = "emails/booking_completed_user.html"
@@ -411,8 +413,10 @@ def room_detail(request, slug):
                     booking.save()
 
                 # send_email_async(booking)
-                send_email_async(booking, old_status=None)
+                # send_email_async(booking, old_status=None)
+                send_booking_emails(booking, old_status=None)
 
+                
                 return JsonResponse({
                     "redirect": True,
                     "url": reverse("booking_confirmation", args=[booking.booking_id])

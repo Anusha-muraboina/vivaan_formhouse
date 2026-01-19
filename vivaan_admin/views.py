@@ -570,7 +570,9 @@ def admin_booking_create(request):
             booking.save()
 
             # ================= EMAIL =================
-            send_email_async(booking, old_status=None)
+            # send_email_async(booking, old_status=None)
+            send_booking_emails(booking, old_status=None)
+
 
             messages.success(request, "Booking created successfully")
             return redirect("vivaan_admin:booking_list")
@@ -628,9 +630,16 @@ def booking_edit(request, pk):
         updated_booking.save()
 
         # 📧 SEND EMAIL ONLY IF STATUS CHANGED
+        # if old_status != updated_booking.status:
+        #     send_booking_emails(updated_booking, old_status)
         if old_status != updated_booking.status:
-            send_booking_emails(updated_booking, old_status)
+            try:
+                send_booking_emails(updated_booking, old_status)
+            except Exception as e:
+                print("EMAIL ERROR:", e)
 
+        # if old_status != updated_booking.status:
+        #     send_booking_emails(updated_booking, old_status)
 
         messages.success(
             request,
