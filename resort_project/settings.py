@@ -224,7 +224,7 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
 EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
-EMAIL_HOST_PASSWORD = 'Shrikant@1234$' 
+EMAIL_HOST_PASSWORD = 'Vivaanfarmhouse.com@#22922' 
 
 DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
 ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
