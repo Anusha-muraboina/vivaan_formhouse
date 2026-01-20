@@ -203,102 +203,72 @@ razorpay_client = razorpay.Client(
 
 
 def send_booking_emails(booking, old_status=None):
-    from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
     from django.template.loader import render_to_string
+    from django.conf import settings
 
     user_subject = None
     user_template = None
 
-    # ==============================
-    # USER EMAIL LOGIC (IMPORTANT)
-    # ==============================
-    # ==========================================
-    # 1️⃣ PAYMENT FAILED
-    # ==========================================
+    # ================= PAYMENT FAILED =================
     if booking.payment_status == "failed":
-        subject = "Payment Failed – Vivaan Farmhouse"
-        template = "emails/payment_failed_user.html"
+        user_subject = "Payment Failed – Vivaan Farmhouse"
+        user_template = "emails/payment_failed_user.html"
 
-    # ==========================================
-    # 2️⃣ FARMHOUSE BOOKING CREATED
-    # ==========================================
+    # ================= FARMHOUSE BOOKING CREATED =================
     elif (
         booking.payment_method == "farmhouse"
         and booking.status == "pending"
-        and old_status is None
+        and old_status in [None, "pending"]
     ):
-        subject = "Booking Received – Pay at Farmhouse"
-        template = "emails/booking_pending_user.html"
+        user_subject = "Booking Received – Pay at Farmhouse"
+        user_template = "emails/booking_pending_user.html"
 
-    # ==========================================
-    # 3️⃣ FARMHOUSE CONFIRMED BY ADMIN
-    # ==========================================
+    # ================= FARMHOUSE CONFIRMED =================
     elif (
         booking.payment_method == "farmhouse"
         and old_status == "pending"
         and booking.status == "confirmed"
     ):
-        subject = "Booking Confirmed – Pay at Farmhouse"
-        template = "emails/user_booking_email.html"
+        user_subject = "Booking Confirmed – Vivaan Farmhouse"
+        user_template = "emails/user_booking_email.html"
 
-    # ==========================================
-    # 4️⃣ PARTIAL PAYMENT CONFIRMATION
-    # ==========================================
+    # ================= PARTIAL PAYMENT =================
     elif (
         booking.payment_method == "partial_razorpay"
         and booking.payment_status == "partial"
         and booking.status == "confirmed"
     ):
-        subject = "Booking Confirmed – Partial Payment Received"
-        template = "emails/partial_payment_confirmed.html"
+        user_subject = "Booking Confirmed – Partial Payment Received"
+        user_template = "emails/partial_payment_confirmed.html"
 
-    # ==========================================
-    # 5️⃣ FULL PAYMENT CONFIRMATION
-    # ==========================================
+    # ================= FULL PAYMENT =================
     elif (
         booking.payment_method == "full_razorpay"
         and booking.payment_status == "paid"
         and booking.status == "confirmed"
     ):
-        subject = "Booking Confirmed – Payment Successful"
-        template = "emails/full_payment_confirmed.html"
+        user_subject = "Booking Confirmed – Payment Successful"
+        user_template = "emails/full_payment_confirmed.html"
 
-    # ==========================================
-    # 6️⃣ STAY COMPLETED
-    # ==========================================
-    elif old_status != booking.status and booking.status == "completed":
-        subject = "Stay Completed – Thank You"
-        template = "emails/booking_completed_user.html"
-
-    # ==========================================
-    # 7️⃣ CANCELLED
-    # ==========================================
+    # ================= CANCELLED =================
     elif old_status != booking.status and booking.status == "cancelled":
-        subject = "Booking Cancelled – Vivaan Farmhouse"
-        template = "emails/booking_cancelled_user.html"
+        user_subject = "Booking Cancelled – Vivaan Farmhouse"
+        user_template = "emails/booking_cancelled_user.html"
 
-
-
-    # ==============================
-    # SEND USER EMAIL
-    # ==============================
+    # ================= SEND USER EMAIL =================
     if user_subject and user_template:
-        user_html = render_to_string(user_template, {
-            "booking": booking,
-            "old_status": old_status,
-        })
+        html = render_to_string(user_template, {"booking": booking})
 
-        user_email = EmailMultiAlternatives(
+        email = EmailMultiAlternatives(
             subject=user_subject,
-            body="Booking update from Vivaan Farmhouse.",
+            body="Booking update from Vivaan Farmhouse",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[booking.guest_email],
-            reply_to=[settings.EMAIL_HOST_USER],
         )
 
-        user_email.attach_alternative(user_html, "text/html")
-        user_email.send(fail_silently=False)
+        email.attach_alternative(html, "text/html")
+        email.send(fail_silently=False)
 
     # ==============================
     # ADMIN EMAIL (ONLY CONFIRMED)
@@ -661,26 +631,28 @@ def room_detail(request, slug):
         total = base_amount - discount
 
         # ================= CREATE BOOKING =================
-        booking = Booking.objects.create(
-            guest_name=form.cleaned_data["guest_name"],
-            guest_email=form.cleaned_data["guest_email"],
-            guest_phone=form.cleaned_data["guest_phone"],
+        booking, created = Booking.objects.get_or_create(
+    guest_email=form.cleaned_data["guest_email"],
+    check_in=form.cleaned_data["check_in"],
+    check_out=form.cleaned_data["check_out"],
+    payment_method=payment_method,
 
-            guest_count=form.cleaned_data["guest_count"],
-            extra_guest_count=form.cleaned_data["extra_guest_count"],
+    defaults={
+        "guest_name": form.cleaned_data["guest_name"],
+        "guest_phone": form.cleaned_data["guest_phone"],
+        "guest_count": form.cleaned_data["guest_count"],
+        "extra_guest_count": form.cleaned_data["extra_guest_count"],
 
-            check_in=form.cleaned_data["check_in"],
-            check_out=form.cleaned_data["check_out"],
+        "sub_total": base_amount,
+        "disc_price": discount,
+        "total_amount": total,
+        "remaining_amount": total,
 
-            sub_total=base_amount,
-            disc_price=discount,
-            total_amount=total,
-            remaining_amount=total,
+        "payment_status": "pending",
+        "status": "pending",
+    }
+)
 
-            payment_method=payment_method,
-            payment_status="pending",
-            status="pending",
-        )
 
         # ================= FARMHOUSE =================
         if payment_method == "farmhouse":

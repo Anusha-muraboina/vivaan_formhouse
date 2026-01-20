@@ -574,7 +574,8 @@ def admin_booking_create(request):
 
             # ================= EMAIL =================
             # send_email_async(booking, old_status=None)
-            send_booking_emails(booking, old_status=None)
+            send_booking_emails(booking, old_status="pending")
+
 
 
             messages.success(request, "Booking created successfully")
@@ -610,7 +611,9 @@ def booking_edit(request, pk):
             updated_booking = form.save(commit=False)
 
             # Safe defaults
-            updated_booking.status = updated_booking.status or "confirmed"
+            # updated_booking.status = updated_booking.status or "confirmed"
+            updated_booking.status = updated_booking.status or old_status
+
             updated_booking.payment_status = (
                 updated_booking.payment_status or old_payment_status
             )
