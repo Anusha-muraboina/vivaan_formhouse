@@ -202,34 +202,87 @@ razorpay_client = razorpay.Client(
 #     admin_email.send()
 
 
-
 def send_booking_emails(booking, old_status=None):
     from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
     from django.template.loader import render_to_string
 
-    # ================= USER EMAIL =================
     user_subject = None
     user_template = None
 
-    if booking.status == "pending":
-        user_subject = "Booking Received – Vivaan Farmhouse"
-        user_template = "emails/booking_pending_user.html"
-    elif booking.status == "confirmed":
-        user_subject = "Booking Confirmed – Vivaan Farmhouse"
-        user_template = "emails/user_booking_email.html"
-    elif booking.status == "completed":
-        user_subject = "Stay Completed – Vivaan Farmhouse"
-        user_template = "emails/booking_completed_user.html"
+    # ==============================
+    # USER EMAIL LOGIC (IMPORTANT)
+    # ==============================
+    # ==========================================
+    # 1️⃣ PAYMENT FAILED
+    # ==========================================
+    if booking.payment_status == "failed":
+        subject = "Payment Failed – Vivaan Farmhouse"
+        template = "emails/payment_failed_user.html"
 
-    elif booking.status == "cancelled":
-        user_subject = "Booking Cancelled – Vivaan Farmhouse"
-        user_template = "emails/booking_cancelled_user.html"
+    # ==========================================
+    # 2️⃣ FARMHOUSE BOOKING CREATED
+    # ==========================================
+    elif (
+        booking.payment_method == "farmhouse"
+        and booking.status == "pending"
+        and old_status is None
+    ):
+        subject = "Booking Received – Pay at Farmhouse"
+        template = "emails/booking_pending_user.html"
 
-    elif booking.payment_status == "failed":
-        user_subject = "Payment Failed – Vivaan Farmhouse"
-        user_template = "emails/payment_failed_user.html"
+    # ==========================================
+    # 3️⃣ FARMHOUSE CONFIRMED BY ADMIN
+    # ==========================================
+    elif (
+        booking.payment_method == "farmhouse"
+        and old_status == "pending"
+        and booking.status == "confirmed"
+    ):
+        subject = "Booking Confirmed – Pay at Farmhouse"
+        template = "emails/user_booking_email.html"
 
+    # ==========================================
+    # 4️⃣ PARTIAL PAYMENT CONFIRMATION
+    # ==========================================
+    elif (
+        booking.payment_method == "partial_razorpay"
+        and booking.payment_status == "partial"
+        and booking.status == "confirmed"
+    ):
+        subject = "Booking Confirmed – Partial Payment Received"
+        template = "emails/partial_payment_confirmed.html"
+
+    # ==========================================
+    # 5️⃣ FULL PAYMENT CONFIRMATION
+    # ==========================================
+    elif (
+        booking.payment_method == "full_razorpay"
+        and booking.payment_status == "paid"
+        and booking.status == "confirmed"
+    ):
+        subject = "Booking Confirmed – Payment Successful"
+        template = "emails/full_payment_confirmed.html"
+
+    # ==========================================
+    # 6️⃣ STAY COMPLETED
+    # ==========================================
+    elif old_status != booking.status and booking.status == "completed":
+        subject = "Stay Completed – Thank You"
+        template = "emails/booking_completed_user.html"
+
+    # ==========================================
+    # 7️⃣ CANCELLED
+    # ==========================================
+    elif old_status != booking.status and booking.status == "cancelled":
+        subject = "Booking Cancelled – Vivaan Farmhouse"
+        template = "emails/booking_cancelled_user.html"
+
+
+
+    # ==============================
+    # SEND USER EMAIL
+    # ==============================
     if user_subject and user_template:
         user_html = render_to_string(user_template, {
             "booking": booking,
@@ -243,12 +296,17 @@ def send_booking_emails(booking, old_status=None):
             to=[booking.guest_email],
             reply_to=[settings.EMAIL_HOST_USER],
         )
+
         user_email.attach_alternative(user_html, "text/html")
         user_email.send(fail_silently=False)
 
-    # ================= ADMIN EMAIL =================
+    # ==============================
+    # ADMIN EMAIL (ONLY CONFIRMED)
+    # ==============================
     if booking.status in ["confirmed", "completed"]:
+
         admin_subject = f"Booking {booking.status.title()} – {booking.booking_id}"
+
         admin_template = (
             "emails/admin_booking_email.html"
             if booking.status == "confirmed"
@@ -267,8 +325,82 @@ def send_booking_emails(booking, old_status=None):
             to=[settings.ADMIN_EMAIL],
             cc=settings.CC_EMAIL,
         )
+
         admin_email.attach_alternative(admin_html, "text/html")
         admin_email.send(fail_silently=False)
+
+# def send_booking_emails(booking, old_status=None):
+#     from django.conf import settings
+#     from django.core.mail import EmailMultiAlternatives
+#     from django.template.loader import render_to_string
+
+#     # ================= USER EMAIL =================
+#     user_subject = None
+#     user_template = None
+
+
+#     if booking.payment_status == "failed":
+#         subject = "Payment Failed – Vivaan Farmhouse"
+#         template = "emails/payment_failed_user.html"
+
+#     elif booking.status == "pending":
+#         subject = "Booking Received – Vivaan Farmhouse"
+#         template = "emails/booking_pending_user.html"
+
+#     elif booking.status == "confirmed":
+#         user_subject = "Booking Confirmed – Vivaan Farmhouse"
+#         user_template = "emails/user_booking_email.html"
+#     elif booking.status == "completed":
+#         user_subject = "Stay Completed – Vivaan Farmhouse"
+#         user_template = "emails/booking_completed_user.html"
+
+#     elif booking.status == "cancelled":
+#         user_subject = "Booking Cancelled – Vivaan Farmhouse"
+#         user_template = "emails/booking_cancelled_user.html"
+
+#     # elif booking.payment_status == "failed":
+#     #     user_subject = "Payment Failed – Vivaan Farmhouse"
+#     #     user_template = "emails/payment_failed_user.html"
+
+#     if user_subject and user_template:
+#         user_html = render_to_string(user_template, {
+#             "booking": booking,
+#             "old_status": old_status,
+#         })
+
+#         user_email = EmailMultiAlternatives(
+#             subject=user_subject,
+#             body="Booking update from Vivaan Farmhouse.",
+#             from_email=settings.DEFAULT_FROM_EMAIL,
+#             to=[booking.guest_email],
+#             reply_to=[settings.EMAIL_HOST_USER],
+#         )
+#         user_email.attach_alternative(user_html, "text/html")
+#         user_email.send(fail_silently=False)
+
+#     # ================= ADMIN EMAIL =================
+#     if booking.status in ["confirmed", "completed"]:
+#         admin_subject = f"Booking {booking.status.title()} – {booking.booking_id}"
+#         admin_template = (
+#             "emails/admin_booking_email.html"
+#             if booking.status == "confirmed"
+#             else "emails/booking_completed_admin.html"
+#         )
+
+#         admin_html = render_to_string(admin_template, {
+#             "booking": booking,
+#             "old_status": old_status,
+#         })
+
+#         admin_email = EmailMultiAlternatives(
+#             subject=admin_subject,
+#             body="Booking status update.",
+#             from_email=settings.DEFAULT_FROM_EMAIL,
+#             to=[settings.ADMIN_EMAIL],
+#             cc=settings.CC_EMAIL,
+#         )
+#         admin_email.attach_alternative(admin_html, "text/html")
+#         admin_email.send(fail_silently=False)
 
 import threading
 
@@ -291,87 +423,229 @@ def send_email_async(booking, old_status=None):
 
 
 
+# def room_detail(request, slug):
+#     room_category = get_object_or_404(RoomCategory, slug=slug)
+
+#     # ===== BOOKED DATES =====
+#     booked_dates = []
+#     # bookings = Booking.objects.filter(
+#     #     status__in=["confirmed", "pending"],
+#     #     check_out__gt=datetime.now().date()
+#     # )
+#     # bookings = Booking.objects.filter(
+#     #     status="confirmed",
+#     #     payment_method__in=["partial_razorpay", "full_razorpay"],
+#     #     payment_status__in=["paid", "partial"],
+#     #     check_out__gt=datetime.now().date()
+#     # )
+#     bookings = Booking.objects.filter(
+#         check_out__gt=datetime.now().date()
+#     ).filter(
+#         Q(
+#             payment_method__in=["partial_razorpay", "full_razorpay"],
+#             payment_status__in=["paid", "partial"],
+#             status="confirmed"
+#         )
+#         |
+#         Q(
+#             payment_method="farmhouse",
+#             payment_status="paid",
+#             status="confirmed"
+#         )
+#     )
+#     for b in bookings:
+#         d = b.check_in
+#         while d < b.check_out:
+#             booked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+            
+            
+            
+#         # d = b.check_in + timedelta(days=1)
+#         # while d < b.check_out:
+#         #     booked_dates.append(d.strftime("%Y-%m-%d"))
+#         #     d += timedelta(days=1)
+
+#     # ===== BLOCKED DATES (ADMIN) =====
+#     # blocked_dates = []
+#     # blocks = BlockedDate.objects.all()
+
+#     # for block in blocks:
+#     #     d = block.start_date
+#     #     while d <= block.end_date:
+#     #         blocked_dates.append(d.strftime("%Y-%m-%d"))
+#     #         d += timedelta(days=1)
+#     # pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+
+
+# # ===== BLOCKED DATES (ADMIN) — FIXED =====
+# # ===== BLOCKED DATES (ADMIN) — FINAL FIX =====
+#     blocked_dates = []
+#     blocks = BlockedDate.objects.all()
+
+#     for block in blocks:
+#         current = block.start_date
+#         while current <= block.end_date:   # ✅ MUST BE <=
+#             blocked_dates.append(current.strftime("%Y-%m-%d"))
+#             current += timedelta(days=1)
+
+#     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+
+#     # ===== AJAX SUBMIT =====
+#     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+#         form = BookingForm(request.POST)
+#         if not form.is_valid():
+#             print("FORM ERRORS 👉", form.errors)   # 👈 IMPORTANT
+#             return JsonResponse({
+#                 "error": "Invalid form",
+#                 "details": form.errors
+#             }, status=400)
+#             # return JsonResponse({"error": "Invalid form"}, status=400)
+
+#         payment_method = request.POST.get("payment_method")
+
+#         base_amount = calculate_booking_cost(
+#             form.cleaned_data["check_in"],
+#             form.cleaned_data["check_out"],
+#             form.cleaned_data["guest_count"],
+#             form.cleaned_data["extra_guest_count"],
+#         )
+
+#         discount = Decimal("0.00")
+#         if form.cleaned_data.get("coupon_code"):
+#             try:
+#                 coupon = Coupon.objects.get(
+#                     code__iexact=form.cleaned_data["coupon_code"],
+#                     is_active=True
+#                 )
+#                 discount = coupon.discount_amount
+#             except Coupon.DoesNotExist:
+#                 pass
+
+#         total = base_amount - discount
+
+#         if payment_method == "farmhouse":
+#             try:
+#                 with transaction.atomic():
+#                     booking = form.save(commit=False)
+#                     # booking.check_in_time = form.cleaned_data.get("check_in_time")
+#                     # booking.check_out_time = form.cleaned_data.get("check_out_time")
+
+#                     booking.sub_total = base_amount
+#                     booking.disc_price = discount
+#                     booking.total_amount = 0
+#                     booking.remaining_amount = total
+#                     # booking.payment_status = "pending"
+#                     # booking.status = "confirmed"
+                    
+                    
+#                     booking.payment_method = "farmhouse"
+#                     booking.payment_status = "pending"   # 🔥 VERY IMPORTANT
+#                     booking.status = "pending"  
+#                     booking.save()
+
+#                 # send_email_async(booking)
+#                 # send_email_async(booking, old_status=None)
+#                 # send_booking_emails(booking, old_status=None)
+#                 send_email_async(booking, old_status=None)
+
+
+                
+#                 return JsonResponse({
+#                     "redirect": True,
+#                     "url": reverse("booking_confirmation", args=[booking.booking_id])
+#                 })
+
+#             except IntegrityError:
+#                 # booking already exists, fetch it
+#                 booking = Booking.objects.get(
+#                     guest_email=form.cleaned_data["guest_email"],
+#                     check_in=form.cleaned_data["check_in"],
+#                     check_out=form.cleaned_data["check_out"],
+#                     payment_method="farmhouse"
+#                 )
+
+#                 return JsonResponse({
+#                     "redirect": True,
+#                     "url": reverse("booking_confirmation", args=[booking.booking_id])
+#                 })
+
+
+#         if payment_method == "partial_razorpay":
+#             # pay_now = total * Decimal("0.30")
+#             pay_now = (total * Decimal("0.30")).quantize(Decimal("1"))
+#         elif payment_method == "full_razorpay":
+#             pay_now = total
+#         else:
+#             pay_now = Decimal("0.00")
+            
+            
+#         # ================= RAZORPAY =================
+#         request.session["pending_booking"] = {
+#             "data": request.POST.dict(),
+#             "base": str(base_amount),
+#             "discount": str(discount),
+#             "total": str(total),
+#             "pay_now": str(pay_now),
+#         }
+#         request.session.modified = True
+#         return JsonResponse({
+#             "razorpay": True,
+#             "amount": float(pay_now)
+#         })
+
+#     # ===== NORMAL PAGE LOAD =====
+#     return render(request, "resort/room_detail.html", {
+#         "room_category": room_category,
+#         "form": BookingForm(),
+#         "booked_dates": booked_dates,
+#         "blocked_dates": blocked_dates, 
+#         "pricing": pricing,
+#         "extra_price": float(pricing.extra_guest_price),
+#     })
+
 def room_detail(request, slug):
     room_category = get_object_or_404(RoomCategory, slug=slug)
 
-    # ===== BOOKED DATES =====
+    # ================= BOOKED DATES =================
     booked_dates = []
-    # bookings = Booking.objects.filter(
-    #     status__in=["confirmed", "pending"],
-    #     check_out__gt=datetime.now().date()
-    # )
-    # bookings = Booking.objects.filter(
-    #     status="confirmed",
-    #     payment_method__in=["partial_razorpay", "full_razorpay"],
-    #     payment_status__in=["paid", "partial"],
-    #     check_out__gt=datetime.now().date()
-    # )
-    bookings = Booking.objects.filter(
-        check_out__gt=datetime.now().date()
-    ).filter(
-        Q(
-            payment_method__in=["partial_razorpay", "full_razorpay"],
-            payment_status__in=["paid", "partial"],
-            status="confirmed"
-        )
-        |
-        Q(
-            payment_method="farmhouse",
-            payment_status="paid",
-            status="confirmed"
-        )
+
+    confirmed_bookings = Booking.objects.filter(
+        check_out__gt=datetime.now().date(),
+        status="confirmed"
     )
-    for b in bookings:
-        d = b.check_in
-        while d < b.check_out:
+
+    for booking in confirmed_bookings:
+        d = booking.check_in
+        while d < booking.check_out:
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
-            
-            
-            
-        # d = b.check_in + timedelta(days=1)
-        # while d < b.check_out:
-        #     booked_dates.append(d.strftime("%Y-%m-%d"))
-        #     d += timedelta(days=1)
 
-    # ===== BLOCKED DATES (ADMIN) =====
-    # blocked_dates = []
-    # blocks = BlockedDate.objects.all()
-
-    # for block in blocks:
-    #     d = block.start_date
-    #     while d <= block.end_date:
-    #         blocked_dates.append(d.strftime("%Y-%m-%d"))
-    #         d += timedelta(days=1)
-    # pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
-
-
-# ===== BLOCKED DATES (ADMIN) — FIXED =====
-# ===== BLOCKED DATES (ADMIN) — FINAL FIX =====
+    # ================= BLOCKED DATES =================
     blocked_dates = []
-    blocks = BlockedDate.objects.all()
 
-    for block in blocks:
-        current = block.start_date
-        while current <= block.end_date:   # ✅ MUST BE <=
-            blocked_dates.append(current.strftime("%Y-%m-%d"))
-            current += timedelta(days=1)
+    for block in BlockedDate.objects.all():
+        d = block.start_date
+        while d <= block.end_date:
+            blocked_dates.append(d.strftime("%Y-%m-%d"))
+            d += timedelta(days=1)
 
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
-    # ===== AJAX SUBMIT =====
+    # ================= AJAX BOOKING =================
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+
         form = BookingForm(request.POST)
+
         if not form.is_valid():
-            print("FORM ERRORS 👉", form.errors)   # 👈 IMPORTANT
             return JsonResponse({
                 "error": "Invalid form",
                 "details": form.errors
             }, status=400)
-            # return JsonResponse({"error": "Invalid form"}, status=400)
 
         payment_method = request.POST.get("payment_method")
 
+        # ================= PRICE =================
         base_amount = calculate_booking_cost(
             form.cleaned_data["check_in"],
             form.cleaned_data["check_out"],
@@ -380,96 +654,69 @@ def room_detail(request, slug):
         )
 
         discount = Decimal("0.00")
-        if form.cleaned_data.get("coupon_code"):
-            try:
-                coupon = Coupon.objects.get(
-                    code__iexact=form.cleaned_data["coupon_code"],
-                    is_active=True
-                )
-                discount = coupon.discount_amount
-            except Coupon.DoesNotExist:
-                pass
+        coupon = form.cleaned_data.get("coupon_code")
+        if coupon:
+            discount = coupon.discount_amount
 
         total = base_amount - discount
 
+        # ================= CREATE BOOKING =================
+        booking = Booking.objects.create(
+            guest_name=form.cleaned_data["guest_name"],
+            guest_email=form.cleaned_data["guest_email"],
+            guest_phone=form.cleaned_data["guest_phone"],
+
+            guest_count=form.cleaned_data["guest_count"],
+            extra_guest_count=form.cleaned_data["extra_guest_count"],
+
+            check_in=form.cleaned_data["check_in"],
+            check_out=form.cleaned_data["check_out"],
+
+            sub_total=base_amount,
+            disc_price=discount,
+            total_amount=total,
+            remaining_amount=total,
+
+            payment_method=payment_method,
+            payment_status="pending",
+            status="pending",
+        )
+
+        # ================= FARMHOUSE =================
         if payment_method == "farmhouse":
-            try:
-                with transaction.atomic():
-                    booking = form.save(commit=False)
-                    # booking.check_in_time = form.cleaned_data.get("check_in_time")
-                    # booking.check_out_time = form.cleaned_data.get("check_out_time")
 
-                    booking.sub_total = base_amount
-                    booking.disc_price = discount
-                    booking.total_amount = 0
-                    booking.remaining_amount = total
-                    # booking.payment_status = "pending"
-                    # booking.status = "confirmed"
-                    
-                    
-                    booking.payment_method = "farmhouse"
-                    booking.payment_status = "pending"   # 🔥 VERY IMPORTANT
-                    booking.status = "pending"  
-                    booking.save()
+            # send booking received email
+            send_email_async(booking, old_status=None)
 
-                # send_email_async(booking)
-                # send_email_async(booking, old_status=None)
-                send_booking_emails(booking, old_status=None)
+            return JsonResponse({
+                "redirect": True,
+                "url": reverse("booking_confirmation", args=[booking.booking_id])
+            })
 
-                
-                return JsonResponse({
-                    "redirect": True,
-                    "url": reverse("booking_confirmation", args=[booking.booking_id])
-                })
-
-            except IntegrityError:
-                # booking already exists, fetch it
-                booking = Booking.objects.get(
-                    guest_email=form.cleaned_data["guest_email"],
-                    check_in=form.cleaned_data["check_in"],
-                    check_out=form.cleaned_data["check_out"],
-                    payment_method="farmhouse"
-                )
-
-                return JsonResponse({
-                    "redirect": True,
-                    "url": reverse("booking_confirmation", args=[booking.booking_id])
-                })
-
-
-        if payment_method == "partial_razorpay":
-            # pay_now = total * Decimal("0.30")
-            pay_now = (total * Decimal("0.30")).quantize(Decimal("1"))
-        elif payment_method == "full_razorpay":
-            pay_now = total
-        else:
-            pay_now = Decimal("0.00")
-            
-            
         # ================= RAZORPAY =================
-        request.session["pending_booking"] = {
-            "data": request.POST.dict(),
-            "base": str(base_amount),
-            "discount": str(discount),
-            "total": str(total),
-            "pay_now": str(pay_now),
-        }
+        if payment_method == "partial_razorpay":
+            pay_now = (total * Decimal("0.30")).quantize(Decimal("1"))
+        else:  # full payment
+            pay_now = total
+
+        # store only booking id
+        request.session["booking_id"] = booking.booking_id
         request.session.modified = True
+
         return JsonResponse({
             "razorpay": True,
             "amount": float(pay_now)
         })
 
-    # ===== NORMAL PAGE LOAD =====
+    # ================= PAGE LOAD =================
     return render(request, "resort/room_detail.html", {
         "room_category": room_category,
         "form": BookingForm(),
         "booked_dates": booked_dates,
-        "blocked_dates": blocked_dates, 
+        "blocked_dates": blocked_dates,
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
     })
-
 
     
 # @csrf_exempt
@@ -597,29 +844,61 @@ def room_detail(request, slug):
 #         "amount": order["amount"]
 #     })
 
+
 @csrf_exempt
 def create_razorpay_order(request):
-    session = request.session.get("pending_booking")
-    if not session:
-        return JsonResponse({"error": "Session expired"}, status=400)
 
-    pay_now = Decimal(session["pay_now"])
+    booking_id = request.session.get("booking_id")
+
+    if not booking_id:
+        return JsonResponse({"error": "Booking not found"}, status=400)
+
+    booking = get_object_or_404(Booking, booking_id=booking_id)
+
+    amount = booking.total_amount
+
+    if booking.payment_method == "partial_razorpay":
+        amount = booking.total_amount * Decimal("0.30")
 
     order = razorpay_client.order.create({
-        "amount": int(pay_now * 100),
+        "amount": int(amount * 100),
         "currency": "INR",
         "payment_capture": 1
     })
 
-    # ✅ STORE order_id in session ONLY
-    request.session["razorpay_order_id"] = order["id"]
-    request.session.modified = True
+    booking.transaction_id = order["id"]
+    booking.save(update_fields=["transaction_id"])
 
     return JsonResponse({
         "order_id": order["id"],
         "key": settings.RAZORPAY_KEY_ID,
         "amount": order["amount"]
     })
+
+
+# @csrf_exempt
+# def create_razorpay_order(request):
+#     session = request.session.get("pending_booking")
+#     if not session:
+#         return JsonResponse({"error": "Session expired"}, status=400)
+
+#     pay_now = Decimal(session["pay_now"])
+
+#     order = razorpay_client.order.create({
+#         "amount": int(pay_now * 100),
+#         "currency": "INR",
+#         "payment_capture": 1
+#     })
+
+#     # ✅ STORE order_id in session ONLY
+#     request.session["razorpay_order_id"] = order["id"]
+#     request.session.modified = True
+
+#     return JsonResponse({
+#         "order_id": order["id"],
+#         "key": settings.RAZORPAY_KEY_ID,
+#         "amount": order["amount"]
+#     })
 
 # @csrf_exempt
 # def verify_razorpay_payment(request):
@@ -814,80 +1093,127 @@ def create_razorpay_order(request):
 
 #     return HttpResponse("OK", status=200)
 
+# @csrf_exempt
+# def razorpay_webhook(request):
+#     try:
+#         signature = request.headers.get("X-Razorpay-Signature")
+#         if not signature:
+#             return HttpResponse("OK", status=200)
+
+#         expected = hmac.new(
+#             settings.RAZORPAY_WEBHOOK_SECRET.encode(),
+#             request.body,
+#             hashlib.sha256
+#         ).hexdigest()
+
+#         if not hmac.compare_digest(expected, signature):
+#             return HttpResponse("Invalid signature", status=400)
+
+#         payload = json.loads(request.body)
+#         event = payload.get("event")
+
+#         if event == "payment.captured":
+#             payment = payload["payload"]["payment"]["entity"]
+
+#             order_id = payment["order_id"]
+#             payment_id = payment["id"]
+
+#             session = request.session.get("pending_booking")
+#             if not session:
+#                 return HttpResponse("Session missing", status=200)
+
+#             data = session["data"]
+
+#             # 🔥 CREATE BOOKING ONLY HERE
+#             booking = Booking.objects.create(
+#                 guest_name=data["guest_name"],
+#                 guest_email=data["guest_email"],
+#                 guest_phone=data["guest_phone"],
+#                 guest_count=data["guest_count"],
+#                 extra_guest_count=data.get("extra_guest_count", 0),
+
+#                 check_in=data["check_in"],
+#                 check_out=data["check_out"],
+
+#                 sub_total=Decimal(session["base"]),
+#                 disc_price=Decimal(session["discount"]),
+#                 total_amount=Decimal(session["total"]),
+#                 remaining_amount=(
+#                     Decimal(session["total"]) * Decimal("0.70")
+#                     if data["payment_method"] == "partial_razorpay"
+#                     else Decimal("0.00")
+#                 ),
+
+#                 payment_method=data["payment_method"],
+#                 payment_status="paid",
+#                 status="confirmed",
+
+#                 transaction_id=order_id,
+#                 payment_id=payment_id,
+#             )
+
+#             # ✅ SEND EMAIL
+#             send_email_async(booking)
+
+#             # ✅ CLEAN SESSION
+#             del request.session["pending_booking"]
+#             request.session.modified = True
+
+#         elif event == "payment.failed":
+#             # ❌ DO NOTHING — NO BOOKING CREATED
+#             pass
+
+#     except Exception as e:
+#         print("Webhook error:", e)
+
+#     return HttpResponse("OK", status=200)
 @csrf_exempt
 def razorpay_webhook(request):
-    try:
-        signature = request.headers.get("X-Razorpay-Signature")
-        if not signature:
-            return HttpResponse("OK", status=200)
 
-        expected = hmac.new(
-            settings.RAZORPAY_WEBHOOK_SECRET.encode(),
-            request.body,
-            hashlib.sha256
-        ).hexdigest()
+    payload = json.loads(request.body)
+    event = payload.get("event")
 
-        if not hmac.compare_digest(expected, signature):
-            return HttpResponse("Invalid signature", status=400)
+    if event == "payment.captured":
 
-        payload = json.loads(request.body)
-        event = payload.get("event")
+        payment = payload["payload"]["payment"]["entity"]
+        booking = Booking.objects.filter(
+            transaction_id=payment["order_id"]
+        ).first()
 
-        if event == "payment.captured":
-            payment = payload["payload"]["payment"]["entity"]
+        if booking:
+            old_status = booking.status
 
-            order_id = payment["order_id"]
-            payment_id = payment["id"]
+            if booking.payment_method == "partial_razorpay":
+                booking.payment_status = "partial"
+                booking.remaining_amount = booking.total_amount * Decimal("0.70")
+            else:
+                booking.payment_status = "paid"
+                booking.remaining_amount = Decimal("0.00")
 
-            session = request.session.get("pending_booking")
-            if not session:
-                return HttpResponse("Session missing", status=200)
+            booking.status = "confirmed"
+            booking.payment_id = payment["id"]
+            booking.save()
 
-            data = session["data"]
+            send_email_async(booking, old_status)
 
-            # 🔥 CREATE BOOKING ONLY HERE
-            booking = Booking.objects.create(
-                guest_name=data["guest_name"],
-                guest_email=data["guest_email"],
-                guest_phone=data["guest_phone"],
-                guest_count=data["guest_count"],
-                extra_guest_count=data.get("extra_guest_count", 0),
+    elif event == "payment.failed":
 
-                check_in=data["check_in"],
-                check_out=data["check_out"],
+        payment = payload["payload"]["payment"]["entity"]
+        booking = Booking.objects.filter(
+            transaction_id=payment["order_id"]
+        ).first()
 
-                sub_total=Decimal(session["base"]),
-                disc_price=Decimal(session["discount"]),
-                total_amount=Decimal(session["total"]),
-                remaining_amount=(
-                    Decimal(session["total"]) * Decimal("0.70")
-                    if data["payment_method"] == "partial_razorpay"
-                    else Decimal("0.00")
-                ),
+        if booking:
+            booking.payment_status = "failed"
+            booking.status = "cancelled"
+            booking.save()
 
-                payment_method=data["payment_method"],
-                payment_status="paid",
-                status="confirmed",
-
-                transaction_id=order_id,
-                payment_id=payment_id,
-            )
-
-            # ✅ SEND EMAIL
             send_email_async(booking)
+#     except Exception as e:
+#         print("Webhook error:", e)
 
-            # ✅ CLEAN SESSION
-            del request.session["pending_booking"]
-            request.session.modified = True
+    return HttpResponse("OK")
 
-        elif event == "payment.failed":
-            # ❌ DO NOTHING — NO BOOKING CREATED
-            pass
-
-    except Exception as e:
-        print("Webhook error:", e)
-
-    return HttpResponse("OK", status=200)
 
 # @csrf_exempt
 # def razorpay_webhook(request):
@@ -995,10 +1321,26 @@ def payment_processing(request):
 #     return JsonResponse({"ready": False})
 
 
+# def check_booking_status(request):
+#     order_id = request.GET.get("order_id")
+#     if not order_id:
+#         return JsonResponse({"ready": False})
+
+#     booking = Booking.objects.filter(
+#         transaction_id=order_id,
+#         payment_status="paid"
+#     ).first()
+
+#     if booking:
+#         return JsonResponse({
+#             "ready": True,
+#             "booking_id": booking.booking_id
+#         })
+
+#     return JsonResponse({"ready": False})
+
 def check_booking_status(request):
     order_id = request.GET.get("order_id")
-    if not order_id:
-        return JsonResponse({"ready": False})
 
     booking = Booking.objects.filter(
         transaction_id=order_id,
@@ -1012,7 +1354,6 @@ def check_booking_status(request):
         })
 
     return JsonResponse({"ready": False})
-
 
 
 def validate_coupon(request):

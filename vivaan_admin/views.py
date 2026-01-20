@@ -543,10 +543,13 @@ def admin_booking_create(request):
             booking = form.save(commit=False)
 
             # ================= DEFAULTS =================
-            booking.payment_status = booking.payment_status or "pending"
-            booking.payment_method = booking.payment_method or "farmhouse"
-            booking.status = booking.status or "confirmed"
-
+            # booking.payment_status = booking.payment_status or "pending"
+            # booking.payment_method = booking.payment_method or "farmhouse"
+            # booking.status = booking.status or "confirmed"
+            # ================= FORCE VALUES =================
+            booking.status = (booking.status or "confirmed").strip().lower()
+            booking.payment_status = (booking.payment_status or "pending").strip().lower()
+            booking.payment_method = (booking.payment_method or "farmhouse").strip().lower()
             # ================= PRICE =================
             nights = (booking.check_out - booking.check_in).days
             base = pricing.weekday_price * nights
@@ -589,70 +592,121 @@ def admin_booking_create(request):
 
 
 
-
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def booking_edit(request, pk):
 
     booking = get_object_or_404(Booking, pk=pk)
-    old_status = booking.status  # 🔑 capture old status
 
-    # ================= BOOKED DATES (EXCLUDE CURRENT) =================
-    booked_dates = set()
-    bookings = Booking.objects.filter(
-        status__in=["confirmed", "pending"]
-    ).exclude(pk=pk)
+    # 🔑 VERY IMPORTANT (before form)
+    old_status = booking.status
+    old_payment_status = booking.payment_status
 
-    for b in bookings:
-        d = b.check_in
-        while d < b.check_out:
-            booked_dates.add(d.isoformat())
-            d += timedelta(days=1)
+    # ================= FORM =================
+    if request.method == "POST":
+        form = AdminBookingForm(request.POST, instance=booking)
 
-    # ================= BLOCKED DATES =================
-    blocked_dates = set()
-    for block in BlockedDate.objects.all():
-        d = block.start_date
-        while d <= block.end_date:
-            blocked_dates.add(d.isoformat())
-            d += timedelta(days=1)
+        if form.is_valid():
+            updated_booking = form.save(commit=False)
 
-    form = AdminBookingForm(request.POST or None, instance=booking)
+            # Safe defaults
+            updated_booking.status = updated_booking.status or "confirmed"
+            updated_booking.payment_status = (
+                updated_booking.payment_status or old_payment_status
+            )
 
-    if form.is_valid():
-        updated_booking = form.save(commit=False)
+            updated_booking.save()
 
-        # Defaults (safe)
-        updated_booking.payment_status = updated_booking.payment_status or "pending"
-        updated_booking.payment_method = updated_booking.payment_method or "farmhouse"
-        updated_booking.status = updated_booking.status or "confirmed"
+            # ================= EMAIL LOGIC =================
+            if (
+                old_status != updated_booking.status
+                or old_payment_status != updated_booking.payment_status
+            ):
+                try:
+                    send_booking_emails(
+                        updated_booking,
+                        old_status=old_status
+                    )
+                except Exception as e:
+                    print("EMAIL ERROR:", e)
 
-        updated_booking.save()
+            messages.success(
+                request,
+                f"Booking {updated_booking.booking_id} updated successfully."
+            )
+            return redirect("vivaan_admin:booking_list")
 
-        # 📧 SEND EMAIL ONLY IF STATUS CHANGED
-        # if old_status != updated_booking.status:
-        #     send_booking_emails(updated_booking, old_status)
-        if old_status != updated_booking.status:
-            try:
-                send_booking_emails(updated_booking, old_status)
-            except Exception as e:
-                print("EMAIL ERROR:", e)
-
-        # if old_status != updated_booking.status:
-        #     send_booking_emails(updated_booking, old_status)
-
-        messages.success(
-            request,
-            f"Booking {updated_booking.booking_id} updated successfully."
-        )
-        return redirect("vivaan_admin:booking_list")
+    else:
+        form = AdminBookingForm(instance=booking)
 
     return render(request, "adminpanel/booking_form.html", {
         "form": form,
         "booking": booking,
-        "booked_dates": sorted(booked_dates),
-        "blocked_dates": sorted(blocked_dates),
     })
+
+# @login_required(login_url="vivaan_admin:login")
+# @user_passes_test(is_admin)
+# def booking_edit(request, pk):
+
+#     booking = get_object_or_404(Booking, pk=pk)
+#     old_status = booking.status  # 🔑 capture old status
+
+#     # ================= BOOKED DATES (EXCLUDE CURRENT) =================
+#     booked_dates = set()
+#     bookings = Booking.objects.filter(
+#         status__in=["confirmed", "pending"]
+#     ).exclude(pk=pk)
+
+#     for b in bookings:
+#         d = b.check_in
+#         while d < b.check_out:
+#             booked_dates.add(d.isoformat())
+#             d += timedelta(days=1)
+
+#     # ================= BLOCKED DATES =================
+#     blocked_dates = set()
+#     for block in BlockedDate.objects.all():
+#         d = block.start_date
+#         while d <= block.end_date:
+#             blocked_dates.add(d.isoformat())
+#             d += timedelta(days=1)
+
+#     form = AdminBookingForm(request.POST or None, instance=booking)
+
+#     if form.is_valid():
+#         updated_booking = form.save(commit=False)
+
+#         # Defaults (safe)
+#         updated_booking.payment_status = updated_booking.payment_status or "pending"
+#         updated_booking.payment_method = updated_booking.payment_method or "farmhouse"
+#         updated_booking.status = updated_booking.status or "confirmed"
+
+#         updated_booking.save()
+
+#         # 📧 SEND EMAIL ONLY IF STATUS CHANGED
+#         # if old_status != updated_booking.status:
+#         #     send_booking_emails(updated_booking, old_status)
+#         if old_status != updated_booking.status:
+#             try:
+#                 send_booking_emails(updated_booking, old_status)
+#             except Exception as e:
+#                 print("EMAIL ERROR:", e)
+
+#         # if old_status != updated_booking.status:
+#         #     send_booking_emails(updated_booking, old_status)
+
+#         messages.success(
+#             request,
+#             f"Booking {updated_booking.booking_id} updated successfully."
+#         )
+#         return redirect("vivaan_admin:booking_list")
+
+#     return render(request, "adminpanel/booking_form.html", {
+#         "form": form,
+#         "booking": booking,
+#         "booked_dates": sorted(booked_dates),
+#         "blocked_dates": sorted(blocked_dates),
+#     })
 
 
 # DETAIL

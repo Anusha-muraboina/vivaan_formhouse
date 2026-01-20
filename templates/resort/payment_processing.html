@@ -12,8 +12,30 @@
 
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700"></div>
 </div>
-
 <script>
+const orderId = localStorage.getItem("rzp_order_id");
+
+if (!orderId) {
+    alert("Payment reference missing");
+} else {
+
+    const timer = setInterval(() => {
+        fetch(`/check-booking-status/?order_id=${orderId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.ready) {
+                    clearInterval(timer);
+                    localStorage.removeItem("rzp_order_id");
+
+                    window.location.href =
+                        `/booking/${data.booking_id}/`;
+                }
+            });
+    }, 3000);
+}
+</script>
+
+{% comment %} <script>
 const orderId = localStorage.getItem("rzp_order_id");
 
 if (!orderId) {
@@ -34,6 +56,6 @@ if (!orderId) {
             });
     }, 3000);
 }
-</script>
+</script> {% endcomment %}
 
 {% endblock %}
