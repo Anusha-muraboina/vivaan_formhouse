@@ -1458,10 +1458,7 @@ document.addEventListener("DOMContentLoaded", function () {
             order_id: data.order_id,
 
             handler: function (response) {
-                localStorage.setItem(
-                    "rzp_order_id",
-                    response.razorpay_order_id
-                );
+
                 window.location.href = "/payment-processing/";
             },
 
@@ -1476,6 +1473,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 }
 
+
+               {% comment %} localStorage.setItem(
+                    "rzp_order_id",
+                    response.razorpay_order_id
+                ); {% endcomment %}
 {% comment %} function openRazorpay(amount) {
 
     // 1️⃣ Create Razorpay Order (booking already created on backend)

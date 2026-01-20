@@ -1311,12 +1311,31 @@ def payment_processing(request):
 
 #     return JsonResponse({"ready": False})
 
+# def check_booking_status(request):
+#     order_id = request.GET.get("order_id")
+
+#     booking = Booking.objects.filter(
+#         transaction_id=order_id,
+#         payment_status="paid"
+#     ).first()
+
+#     if booking:
+#         return JsonResponse({
+#             "ready": True,
+#             "booking_id": booking.booking_id
+#         })
+
+#     return JsonResponse({"ready": False})
 def check_booking_status(request):
-    order_id = request.GET.get("order_id")
+
+    booking_id = request.session.get("booking_id")
+
+    if not booking_id:
+        return JsonResponse({"ready": False})
 
     booking = Booking.objects.filter(
-        transaction_id=order_id,
-        payment_status="paid"
+        booking_id=booking_id,
+        status="confirmed"
     ).first()
 
     if booking:
