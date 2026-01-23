@@ -2,13 +2,30 @@
 <html lang="en">
 
 <head>
+  {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Vivaan Farmhouse - Hyderabad{% endblock %}</title>
-    <meta name="description"
-        content="Vivaan Farmhouse in Hyderabad offers valley views, cosy stays, and soulful dining, creating moments that linger.">
-{% load static %}
 
+
+<title>
+{% block title %}
+{{ seo_title|default:"Vivaan Farmhouse – Elkatta, Hyderabad" }}
+{% endblock %}
+</title>
+
+<meta name="description"
+      content="{{ seo_description|default:'Luxury farmhouse stay in Hyderabad with valley views, private stay and peaceful nature.' }}">
+
+<meta name="keywords"
+      content="{{ seo_keywords|default:'farmhouse in hyderabad, luxury farmhouse, weekend stay hyderabad' }}">
+
+
+      
+    {% comment %} <title>{% block title %}Vivaan Farmhouse -Elkatta(Hyderabad){% endblock %}</title> {% endcomment %}
+        <!-- ✅ FAVICON -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images\vihaan-logo (1) 1.png' %}">
+    {% comment %} <meta name="description"
+        content="Vivaan Farmhouse in Hyderabad offers valley views, cosy stays, and soulful dining, creating moments that linger."> {% endcomment %}
 
 <link
   rel="stylesheet"
@@ -41,7 +58,7 @@
 </head>
 
 <body class="bg-red-50">
-
+   
     <!-- Navigation -->
     <nav class="navbar-glass bg-emerald-700 md:px-14 px-4 sticky top-0 z-50 shadow-md">
         <div class=" px-4">
@@ -59,7 +76,7 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{% url 'home' %}#home" class="text-white hover:text-amber-400 font-medium transition">Home</a>
+                    <a href="/" class="text-white hover:text-amber-400 font-medium transition">Home</a>
                     <a href="{% url 'home' %}#about"
                         class="text-white hover:text-amber-400 font-medium transition">About</a>
                     <a href="{% url 'home' %}#rooms"

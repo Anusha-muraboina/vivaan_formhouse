@@ -10,9 +10,18 @@ from django.views.generic import TemplateView
 
 from django.contrib.sitemaps.views import sitemap
 from resort.sitemaps import StaticSitemap, RoomSitemap
+from blog.sitemaps import (
+    BlogStaticSitemap,
+    BlogCategorySitemap,
+    BlogDetailSitemap,
+)
+
 sitemaps = {
     'static': StaticSitemap,
     'rooms': RoomSitemap,
+    "blog_static": BlogStaticSitemap,
+    "blog_categories": BlogCategorySitemap,
+    "blog_posts": BlogDetailSitemap,
 }
 
 

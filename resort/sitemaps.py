@@ -8,11 +8,15 @@ class StaticSitemap(Sitemap):
     changefreq = "daily"
 
     def items(self):
-        return ['home']
+        return [
+            'home',
+            'contact',
+            'leave_review',
+            'cancel_booking',
+        ]
 
     def location(self, item):
         return reverse(item)
-
 
 
 class RoomSitemap(Sitemap):

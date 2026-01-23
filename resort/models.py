@@ -42,7 +42,9 @@ class RoomCategory(models.Model):
     has_bathtub = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    page_title = models.CharField(max_length=200, null=True, blank=True)
+    meta_keyword = models.CharField(max_length=200, null=True, blank=True)
+    meta_description = models.TextField(null=True, blank=True)
     class Meta:
         verbose_name_plural = 'Room Categories'
         ordering = ['-base_price']

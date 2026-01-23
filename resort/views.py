@@ -53,6 +53,7 @@ from django.http import JsonResponse, HttpResponse
 def home(request):
     """Homepage view"""
     banners = MainBanner.objects.filter(active=True).order_by("slot_position")
+    seo_banner = banners.first()
     featured_rooms = RoomCategory.objects.all()[:3]
     amenities = Amenity.objects.filter(is_featured=True)
     offers = Offer.objects.filter(
@@ -75,6 +76,11 @@ def home(request):
         'offers': offers,
         'testimonials': testimonials,
         'gallery_images': gallery_images,
+        
+                # ✅ SEO DATA
+        "seo_title": seo_banner.page_title if seo_banner and seo_banner.page_title else "Vivaan Farmhouse – Elkatta, Hyderabad",
+        "seo_description": seo_banner.meta_description if seo_banner else "",
+        "seo_keywords": seo_banner.meta_keyword if seo_banner else "",
     }
     return render(request, 'resort/home.html', context)
 
@@ -688,6 +694,7 @@ def room_detail(request, slug):
         "blocked_dates": blocked_dates,
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
+        
     })
 
     

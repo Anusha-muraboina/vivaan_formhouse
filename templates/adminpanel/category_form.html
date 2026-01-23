@@ -1,0 +1,62 @@
+{% extends "adminpanel/base.html" %}
+{% block title %}
+{% if mode == "edit" %}Edit Room Category{% else %}Add Room Category{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- BASIC INFO -->
+    <input type="text" name="name" value="{{ category.name|default:'' }}" required>
+
+    <textarea name="description">{{ category.description|default:'' }}</textarea>
+
+    <input type="number" name="base_price" value="{{ category.base_price|default:'' }}">
+
+    <input type="number" name="size_sqft" value="{{ category.size_sqft|default:'' }}">
+
+    <input type="number" name="max_occupancy" value="{{ category.max_occupancy|default:'' }}">
+
+    <input type="text" name="floor" value="{{ category.floor|default:'' }}">
+
+    <!-- IMAGE -->
+    <input type="file" name="image">
+
+    <!-- FEATURES -->
+    <label>
+        <input type="checkbox" name="has_balcony"
+               {% if category.has_balcony %}checked{% endif %}>
+        Balcony
+    </label>
+
+    <label>
+        <input type="checkbox" name="has_bathtub"
+               {% if category.has_bathtub %}checked{% endif %}>
+        Bathtub
+    </label>
+
+    <hr>
+
+    <!-- ✅ SEO -->
+    <h3>SEO Settings</h3>
+
+    <input type="text" name="page_title"
+           value="{{ category.page_title|default:'' }}">
+
+    <input type="text" name="meta_keyword"
+           value="{{ category.meta_keyword|default:'' }}">
+
+    <textarea name="meta_description">{{ category.meta_description|default:'' }}</textarea>
+
+    <br>
+
+    <button type="submit">
+        {% if category %}Update{% else %}Save{% endif %}
+    </button>
+
+</form>
+
+
+{% endblock %}
