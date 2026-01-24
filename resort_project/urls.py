@@ -7,21 +7,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from django.views.generic import TemplateView
-
+from resort.sitemaps import clean_sitemap
 from django.contrib.sitemaps.views import sitemap
-from resort.sitemaps import StaticSitemap, RoomSitemap
+from resort.sitemaps import StaticSitemap, RoomCategorySitemap
 from blog.sitemaps import (
-    BlogStaticSitemap,
-    BlogCategorySitemap,
+    BlogListSitemap,
     BlogDetailSitemap,
 )
 
 sitemaps = {
     'static': StaticSitemap,
-    'rooms': RoomSitemap,
-    "blog_static": BlogStaticSitemap,
-    "blog_categories": BlogCategorySitemap,
-    "blog_posts": BlogDetailSitemap,
+    'rooms': RoomCategorySitemap,
+    "blog_list": BlogListSitemap,
+    # "blogs": BlogDetailSitemap,
 }
 
 
@@ -33,10 +31,12 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path(
         'sitemap.xml',
-        sitemap,
+        clean_sitemap,
         {'sitemaps': sitemaps},
         name='sitemap'
     ),
+    
+    
     path(
         "robots.txt",
         TemplateView.as_view(
