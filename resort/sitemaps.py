@@ -37,7 +37,6 @@ class StaticSitemap(Sitemap):
     def items(self):
         return [
             "home",
-            "contact",
             "leave_review",
         ]
 

@@ -51,6 +51,55 @@ from django.http import JsonResponse, HttpResponse
 
 
 def home(request):
+      # ================= CONTACT FORM =================
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+
+        if form.is_valid():
+            contact_msg = form.save()
+
+            context = {
+                "name": contact_msg.name,
+                "email": contact_msg.email,
+                "phone": contact_msg.phone,
+                "subject": contact_msg.subject,
+                "message": contact_msg.message,
+            }
+
+            # ---------- ADMIN EMAIL ----------
+            admin_html = render_to_string(
+                "contact/admin_contact.html", context
+            )
+
+            admin_email = EmailMultiAlternatives(
+                subject=f"New Contact Message: {contact_msg.subject}",
+                body="",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.ADMIN_EMAIL],
+            )
+            admin_email.attach_alternative(admin_html, "text/html")
+            admin_email.send()
+
+            # ---------- USER EMAIL ----------
+            user_html = render_to_string(
+                "contact/user_contact.html", context
+            )
+
+            user_email = EmailMultiAlternatives(
+                subject="Thank you for contacting Vivaan Farmhouse",
+                body="",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[contact_msg.email],
+            )
+            user_email.attach_alternative(user_html, "text/html")
+            user_email.send()
+
+            messages.success(request, "Thank you! Your message has been sent successfully.")
+
+            return redirect("home")  # reload same page
+
+    else:
+        form = ContactForm()
     """Homepage view"""
     banners = MainBanner.objects.filter(active=True).order_by("slot_position")
     seo_banner = banners.first()
