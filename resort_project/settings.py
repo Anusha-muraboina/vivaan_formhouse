@@ -261,4 +261,22 @@ SESSION_COOKIE_SECURE = True
 
 CSRF_COOKIE_HTTPONLY = False   # required for JS fetch
 CSRF_USE_SESSIONS = False
+# =======================
+# SECURITY & SEO
+# =======================
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://vivaanfarmhouse.com",
+    "https://www.vivaanfarmhouse.com",
+]
+
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
 
