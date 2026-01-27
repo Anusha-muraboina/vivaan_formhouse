@@ -1,5 +1,5 @@
 {% extends "resort/base.html" %}
-{% block title %}Blog – Vivaan Farmhouse{% endblock %}
+{% comment %} {% block title %}Blog – Vivaan Farmhouse{% endblock %} {% endcomment %}
 
 {% block content %}
 
@@ -21,9 +21,44 @@
     Discover the beauty of simple living and authentic experiences.
   </p>
 </header> {% endcomment %}
+ {% comment %} <section class="mx-auto md:px-16 px-4 md:py-12 py-4 bg-white ">
+<h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3 text-center"
+    style="font-family: 'Playfair Display', serif;">
+  Our Latest Blogs
+</h1>
 
+<p class="text-center text-gray-500 mb-10  font-bold">
+  Tips, guides and updates on farmhouses, travel & weekend getaways
+</p>
+
+</section>  {% endcomment %}
+
+
+
+<section class="relative h-56 flex items-center bg-white justify-center text-green-900 overflow-hidden">
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl  md:text-6xl font-bold mb-4"> Our Latest Blogs</h1>
+        <p class="text-xl  opacity-90">  Tips, guides and updates on farmhouses, travel & weekend getaways</p>
+    </div>
+</section>
+
+
+{% comment %} <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/80 z-10"></div>
+    </div>
+
+    <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">Our Blogs</h1>
+        <p class="text-xl opacity-90">Tips, guides and updates on farmhouses, travel & weekend getaways</p>
+    </div>
+</section> {% endcomment %}
 <!-- Main Content -->
-<section class="mx-auto px-16 py-12 bg-white ">
+<section class="mx-auto md:px-16 md:py-8 py-4 px-2 bg-white ">
   <div class="flex flex-col lg:flex-row gap-8">
     
     <!-- Left Column - Blog Cards -->

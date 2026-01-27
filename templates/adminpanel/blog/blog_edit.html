@@ -51,7 +51,7 @@
             <label>Featured Image</label>
             <input type="file" name="featured_image" class="form-control">
             {% if blog.featured_image %}
-                <img src="{{ blog.featured_image.url }}" width="120" class="mt-2">
+                <img src="{{ blog.featured_image.url }}" width="120" class="mt-2" alt="blog-image">
             {% endif %}
         </div>
 

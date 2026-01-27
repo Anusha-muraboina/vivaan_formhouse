@@ -45,6 +45,15 @@
              transition-opacity duration-1000
              {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}"
       style="background-image: url('{{ banner.image.url }}');">
+
+            <!-- ✅ SEO + accessibility -->
+      <img
+        src="{{ banner.image.url }}"
+        alt="{{ banner.title|default:'Farmhouse banner image' }}"
+        class="hidden"
+        loading="lazy"
+      >
+
     </div>
     {% endfor %}
 
@@ -394,9 +403,9 @@
       <!-- LEFT: IMAGE CAROUSEL -->
       <div class="relative z-20 rounded-3xl overflow-hidden shadow-2xl">
         <div class="relative h-[420px]" id="carousel">
-<img src="{% static 'images/vihan-group1.webp' %}" class="carousel-img active">
-<img src="{% static 'images/vihan-group2.webp' %}" class="carousel-img">
-<img src="{% static 'images/vihan-group3.webp' %}" class="carousel-img">
+        <img src="{% static 'images/vihan-group1.webp' %}" class="carousel-img active" alt="contact-image">
+        <img src="{% static 'images/vihan-group2.webp' %}" class="carousel-img" alt="contact-image">
+        <img src="{% static 'images/vihan-group3.webp' %}" class="carousel-img" alt="contact-image">
 
         </div>
 

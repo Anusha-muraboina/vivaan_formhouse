@@ -31,7 +31,7 @@
                 <td>{{ amenity.is_featured|yesno:"Yes,No" }}</td>
                 <td>
                     {% if amenity.amenity_image %}
-                        <img src="{{ amenity.amenity_image.url }}" width="60">
+                        <img src="{{ amenity.amenity_image.url }}" width="60" alt="amenity">
                     {% endif %}
                 </td>
                 <td>

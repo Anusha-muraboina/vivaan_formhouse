@@ -45,7 +45,7 @@
             {{ form.image }}
 
             {% if photo and photo.image %}
-            <img src="{{ photo.image.url }}"
+            <img src="{{ photo.image.url }}"  alt="gallery-image"
                  class="mt-3 w-full h-40 object-cover rounded-lg border">
             {% endif %}
         </div>

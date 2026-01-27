@@ -55,7 +55,7 @@
         <tbody>
             {% for photo in photos %}
             <tr>
-                <td><img src="{{ photo.image.url }}" style="height:50px; border-radius:4px;"></td>
+                <td><img src="{{ photo.image.url }}" style="height:50px; border-radius:4px;" alt="gallery-image"></td>
                 <td>{{ photo.title }}</td>
                  <td>{{ photo.slot_position }}</td>
 <td>{{ photo.is_featured }}</td>

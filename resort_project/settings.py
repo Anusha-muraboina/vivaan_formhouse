@@ -251,8 +251,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ]
 
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://vivaanfarmhouse.com",
+    "https://www.vivaanfarmhouse.com",
+]
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "3.111.58.197",
-#     # "https://e23d39b29fc8.ngrok-free.app/",
-# ]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_HTTPONLY = False   # required for JS fetch
+CSRF_USE_SESSIONS = False
+
