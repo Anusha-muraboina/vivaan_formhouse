@@ -90,17 +90,23 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="/" class="text-white hover:text-amber-400 font-medium transition">Home</a>
-                    <a href="{% url 'home' %}#about"
+                    {% comment %} <a href="{% url 'home' %}#about"
                         class="text-white hover:text-amber-400 font-medium transition">About</a>
                     <a href="{% url 'home' %}#rooms"
                         class="text-white hover:text-amber-400 font-medium transition">Rooms</a>
                     <a href="{% url 'home' %}#amenities"
                         class="text-white hover:text-amber-400 font-medium transition">Amenities</a>
-                     {% comment %} <a href="{% url 'offers' %}"
-                        class="text-white hover:text-black font-medium transition">Offers</a>  {% endcomment %}
+                   
                     <a href="{% url 'home' %}#gallery"
                         class="text-white hover:text-amber-400 font-medium transition">Gallery</a> 
-                   
+                    {% endcomment %}
+                    {% comment %} <a onclick="scrollToSection('about')" class="text-white cursor-pointer">About</a> {% endcomment %}
+                    <a href="{% url 'home' %}" onclick="setScroll('about')" class="text-white cursor-pointer">About</a>
+                     <a href="{% url 'home' %}" onclick="setScroll('rooms')" class="text-white cursor-pointer">Rooms</a>
+                    {% comment %} <a onclick="scrollToSection('rooms')" class="text-white cursor-pointer">Rooms</a> {% endcomment %}
+                    <a href="{% url 'home' %}" onclick="setScroll('amenities')" class="text-white cursor-pointer">Amenities</a>
+                    <a href="{% url 'home' %}" onclick="setScroll('gallery')" class="text-white cursor-pointer">Gallery</a>
+                  
                     
                                     {% comment %} <a href="{% url 'home' %}#reviews" class="text-white hover:text-amber-400 font-medium transition"
                 onclick="toggleMobileMenu()">Review</a>
@@ -131,30 +137,36 @@
     ">
 
     <li>
-      <a href="{% url 'home' %}#reviews"
-         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+      <a onclick="setScroll('reviews')" href="{% url 'home' %}"
+         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition cursor-pointer">
         <i class="fas fa-star text-emerald-600"></i>
         Reviews
-      </a>
+      </a> 
+
+       {% comment %} <a onclick="scrollToSection('reviews')" class="text-white cursor-pointer">Reviews</a> {% endcomment %}
+
     </li>
 
     <li>
-      <a href="{% url 'home' %}#contact"
-         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+
+        {% comment %} <a onclick="scrollToSection('contact')" class="text-white cursor-pointer">Contact</a> {% endcomment %}
+
+      <a onclick="setScroll('contact')" href="{% url 'home' %}"
+         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition cursor-pointer">
         <i class="fas fa-phone-alt text-emerald-600"></i>
         Contact
       </a>
     </li>
        <li>
-    <a href="{% url 'blog:blog_list' %}"
-       class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+    <a href="{% url 'blog:blog_list' %}" 
+       class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition cursor-pointer">
        <i class="fas fa-newspaper text-emerald-600"></i>
         Blog
     </a>
 </li>
     <li>
-      <a href="{% url 'home' %}#location"
-         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+      <a onclick="setScroll('location')" href="{% url 'home' %}"
+         class="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition cursor-pointer">
         <i class="fas fa-map-marker-alt text-emerald-600"></i>
         Location
       </a>
@@ -200,13 +212,14 @@
 
   <!-- Menu List -->
   <ul class="px-6 py-6 space-y-4 text-white text-lg">
-    <li><a href="#home" class="off-link">Home</a></li>
-    <li><a href="#about" class="off-link">About</a></li>
-    <li><a href="#rooms" class="off-link">Rooms</a></li>
-    <li><a href="#amenities" class="off-link">Amenities</a></li>
-    <li><a href="#gallery" class="off-link">Gallery</a></li>
-    <li><a href="#reviews" class="off-link">Reviews</a></li>
-    <li><a href="#contact" class="off-link">Contact</a></li>
+   <li><a href="{% url 'home' %}" onclick="setScroll('home')" class="off-link">Home</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('about')" class="off-link">About</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('rooms')" class="off-link">Rooms</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('amenities')" class="off-link">Amenities</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('gallery')" class="off-link">Gallery</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('reviews')" class="off-link">Reviews</a></li>
+    <li><a href="{% url 'home' %}" onclick="setScroll('contact')" class="off-link">Contact</a></li> 
+
 
     <!-- CTA -->
     <li class="pt-4">
@@ -259,19 +272,19 @@
                 <div>
                     <h4 class="text-xl font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'home' %}#about" class="text-white hover:text-amber-400 transition">About
+                        <li><a href="{% url 'home' %}" onclick="setScroll('about')" class="text-white hover:text-amber-400 transition">About
                                 Us</a></li>
-                        <li><a href="{% url 'home' %}#rooms" class="text-white hover:text-amber-400 transition">Rooms</a></li>
+                        <li><a href="{% url 'home' %}" onclick="setScroll('rooms')" class="text-white hover:text-amber-400 transition">Rooms</a></li>
 
-                        <li><a href="{% url 'home' %}#amenities"
+                        <li><a href="{% url 'home' %}" onclick="setScroll('amenities')"
                                 class="text-white hover:text-amber-400 transition">Amenities</a></li>
                         {% comment %} <li><a href="{% url 'home' %}#offers" class="text-white hover:text-amber-400 transition">
                                 Offers</a></li> {% endcomment %}
-                        <li><a href="{% url 'home' %}#gallery"
+                        <li><a href="{% url 'home' %}" onclick="setScroll('gallery')"
                                 class="text-white hover:text-amber-400 transition">Gallery</a></li>
-                                  <li><a href="{% url 'home' %}#contact"
+                                  <li><a href="{% url 'home' %}" onclick="setScroll('contact')"
                                 class="text-white hover:text-amber-400 transition">Contact</a></li>
-                                  <li><a href="{% url 'home' %}#location"
+                                  <li><a href="{% url 'home' %}" onclick="setScroll('location')"
                                 class="text-white hover:text-amber-400 transition">Location</a></li>
                     </ul>
                 </div>
@@ -293,8 +306,8 @@
                                                                          <li><a href="{% url 'cancel_booking' %}"
                                 class="text-white hover:text-amber-400 transition">Manage Booking</a>
                         </li>           
-                        <li><a href="{% url 'home' %}#policy"  class="text-white hover:text-amber-400 transition">Privacy Policy</a></li>
-                        <li><a href="{% url 'home' %}#terms"  class="text-white hover:text-amber-400 transition">Terms & Conditions</a>
+                        <li><a href="{% url 'home' %}" onclick="setScroll('policy')"  class="text-white hover:text-amber-400 transition">Privacy Policy</a></li>
+                        <li><a href="{% url 'home' %}" onclick="setScroll('terms')"  class="text-white hover:text-amber-400 transition">Terms & Conditions</a>
                         </li>
 
                         {% comment %} <li><a href="#" class="text-white hover:text-amber-400 transition">House Rules</a></li> {% endcomment %}
@@ -334,6 +347,29 @@ laxminarayaninfotech.com
 
         </div>
     </footer>
+<script>
+function setScroll(section) {
+    sessionStorage.setItem("scrollTo", section);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const section = sessionStorage.getItem("scrollTo");
+
+    if (section) {
+        // small delay so page sections are ready
+        setTimeout(function () {
+            const el = document.getElementById(section);
+            if (el) {
+                el.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+            sessionStorage.removeItem("scrollTo");
+        }, 300);
+    }
+});
+</script>
 
 <script>
 function openOffcanvas() {

@@ -110,7 +110,7 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Category</th>
+                {% comment %} <th>Category</th> {% endcomment %}
                 <th>Status</th>
                 <th>Featured</th>
                 <th>Views</th>
@@ -130,7 +130,7 @@
                     </span>
                 </td>
 
-                <td>{{ blog.category }}</td>
+                {% comment %} <td>{{ blog.category }}</td> {% endcomment %}
 
                 <td>
                     {% if blog.status == 'published' %}

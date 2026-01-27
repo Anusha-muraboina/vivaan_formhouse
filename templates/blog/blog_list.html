@@ -1,5 +1,16 @@
 {% extends "resort/base.html" %}
 {% comment %} {% block title %}Blog – Vivaan Farmhouse{% endblock %} {% endcomment %}
+{% comment %} <title>
+  {% block title %}
+    {{ seo_title|default:"Vivaan Farmhouse – Hyderabad" }}
+  {% endblock %}
+</title> {% endcomment %}
+
+{% comment %} <meta name="description"
+      content="{{ seo_description|default:'Luxury farmhouse stay in Hyderabad.' }}">
+
+<meta name="keywords"
+      content="{{ seo_keywords|default:'farmhouse hyderabad, luxury farmhouse' }}"> {% endcomment %}
 
 {% block content %}
 
@@ -37,7 +48,7 @@
 
 <section class="relative h-56 flex items-center bg-white justify-center text-green-900 overflow-hidden">
     <div class="container mx-auto px-4 z-20 text-center">
-        <h1 class="text-5xl  md:text-6xl font-bold mb-4"> Our Latest Blogs</h1>
+        <h1 class="text-3xl  md:text-4xl font-bold mb-4"> Our Latest Blogs</h1>
         <p class="text-xl  opacity-90">  Tips, guides and updates on farmhouses, travel & weekend getaways</p>
     </div>
 </section>
@@ -60,8 +71,90 @@
 <!-- Main Content -->
 <section class="mx-auto md:px-16 md:py-8 py-4 px-2 bg-white ">
   <div class="flex flex-col lg:flex-row gap-8">
-    
-    <!-- Left Column - Blog Cards -->
+    <!-- BLOG GRID -->
+<main class="flex-1">
+
+  <!-- GRID -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+    {% for blog in blogs %}
+    <article
+      class="bg-white rounded-2xl overflow-hidden shadow hover:shadow-2xl transition-all duration-300">
+
+      <!-- IMAGE -->
+      <div class="relative h-60 overflow-hidden">
+
+        {% if blog.featured_image %}
+          <img
+            src="{{ blog.featured_image.url }}"
+            alt="{{ blog.title }}"
+            class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+        {% else %}
+          <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+            No Image
+          </div>
+        {% endif %}
+
+        {% if blog.is_featured %}
+          <span
+            class="absolute top-4 left-4 bg-orange-500 text-white text-xs px-4 py-1 rounded-full font-semibold">
+            Featured
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- CONTENT -->
+      <div class="p-6">
+
+        <!-- META -->
+        <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
+          {% if blog.author %}
+            <span>By <strong>{{ blog.author }}</strong></span>
+          {% endif %}
+
+          {% if blog.published_date %}
+            <span>•</span>
+            <span>{{ blog.published_date|date:"M d, Y" }}</span>
+          {% endif %}
+        </div>
+
+        <!-- TITLE -->
+        <h2
+          class="text-xl font-semibold text-gray-900 leading-snug mb-3 hover:text-green-700 transition"
+          style="font-family: 'Playfair Display', serif;">
+          <a href="{% url 'blog:blog_detail' blog.slug %}">
+            {{ blog.title }}
+          </a>
+        </h2>
+
+        <!-- DESCRIPTION -->
+        <p class="text-gray-600 mb-5 leading-relaxed">
+          {{ blog.short_description|truncatewords:25 }}
+        </p>
+
+        <!-- READ MORE -->
+        <a href="{% url 'blog:blog_detail' blog.slug %}"
+           class="inline-flex items-center gap-2 text-green-700 font-medium hover:underline">
+          Read More
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+
+      </div>
+    </article>
+    {% empty %}
+      <div class="col-span-2 text-center py-20 text-gray-500">
+        No blog posts available.
+      </div>
+    {% endfor %}
+
+  </div>
+
+</main>
+
+    {% comment %} <!-- Left Column - Blog Cards -->
     <main class="flex-1 lg:w-2">
       <div class="space-y-8">
         {% for blog in blogs %}
@@ -141,12 +234,12 @@
         </div>
         {% endfor %}
       </div>
-    </main>
+    </main> {% endcomment %}
 
     <!-- Right Sidebar -->
-    <aside class="lg:w-80 space-y-6">
+    {% comment %} <aside class="lg:w-80 space-y-6">
       
-      <!-- Search Widget -->
+     
       <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200" style="font-family: 'Playfair Display', serif;">
           Search
@@ -165,10 +258,10 @@
             </svg>
           </button>
         </form>
-      </div>
+      </div> {% endcomment %}
 
-      <!-- Categories Widget -->
-      <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
+     
+      {% comment %} <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200" style="font-family: 'Playfair Display', serif;">
           Categories
         </h3>
@@ -192,10 +285,9 @@
           </li>
           {% endfor %}
         </ul>
-      </div>
+      </div> {% endcomment %}
 
-      <!-- Tags Widget -->
-      <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
+      {% comment %} <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200" style="font-family: 'Playfair Display', serif;">
           Popular Tags
         </h3>
@@ -209,10 +301,10 @@
           </a>
           {% endfor %}
         </div>
-      </div>
+      </div> {% endcomment %}
 
-      <!-- Recent Comments Widget -->
-      <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
+    
+      {% comment %} <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-md">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center gap-2" style="font-family: 'Playfair Display', serif;">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -239,9 +331,9 @@
           <p class="text-sm text-gray-500">No comments yet.</p>
           {% endfor %}
         </div>
-      </div>
+      </div> {% endcomment %}
 
-    </aside>
+    {% comment %} </aside> {% endcomment %}
   </div>
 </section>
 

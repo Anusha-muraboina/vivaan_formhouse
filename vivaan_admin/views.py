@@ -1570,12 +1570,10 @@ def blog_list(request):
     return render(request, 'adminpanel/blog/blog_list.html', {
         'blogs': blogs
     })
+    
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
 def blog_add(request):
-
-    categories = BlogCategory.objects.all()
-    tags = BlogTag.objects.all()
 
     if request.method == "POST":
 
@@ -1584,7 +1582,6 @@ def blog_add(request):
         blog = Blog.objects.create(
             title=title,
             slug=slugify(title),
-            category_id=request.POST.get('category'),
             short_description=request.POST.get('short_description'),
             content=request.POST.get('content'),
             status=request.POST.get('status'),
@@ -1595,41 +1592,30 @@ def blog_add(request):
             author=request.user
         )
 
-        # publish date
+        # ✅ publish date
         if blog.status == "published":
             blog.published_date = timezone.now()
             blog.save()
 
-        # image
+        # ✅ featured image
         if request.FILES.get('featured_image'):
             blog.featured_image = request.FILES.get('featured_image')
             blog.save()
 
-        # ✅ SINGLE TAG
-        tag_id = request.POST.get('tags')
-        if tag_id:
-            blog.tags.set([tag_id])
-
         messages.success(request, "Blog created successfully.")
         return redirect('vivaan_admin:blog_list')
 
-    return render(request, 'adminpanel/blog/blog_form.html', {
-        'categories': categories,
-        'tags': tags
-    })
+    return render(request, 'adminpanel/blog/blog_form.html')
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
 def blog_edit(request, pk):
 
     blog = get_object_or_404(Blog, pk=pk)
-    categories = BlogCategory.objects.all()
-    tags = BlogTag.objects.all()
 
     if request.method == "POST":
 
         blog.title = request.POST.get('title')
         blog.slug = slugify(blog.title)
-        blog.category_id = request.POST.get('category')
         blog.short_description = request.POST.get('short_description')
         blog.content = request.POST.get('content')
         blog.status = request.POST.get('status')
@@ -1638,32 +1624,117 @@ def blog_edit(request, pk):
         blog.meta_description = request.POST.get('meta_description')
         blog.meta_keywords = request.POST.get('meta_keywords')
 
-        # publish date logic
+        # ✅ publish date logic
         if blog.status == "published" and not blog.published_date:
             blog.published_date = timezone.now()
 
-        # image update
+        # ✅ update image
         if request.FILES.get('featured_image'):
             blog.featured_image = request.FILES.get('featured_image')
 
         blog.save()
 
-        # ✅ SINGLE TAG UPDATE
-        tag_id = request.POST.get('tags')
-
-        if tag_id:
-            blog.tags.set([tag_id])
-        else:
-            blog.tags.clear()
-
         messages.success(request, "Blog updated successfully.")
         return redirect('vivaan_admin:blog_list')
 
     return render(request, 'adminpanel/blog/blog_form.html', {
-        'blog': blog,
-        'categories': categories,
-        'tags': tags
+        'blog': blog
     })
+
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin)
+# def blog_add(request):
+
+#     categories = BlogCategory.objects.all()
+#     tags = BlogTag.objects.all()
+
+#     if request.method == "POST":
+
+#         title = request.POST.get('title')
+
+#         blog = Blog.objects.create(
+#             title=title,
+#             slug=slugify(title),
+#             category_id=request.POST.get('category'),
+#             short_description=request.POST.get('short_description'),
+#             content=request.POST.get('content'),
+#             status=request.POST.get('status'),
+#             is_featured=True if request.POST.get('is_featured') else False,
+#             meta_title=request.POST.get('meta_title'),
+#             meta_description=request.POST.get('meta_description'),
+#             meta_keywords=request.POST.get('meta_keywords'),
+#             author=request.user
+#         )
+
+#         # publish date
+#         if blog.status == "published":
+#             blog.published_date = timezone.now()
+#             blog.save()
+
+#         # image
+#         if request.FILES.get('featured_image'):
+#             blog.featured_image = request.FILES.get('featured_image')
+#             blog.save()
+
+#         # ✅ SINGLE TAG
+#         tag_id = request.POST.get('tags')
+#         if tag_id:
+#             blog.tags.set([tag_id])
+
+#         messages.success(request, "Blog created successfully.")
+#         return redirect('vivaan_admin:blog_list')
+
+#     return render(request, 'adminpanel/blog/blog_form.html', {
+#         'categories': categories,
+#         'tags': tags
+#     })
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin)
+# def blog_edit(request, pk):
+
+#     blog = get_object_or_404(Blog, pk=pk)
+#     categories = BlogCategory.objects.all()
+#     tags = BlogTag.objects.all()
+
+#     if request.method == "POST":
+
+#         blog.title = request.POST.get('title')
+#         blog.slug = slugify(blog.title)
+#         blog.category_id = request.POST.get('category')
+#         blog.short_description = request.POST.get('short_description')
+#         blog.content = request.POST.get('content')
+#         blog.status = request.POST.get('status')
+#         blog.is_featured = True if request.POST.get('is_featured') else False
+#         blog.meta_title = request.POST.get('meta_title')
+#         blog.meta_description = request.POST.get('meta_description')
+#         blog.meta_keywords = request.POST.get('meta_keywords')
+
+#         # publish date logic
+#         if blog.status == "published" and not blog.published_date:
+#             blog.published_date = timezone.now()
+
+#         # image update
+#         if request.FILES.get('featured_image'):
+#             blog.featured_image = request.FILES.get('featured_image')
+
+#         blog.save()
+
+#         # ✅ SINGLE TAG UPDATE
+#         tag_id = request.POST.get('tags')
+
+#         if tag_id:
+#             blog.tags.set([tag_id])
+#         else:
+#             blog.tags.clear()
+
+#         messages.success(request, "Blog updated successfully.")
+#         return redirect('vivaan_admin:blog_list')
+
+#     return render(request, 'adminpanel/blog/blog_form.html', {
+#         'blog': blog,
+#         'categories': categories,
+#         'tags': tags
+#     })
 
 
 

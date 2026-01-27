@@ -47,7 +47,7 @@ class Blog(models.Model):
     category = models.ForeignKey(
         BlogCategory,
         on_delete=models.SET_NULL,
-        null=True,
+        null=True, blank=True,
         related_name="blogs"
     )
     tags = models.ManyToManyField(

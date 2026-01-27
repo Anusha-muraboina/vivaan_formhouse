@@ -15,7 +15,7 @@
             <input type="text" name="title" value="{{ blog.title }}" class="form-control">
         </div>
 
-        <div class="col-md-6 mb-3">
+        {% comment %} <div class="col-md-6 mb-3">
             <label>Category</label>
             <select name="category" class="form-control">
                 {% for cat in categories %}
@@ -35,7 +35,7 @@
                 </option>
                 {% endfor %}
             </select>
-        </div>
+        </div> {% endcomment %}
 
         <div class="col-md-12 mb-3">
             <label>Short Description</label>
