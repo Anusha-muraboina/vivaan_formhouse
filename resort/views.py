@@ -734,7 +734,13 @@ def room_detail(request, slug):
             "razorpay": True,
             "amount": float(pay_now)
         })
+    seo_title = f"{room_category.name} | Vivaan Farmhouse"
 
+    seo_description = (
+        f"Book {room_category.name} at Vivaan Farmhouse. "
+        f"Enjoy a private luxury farmhouse stay with premium amenities, "
+        f"perfect for family outings, weekend getaways, and celebrations."
+    )
     # ================= PAGE LOAD =================
     return render(request, "resort/room_detail.html", {
         "room_category": room_category,
@@ -743,6 +749,9 @@ def room_detail(request, slug):
         "blocked_dates": blocked_dates,
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
+                # ✅ SEO
+        "seo_title": seo_title,
+        "seo_description": seo_description,
         
     })
 
@@ -1520,6 +1529,15 @@ def about(request):
 
 
 def cancel_booking(request):
+        # ✅ SEO (works with your base.html)
+    seo_context = {
+        "seo_title": "Cancel Booking Online | Vivaan Farmhouse",
+        "seo_description": (
+            "Cancel your Vivaan Farmhouse booking online easily. "
+            "Check cancellation policy, refund eligibility, and manage your reservation securely."
+        ),
+       
+    }
     """View to search and cancel a booking"""
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
@@ -1572,7 +1590,7 @@ def cancel_booking(request):
         except Booking.DoesNotExist:
             messages.error(request, 'No booking found with these details. Please check your Booking ID and Email.')
             
-    return render(request, 'resort/cancel_booking.html')
+    return render(request, 'resort/cancel_booking.html' ,seo_context)
 
 
 
@@ -1593,6 +1611,12 @@ def leave_review(request):
     context = {
         'reviews': reviews,
         'form': form,
+                # ✅ SEO
+        "seo_title": "Guest Reviews & Ratings | Vivaan Farmhouse",
+        "seo_description": (
+            "Read real guest reviews of Vivaan Farmhouse. "
+            "See customer experiences, ratings, and share your stay feedback online."
+        ),
     }
     return render(request, 'resort/leave_review.html', context)
 

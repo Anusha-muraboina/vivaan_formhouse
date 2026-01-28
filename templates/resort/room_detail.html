@@ -1,6 +1,10 @@
 {% extends 'resort/base.html' %}
 
-{% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
+{% comment %} {% block title %}{{ room_category.name }} - Vivaan Farmhouse{% endblock %}
+{% block meta_description %}
+Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premium amenities, peaceful environment, and affordable pricing. Perfect for families and groups.
+{% endblock %} {% endcomment %}
+
 {% csrf_token %}
 {% load static %}
 {% block content %}
@@ -183,8 +187,8 @@
 <!-- Room Details & Booking -->
 
 
-<section class=" py-4 md:py-16 ">
-    <div class="container mx-auto px-4">
+<section class=" py-4 md:py-16 md:px-16 px-2  ">
+    <div class="mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             <!-- Booking Form -->
