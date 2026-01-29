@@ -651,7 +651,8 @@ def room_detail(request, slug):
 
     for block in BlockedDate.objects.all():
         d = block.start_date
-        while d <= block.end_date:
+        # while d <= block.end_date:
+        while d < block.end_date: 
             blocked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 

@@ -1724,44 +1724,47 @@ document.addEventListener("DOMContentLoaded", function () {
     // =============================
     // CHECK-OUT
     // =============================
-    checkOutPicker = flatpickr("input[name='check_out']", {
-        dateFormat: "Y-m-d",
-        disable: blockedDates,
+checkOutPicker = flatpickr("input[name='check_out']", {
+    dateFormat: "Y-m-d",
 
-        onChange(selectedDates) {
-            if (!selectedDates.length) return;
+    // ✅ DO NOT block admin blocked dates
+    disable: bookedDates,
 
-            const checkInDate = checkInPicker.selectedDates[0];
+    onChange(selectedDates) {
+        if (!selectedDates.length) return;
 
-            if (!checkInDate) {
-                alert("Please select check-in date first");
+        const checkInDate = checkInPicker.selectedDates[0];
+
+        if (!checkInDate) {
+            alert("Please select check-in date first");
+            checkOutPicker.clear();
+            return;
+        }
+
+        let current = new Date(checkInDate);
+        const end = new Date(selectedDates[0]);
+        end.setDate(end.getDate() - 1);
+
+        while (current <= end) {
+            const d = formatDate(current);
+
+            if (bookedDates.includes(d)) {
+                alert("These dates are already booked");
                 checkOutPicker.clear();
                 return;
             }
 
-            let current = new Date(checkInDate);
-            const end = new Date(selectedDates[0]);
-            end.setDate(end.getDate() - 1);
-
-            while (current <= end) {
-                const d = formatDate(current);
-
-                if (bookedDates.includes(d)) {
-                    alert("These dates are already booked");
-                    checkOutPicker.clear();
-                    return;
-                }
-
-                if (blockedDates.includes(d)) {
-                    alert("These dates are blocked by admin");
-                    checkOutPicker.clear();
-                    return;
-                }
-
-                current.setDate(current.getDate() + 1);
+            if (blockedDates.includes(d)) {
+                alert("These dates are blocked by admin");
+                checkOutPicker.clear();
+                return;
             }
+
+            current.setDate(current.getDate() + 1);
         }
-    });
+    }
+});
+
 
     console.log("✅ Flatpickr initialized correctly");
 }
