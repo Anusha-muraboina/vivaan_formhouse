@@ -755,13 +755,9 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     </div>
 
   <div  id="step4" class="collapse-body hidden p-6 space-y-4">
-
                         <div>
                             <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
-
                             <div class="space-y-3">
-
-
                                 <label
                                     class="flex items-center space-x-3 border p-3 rounded-lg cursor-pointer hover:border-emerald-600">
                                     <input type="radio" name="payment_method" value="farmhouse"
@@ -1752,6 +1748,7 @@ document.addEventListener("DOMContentLoaded", function () {
     checkInPicker = flatpickr("input[name='check_in']", {
         dateFormat: "Y-m-d",
         minDate: "today",
+        disableMobile: true,
         disable: disabledCheckInDates,
 
         onChange(selectedDates) {
@@ -1773,6 +1770,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ✅ DO NOT block admin blocked dates
     disable: bookedDates,
+    disableMobile: true,
 
     onChange(selectedDates) {
         if (!selectedDates.length) return;
@@ -1924,7 +1922,24 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+<script>
+/* 🚫 BLOCK ANDROID NATIVE DATE PICKER COMPLETELY */
+["check_in", "check_out"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
+    el.addEventListener("focus", e => {
+        e.preventDefault();
+        el.blur();          // stop native picker
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    initCalendarIfNeeded();
+});
+</script>
 
 {% endblock %}
 {% endblock %}
