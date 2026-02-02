@@ -9,7 +9,7 @@ Disallow: /payment-processing/
 Disallow: /check-booking-status/
 Disallow: /validate-coupon/
 Disallow: /razorpay/
-
+Disallow: /comment.php
 Disallow: /*?
 
 Sitemap: https://www.vivaanfarmhouse.com/sitemap.xml

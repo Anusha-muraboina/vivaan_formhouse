@@ -62,7 +62,7 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     }
 
     /* 🟢 Selected range */
-    .flatpickr-day.inRange,
+    {% comment %} .flatpickr-day.inRange,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange {
         background: #c9f5d9ff !important;
@@ -75,7 +75,7 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     .flatpickr-day.today {
         border-color: #011637ff !important;
         /* blue-500 */
-    }
+    } {% endcomment %}
 
     /* Disabled look */
     {% comment %} .flatpickr-day.disabled {
@@ -95,12 +95,56 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     border: 2px solid #012a1d;
 }
 </style>
+
+
 <style>
 .collapse-header {
     pointer-events: none;
 }
 
 
+/* ===============================
+   REMOVE ALL FLATPICKR COLORS
+   (CHECK-IN + CHECK-OUT)
+================================ */
+
+/* Selected day */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected:focus {
+    background: transparent !important;
+    color: #222 !important;
+    border: none !important;
+}
+
+/* Range styles (auto added by flatpickr) */
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.inRange {
+    background: transparent !important;
+    color: #222 !important;
+    border: none !important;
+}
+
+/* Hover effect (mobile tap highlight) */
+.flatpickr-day:hover {
+    background: #f3f4f6 !important; /* light grey */
+    color: #111 !important;
+}
+
+/* Today highlight */
+.flatpickr-day.today {
+    border: none !important;
+}
+
+/* Disabled dates (keep default greyed) */
+.flatpickr-day.disabled {
+    opacity: 0.4 !important;
+}
+
+
+
+{% comment %} 
 .time-dropdown {
     position: relative;
 }
@@ -118,9 +162,9 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
 
     cursor: pointer;
     color: #0c0c0ccb; 
-}
+} {% endcomment %}
 
-.time-list {
+{% comment %} .time-list {
     position: absolute;
     width: 100%;
     max-height: 150px;
@@ -130,10 +174,10 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     background: white;
     margin-top: 4px;
     z-index: 50;
-}
+} {% endcomment %}
 
 /* 🔥 EXACT 30px OPTION HEIGHT */
-.time-option {
+{% comment %} .time-option {
     height: 30px;
     line-height: 30px;
     padding: 0 10px;
@@ -153,7 +197,7 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
 .time-list::-webkit-scrollbar-thumb {
     background: #047857;
     border-radius: 4px;
-}
+} {% endcomment %}
 </style>
 
 <div class="fixed inset-0 -z-10">
@@ -1724,7 +1768,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // =============================
     // CHECK-OUT
     // =============================
-checkOutPicker = flatpickr("input[name='check_out']", {
+    checkOutPicker = flatpickr("input[name='check_out']", {
     dateFormat: "Y-m-d",
 
     // ✅ DO NOT block admin blocked dates
