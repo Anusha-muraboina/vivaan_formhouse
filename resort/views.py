@@ -1205,6 +1205,8 @@ def create_razorpay_order(request):
 #         print("Webhook error:", e)
 
 #     return HttpResponse("OK", status=200)
+
+
 @csrf_exempt
 def razorpay_webhook(request):
 
@@ -1392,6 +1394,7 @@ def payment_processing(request):
 #         })
 
 #     return JsonResponse({"ready": False})
+
 def check_booking_status(request):
 
     booking_id = request.session.get("booking_id")
