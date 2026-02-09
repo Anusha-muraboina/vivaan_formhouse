@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'vivaan_admin',
 
     'ckeditor',
+    'ckeditor_uploader',
     "blog",
 
     'django.contrib.sites',

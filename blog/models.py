@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
@@ -44,24 +44,22 @@ class Blog(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=260, unique=True, blank=True)
 
-    category = models.ForeignKey(
-        BlogCategory,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="blogs"
-    )
-    tags = models.ManyToManyField(
-        "BlogTag",
-        related_name="blogs",
-        blank=True ,null=True
-    )
+    # category = models.ForeignKey(
+    #     BlogCategory,
+    #     on_delete=models.SET_NULL,
+    #     null=True, blank=True,
+    #     related_name="blogs"
+    # )
+    # tags = models.ManyToManyField(
+    #     "BlogTag",
+    #     related_name="blogs",
+    #     blank=True ,null=True
+    # )
     short_description = models.TextField(
         help_text="Short summary for listing & SEO"
     )
 
-    content = models.TextField(
-        help_text="Full blog content (HTML allowed)"
-    )
+    content = RichTextUploadingField()
 
     featured_image = models.ImageField(
         upload_to="blog_images/",
