@@ -92,15 +92,15 @@ Visit: http://127.0.0.1:8000/admin/
 | Page | URL | Status |
 |------|-----|--------|
 | Homepage | http://127.0.0.1:8000/ | ✅ Working |
-| Rooms Listing | http://127.0.0.1:8000/rooms/ | ✅ Working |
-| Room Detail | http://127.0.0.1:8000/room/[slug]/ | ✅ Fixed! |
+<!-- | Rooms Listing | http://127.0.0.1:8000/rooms/ | ✅ Working |
+| Room Detail | http://127.0.0.1:8000/room/[slug]/ | ✅ Fixed! | -->
 | Booking Confirm | http://127.0.0.1:8000/booking/[id]/ | ✅ Working |
-| About | http://127.0.0.1:8000/about/ | ✅ Working |
+<!-- | About | http://127.0.0.1:8000/about/ | ✅ Working |
 | Amenities | http://127.0.0.1:8000/amenities/ | ✅ Working |
 | Offers | http://127.0.0.1:8000/offers/ | ✅ Working |
 | Gallery | http://127.0.0.1:8000/gallery/ | ✅ Working |
 | Contact | http://127.0.0.1:8000/contact/ | ✅ Working |
-| Admin Panel | http://127.0.0.1:8000/admin/ | ✅ Working |
+| Admin Panel | http://127.0.0.1:8000/admin/ | ✅ Working | -->
 
 ---
 

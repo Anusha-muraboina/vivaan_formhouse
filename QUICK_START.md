@@ -28,14 +28,14 @@ Your Django resort booking application is ready to use!
 
 ### 📄 All Pages Created
 1. **Homepage** (/) - Hero, rooms, offers, testimonials
-2. **Rooms** (/rooms/) - All room categories with filters
-3. **Room Detail** (/room/<slug>/) - Booking form
+<!-- 2. **Rooms** (/rooms/) - All room categories with filters
+3. **Room Detail** (/room/<slug>/) - Booking form -->
 4. **Booking Confirmation** (/booking/<id>/)
-5. **About** (/about/) - Resort story
+<!-- 5. **About** (/about/) - Resort story
 6. **Amenities** (/amenities/) - Facilities showcase
 7. **Offers** (/offers/) - Special deals
 8. **Gallery** (/gallery/) - Photo gallery
-9. **Contact** (/contact/) - Contact form
+9. **Contact** (/contact/) - Contact form -->
 
 ---
 

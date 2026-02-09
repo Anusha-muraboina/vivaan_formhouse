@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'resort',
     'vivaan_admin',
+    
+    # 'django_extensions',
 
     'ckeditor',
     'ckeditor_uploader',

@@ -1,12 +1,12 @@
-{% extends 'resort/base.html' %}
+{% comment %} {% extends 'resort/base.html' %}
 
 {% block title %}About Us - Vivaan Farmhouse{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+
 <section class="relative h-96 flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 z-0">
-        {% comment %} <div class="absolute inset-0 bg-gradient-to-r from-black-900/90 to-black-700/80 z-10"></div> {% endcomment %}
+
         <div class="absolute inset-0 bg-cover bg-center"
             style="background-image: url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
         </div>
@@ -20,7 +20,7 @@
     </div>
 </section>
 
-<!-- About Content -->
+
 <section class="py-20 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto">
@@ -51,7 +51,7 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
     </div>
 </section>
 
-<!-- Features -->
+
 <section class="py-20 bg-gray-50">
     <div class="container mx-auto px-4">
         <h2 class="text-4xl font-bold text-center text-gray-800 mb-12 section-title">Why Choose Us</h2>
@@ -87,7 +87,6 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
     </div>
 </section>
 
-<!-- Location -->
 <section class="py-20 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-6xl mx-auto">
@@ -130,7 +129,6 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
                 </div>
 
                 <div class="h-96 bg-gray-200 rounded-2xl overflow-hidden shadow-xl">
-                    <!-- You can embed Google Maps here -->
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.7666!2d73.6565!3d17.9244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDU1JzI3LjgiTiA3M8KwMzknMjMuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
                         width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
@@ -139,4 +137,4 @@ blend modern amenities with a natural, rustic charm. Whether you’re planning a
         </div>
     </div>
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}

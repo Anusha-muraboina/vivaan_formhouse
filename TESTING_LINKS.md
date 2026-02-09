@@ -163,10 +163,10 @@ http://127.0.0.1:8000/admin/resort/contactmessage/   - Contact Messages
 
 ### 1. Quick Website Tour (5 minutes)
 1. Homepage: http://127.0.0.1:8000/
-2. Browse rooms: http://127.0.0.1:8000/rooms/
+<!-- 2. Browse rooms: http://127.0.0.1:8000/rooms/
 3. Check offers: http://127.0.0.1:8000/offers/
 4. View amenities: http://127.0.0.1:8000/amenities/
-5. Read about: http://127.0.0.1:8000/about/
+5. Read about: http://127.0.0.1:8000/about/ -->
 
 ### 2. Test Booking Flow (5 minutes)
 1. Open Penthouse: http://127.0.0.1:8000/room/penthouse-suite-with-balcony-pool-valley-view-first-floor/
@@ -258,11 +258,11 @@ Copy-paste these URLs to test each feature:
 - [ ] Verify booking confirmation page
 
 **Other Pages**
-- [ ] http://127.0.0.1:8000/about/
+<!-- - [ ] http://127.0.0.1:8000/about/
 - [ ] http://127.0.0.1:8000/amenities/
 - [ ] http://127.0.0.1:8000/offers/
 - [ ] http://127.0.0.1:8000/gallery/
-- [ ] http://127.0.0.1:8000/contact/
+- [ ] http://127.0.0.1:8000/contact/ -->
 
 **Admin**
 - [ ] http://127.0.0.1:8000/admin/

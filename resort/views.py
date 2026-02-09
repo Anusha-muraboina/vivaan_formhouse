@@ -1438,97 +1438,97 @@ def booking_confirmation(request, booking_id):
     return render(request, 'resort/booking_confirmation.html', context)
 
 
-def amenities_view(request):    
-    """Amenities view"""
-    amenities = Amenity.objects.all()
-    context = {
-        'amenities': amenities,
-    }
-    return render(request, 'resort/amenities.html', context)
+# def amenities_view(request):    
+#     """Amenities view"""
+#     amenities = Amenity.objects.all()
+#     context = {
+#         'amenities': amenities,
+#     }
+#     return render(request, 'resort/amenities.html', context)
 
 
-def offers_view(request):
-    """Offers view"""
-    active_offers = Offer.objects.filter(
-        is_active=True, 
-        valid_until__gte=datetime.now().date()
-    )
-    context = {
-        'offers': active_offers,
-    }
-    return render(request, 'resort/offers.html', context)
+# def offers_view(request):
+#     """Offers view"""
+#     active_offers = Offer.objects.filter(
+#         is_active=True, 
+#         valid_until__gte=datetime.now().date()
+#     )
+#     context = {
+#         'offers': active_offers,
+#     }
+#     return render(request, 'resort/offers.html', context)
 
 
-def gallery_view(request):
-    """Gallery view"""
-    category = request.GET.get('category')
-    if category:
-        images = Gallery.objects.filter(category=category)
-    else:
-        images = Gallery.objects.all()
+# def gallery_view(request):
+#     """Gallery view"""
+#     category = request.GET.get('category')
+#     if category:
+#         images = Gallery.objects.filter(category=category)
+#     else:
+#         images = Gallery.objects.all()
     
-    context = {
-        'images': images,
-        'categories': Gallery._meta.get_field('category').choices,
-    }
-    return render(request, 'resort/gallery.html', context)
+#     context = {
+#         'images': images,
+#         'categories': Gallery._meta.get_field('category').choices,
+#     }
+#     return render(request, 'resort/gallery.html', context)
 
 
 
-def contact(request):
+# def contact(request):
 
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
+#     if request.method == 'POST':
+#         form = ContactForm(request.POST)
 
-        if form.is_valid():
-            contact_msg = form.save()
+#         if form.is_valid():
+#             contact_msg = form.save()
 
-            context = {
-                'name': contact_msg.name,
-                'email': contact_msg.email,
-                'phone': contact_msg.phone,
-                'subject': contact_msg.subject,
-                'message': contact_msg.message
-            }
+#             context = {
+#                 'name': contact_msg.name,
+#                 'email': contact_msg.email,
+#                 'phone': contact_msg.phone,
+#                 'subject': contact_msg.subject,
+#                 'message': contact_msg.message
+#             }
 
-            # ========== SEND EMAIL TO ADMIN ==========
+#             # ========== SEND EMAIL TO ADMIN ==========
 
-            admin_html = render_to_string("contact/admin_contact.html", context)
+#             admin_html = render_to_string("contact/admin_contact.html", context)
 
-            admin_email = EmailMultiAlternatives(
-                subject=f"New Contact Message: {contact_msg.subject}",
-                body="",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[settings.ADMIN_EMAIL],
-            )
-            admin_email.attach_alternative(admin_html, "text/html")
-            admin_email.send()
+#             admin_email = EmailMultiAlternatives(
+#                 subject=f"New Contact Message: {contact_msg.subject}",
+#                 body="",
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 to=[settings.ADMIN_EMAIL],
+#             )
+#             admin_email.attach_alternative(admin_html, "text/html")
+#             admin_email.send()
 
-            # ========== SEND EMAIL TO USER ==========
+#             # ========== SEND EMAIL TO USER ==========
 
-            user_html = render_to_string("contact/user_contact.html", context)
+#             user_html = render_to_string("contact/user_contact.html", context)
 
-            user_email = EmailMultiAlternatives(
-                subject="Thank You for Contacting Strawberry King Resort",
-                body="",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[contact_msg.email],
-            )
-            user_email.attach_alternative(user_html, "text/html")
-            user_email.send()
+#             user_email = EmailMultiAlternatives(
+#                 subject="Thank You for Contacting Strawberry King Resort",
+#                 body="",
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 to=[contact_msg.email],
+#             )
+#             user_email.attach_alternative(user_html, "text/html")
+#             user_email.send()
 
-            # messages.success(request, "Thank you! Your message has been sent.")
-            return redirect('home')
+#             # messages.success(request, "Thank you! Your message has been sent.")
+#             return redirect('home')
 
-    else:
-        form = ContactForm()
+#     else:
+#         form = ContactForm()
 
-    return render(request, 'resort/home.html', {'form': form})
+#     return render(request, 'resort/home.html', {'form': form})
 
 
-def about(request):
-    """About view"""
-    return render(request, 'resort/about.html')
+# def about(request):
+#     """About view"""
+#     return render(request, 'resort/about.html')
 
 
 
