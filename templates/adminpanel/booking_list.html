@@ -3,6 +3,334 @@
 {% block header %}Bookings{% endblock %}
 
 {% block content %}
+
+<style>
+/* ===== HEADER ===== */
+.booking-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.title {
+    font-size:20px;
+    font-weight:700;
+    margin:0;
+}
+
+.subtitle {
+    font-size:13px;
+    color:#6b7280;
+    margin-top:3px;
+}
+
+.btn-add {
+    background:#111827;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-wrapper {
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:18px;
+}
+
+.filter-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+}
+
+.input {
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:14px;
+}
+
+.search { width:220px; }
+.select { width:150px; }
+.date { width:150px; }
+
+.btn-filter {
+    background:#111827;
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:8px;
+    font-weight:600;
+}
+
+/* ===== TABLE ===== */
+.table-wrapper {
+    background:#fff;
+    border-radius:12px;
+    border:1px solid #eee;
+    overflow:hidden;
+}
+
+.table-modern {
+    width:100%;
+    border-collapse:collapse;
+}
+
+.table-modern thead {
+    background:#fafafa;
+}
+
+.table-modern th {
+    text-align:left;
+    font-size:12px;
+    color:#6b7280;
+    font-weight:600;
+    padding:14px;
+}
+
+.table-modern td {
+    padding:16px 14px;
+    border-top:1px solid #f1f1f1;
+    font-size:14px;
+}
+
+.table-modern tr:hover {
+    background:#fafafa;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.badge-pending { background:#fef3c7; color:#92400e; }
+.badge-confirmed { background:#dcfce7; color:#166534; }
+.badge-cancelled { background:#fee2e2; color:#991b1b; }
+
+/* ===== ACTION BUTTONS ===== */
+.btn-action {
+    padding:6px 10px;
+    border-radius:8px;
+    font-size:13px;
+    text-decoration:none;
+    margin-right:5px;
+}
+
+.btn-view { background:#eef2ff; color:#4338ca; }
+.btn-delete { background:#fee2e2; color:#dc2626; }
+
+/* ===== PAGINATION ===== */
+.pagination {
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    padding:14px;
+}
+
+.page-btn {
+    padding:6px 12px;
+    border-radius:8px;
+    border:1px solid #e5e7eb;
+    background:#111827;
+    text-decoration:none;
+    font-size:13px;
+}
+
+.page-current {
+    background:#4f46e5;
+    color:#fff;
+    border:none;
+}
+</style>
+
+
+<!-- 🔷 HEADER -->
+<div class="booking-header">
+    <div>
+        <h3 class="title">All Bookings</h3>
+        <div class="subtitle">Manage and track villa bookings</div>
+    </div>
+
+    <a href="{% url 'vivaan_admin:booking_create' %}" class="btn-add">
+        + Add Booking
+    </a>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-wrapper">
+    <form method="get" class="filter-row">
+        <input type="text" name="search"
+               value="{{ request.GET.search }}"
+               class="input search"
+               placeholder="Search booking or guest">
+
+        <select name="status" class="input select">
+            <option value="">Status</option>
+            {% for key, value in bookings.paginator.object_list.model.STATUS_CHOICES %}
+            <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>
+                {{ value }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="payment_status" class="input select">
+            <option value="">Payment</option>
+            {% for key, value in bookings.paginator.object_list.model.PAYMENT_STATUS_CHOICES %}
+            <option value="{{ key }}" {% if request.GET.payment_status == key %}selected{% endif %}>
+                {{ value }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="payment_method" class="input select">
+            <option value="">Method</option>
+            {% for key, value in bookings.paginator.object_list.model.PAYMENT_METHOD_CHOICES %}
+            <option value="{{ key }}" {% if request.GET.payment_method == key %}selected{% endif %}>
+                {{ value }}
+            </option>
+            {% endfor %}
+        </select>
+
+        {% comment %} <input type="date" name="check_in_from"
+               value="{{ request.GET.check_in_from }}"
+               class="input date">
+
+
+
+
+        <input type="date" name="check_in_to"
+        class="input date"> {% endcomment %}
+
+        <button class="btn-filter">Filter</button>
+    </form>
+</div>
+
+
+<!-- 🔷 TABLE -->
+<div class="table-wrapper">
+    <table class="table-modern">
+        <thead>
+            <tr>
+                <th>Booking</th>
+                <th>Guest</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for b in bookings %}
+            <tr>
+                <td>
+                    <strong>{{ b.booking_id }}</strong><br>
+                    <small>{{ b.created_at|date:"d M Y" }}</small>
+                </td>
+
+                <td>
+                    <strong>{{ b.guest_name }}</strong><br>
+                    <small>{{ b.guest_phone }}</small>
+                </td>
+
+                <td>
+                    {{ b.check_in|date:"d M Y" }} → {{ b.check_out|date:"d M Y" }}
+                </td>
+
+                <td>
+                    <span class="badge 
+                        {% if b.status == 'confirmed' %}badge-confirmed
+                        {% elif b.status == 'cancelled' %}badge-cancelled
+                        {% else %}badge-pending{% endif %}">
+                        {{ b.get_status_display }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="badge badge-pending">
+                        {{ b.get_payment_status_display }}
+                    </span>
+                </td>
+
+                <td>
+                    <a href="{% url 'vivaan_admin:booking_detail' b.id %}" class="btn-action btn-view">View</a>
+                    <a href="{% url 'vivaan_admin:booking_edit' b.id %}" class="btn-action btn-view">Edit</a>
+                    <a href="{% url 'vivaan_admin:booking_delete' b.id %}"
+                       class="btn-action btn-delete"
+                       onclick="return confirm('Delete booking?');">
+                       Delete
+                    </a>
+                </td>
+            </tr>
+
+        {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;padding:40px;color:#6b7280;">
+                    No bookings found
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<!-- 🔷 PAGINATION -->
+<div class="pagination">
+
+    {% if bookings.has_previous %}
+        <a href="?page={{ bookings.previous_page_number }}" class="page-btn">Prev</a>
+    {% endif %}
+
+    <span class="page-btn page-current">
+        {{ bookings.number }} / {{ bookings.paginator.num_pages }}
+    </span>
+
+    {% if bookings.has_next %}
+        <a href="?page={{ bookings.next_page_number }}" class="page-btn">Next</a>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "adminpanel/base.html" %}
+{% block title %}Bookings{% endblock %}
+{% block header %}Bookings{% endblock %}
+
+{% block content %}
 <div class="card">
     <div class="card-header">
         <h2>All Bookings</h2>
@@ -48,4 +376,4 @@
     </table>
 </div>
 </div>
-{% endblock %}
+{% endblock %} {% endcomment %}

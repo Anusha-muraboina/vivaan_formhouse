@@ -356,11 +356,70 @@ def dashboard(request):
 from .forms import *
 
 # LIST
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin)
+# def booking_list(request):
+#     bookings = Booking.objects.all()
+#     return render(request, "adminpanel/booking_list.html", {"bookings": bookings})
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.db.models import Q
+# from .models import Booking
+
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)
 def booking_list(request):
+    
     bookings = Booking.objects.all()
-    return render(request, "adminpanel/booking_list.html", {"bookings": bookings})
+
+    # 🔎 SEARCH
+    search_query = request.GET.get("search")
+    if search_query:
+        bookings = bookings.filter(
+            Q(booking_id__icontains=search_query) |
+            Q(guest_name__icontains=search_query) |
+            Q(guest_email__icontains=search_query) |
+            Q(guest_phone__icontains=search_query)
+        )
+
+    # 🎯 FILTERS
+    status = request.GET.get("status")
+    payment_status = request.GET.get("payment_status")
+    payment_method = request.GET.get("payment_method")
+
+    if status:
+        bookings = bookings.filter(status=status)
+
+    if payment_status:
+        bookings = bookings.filter(payment_status=payment_status)
+
+    if payment_method:
+        bookings = bookings.filter(payment_method=payment_method)
+
+    # 📅 DATE RANGE FILTER
+    check_in_from = request.GET.get("check_in_from")
+    check_in_to = request.GET.get("check_in_to")
+
+    if check_in_from:
+        bookings = bookings.filter(check_in__gte=check_in_from)
+
+    if check_in_to:
+        bookings = bookings.filter(check_in__lte=check_in_to)
+
+    # 📄 PAGINATION
+    paginator = Paginator(bookings, 10)  # 10 per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "bookings": page_obj,
+        "page_obj": page_obj,
+    }
+
+    return render(request, "adminpanel/booking_list.html", context)
 
 
 from resort.views import calculate_booking_cost
