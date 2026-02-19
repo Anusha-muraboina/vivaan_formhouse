@@ -46,7 +46,7 @@
 />
 
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,8 @@
     {% comment %} <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"> {% endcomment %}
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    {% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" as="style">
 
         <link
   href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
@@ -259,13 +260,13 @@
                         Our farmhouse blends natural beauty, spacious interiors, and a relaxing atmosphere for an unforgettable stay
                     </p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-white hover:text-amber-400 transition"><i
+                        <a href="#" aria-label="Visit our Instagram" class="text-white hover:text-amber-400 transition"><i
                                 class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="text-white hover:text-amber-400 transition"><i
-                                class="fab fa-instagram fa-lg"></i></a>
-                        <a href="#" class="text-white hover:text-amber-400 transition"><i
+                        {% comment %} <a href="#" aria-label="Visit our facebook" class="text-white hover:text-amber-400 transition"><i
+                                class="fab fa- fa-lg"></i></a> {% endcomment %}
+                        <a href="#" aria-label="Visit our twitter" class="text-white hover:text-amber-400 transition"><i
                                 class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" class="text-white hover:text-amber-400 transition"><i
+                        <a href="#" aria-label="Visit our youtube" class="text-white hover:text-amber-400 transition"><i
                                 class="fab fa-youtube fa-lg"></i></a>
                     </div>
                 </div>

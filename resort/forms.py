@@ -2,7 +2,8 @@ from django import forms
 from .models import Booking, ContactMessage ,Testimonial
 
 from django import forms
-from .models import Booking
+from .models import Amenity
+from .models import BlockedDate
 
 
 
@@ -79,36 +80,6 @@ class BookingForm(forms.ModelForm):
 
         }
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     check_in = cleaned_data.get('check_in')
-    #     check_out = cleaned_data.get('check_out')
-
-    #     if check_in and check_out:
-    #         if check_out <= check_in:
-    #             raise forms.ValidationError('Check-out date must be after check-in date.')
-
-    #     return cleaned_data
-        
-    # def clean(self):
-    #         cleaned = super().clean()
-
-    #         check_in = cleaned.get("check_in")
-    #         check_out = cleaned.get("check_out")
-    #         in_time = cleaned.get("check_in_time")
-    #         out_time = cleaned.get("check_out_time")
-
-    #         if check_in and check_out and check_out < check_in:
-    #             raise forms.ValidationError("Check-out must be after check-in")
-
-    #         # ✅ SAME DAY TIME VALIDATION
-    #         if check_in == check_out and in_time and out_time:
-    #             if out_time <= in_time:
-    #                 raise forms.ValidationError(
-    #                     "Check-out time must be after check-in time"
-    #                 )
-
-    #         return cleaned
     def clean_guest_count(self):
         guest_count = self.cleaned_data.get("guest_count")
 
@@ -157,7 +128,6 @@ class ContactForm(forms.ModelForm):
 
 
 
-from .models import Amenity
 
 class AmenityForm(forms.ModelForm):
     class Meta:
@@ -175,7 +145,6 @@ class AmenityForm(forms.ModelForm):
 
 
 
-from .models import BlockedDate
 
 class BlockedDateForm(forms.ModelForm):
     class Meta:

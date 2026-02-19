@@ -941,6 +941,8 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
 </section>
 
 {% block extra_js %}
+
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 {% comment %} {{ booked_dates|json_script:"booked-dates-data" }} {% endcomment %}
 {{ booked_dates|json_script:"booked-dates-data" }}
 {{ booked_info|json_script:"booked-info-data" }}

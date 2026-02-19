@@ -37,7 +37,24 @@
   <!-- Carousel Wrapper -->
   <div id="hero-carousel" class="absolute inset-0 z-0">
 
+
     {% for banner in banners %}
+<div
+  class="carousel-item absolute inset-0 transition-opacity duration-1000
+         {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}">
+
+    <img
+        src="{{ banner.image.url }}"
+        alt="{{ banner.title|default:'Farmhouse banner image' }}"
+        class="w-full h-full object-contain md:object-cover"
+        fetchpriority="high"
+    >
+
+</div>
+{% endfor %}
+
+
+    {% comment %} {% for banner in banners %}
     <div
       class="carousel-item absolute inset-0
              bg-center bg-no-repeat
@@ -55,20 +72,21 @@
       >
 
     </div>
-    {% endfor %}
+    {% endfor %} {% endcomment %}
 
   </div>
 
   <!-- PREV BUTTON -->
-  <button id="prevBtn"
+  <button id="prevBtn"   aria-label="Previous slide"
     class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20
            bg-black/60 hover:bg-black/80
            p-3 md:p-4 rounded-full transition">
+           
     <i class="fas fa-chevron-left text-lg md:text-2xl"></i>
   </button>
 
   <!-- NEXT BUTTON -->
-  <button id="nextBtn"
+  <button id="nextBtn"  aria-label="Next slide"
     class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20
            bg-black/60 hover:bg-black/80
            p-3 md:p-4 rounded-full transition">
@@ -101,7 +119,7 @@
             <div class="bg-emerald-50 rounded-2xl shadow-xl overflow-hidden card-hover">
                 <div class="h-96 bg-gradient-to-br from-red-400 to-red-600 relative overflow-hidden">
                     {% if room.image %}
-                    <img src="{{ room.image.url }}" alt="{{ room.name }}" class="w-full h-full object-cover">
+                    <img src="{{ room.image.url }}" alt="{{ room.name }}" class="w-full h-full object-cover"  loading="lazy"  decoding="async" >
                     {% else %}
                     <div class="absolute inset-0 flex items-center justify-center text-white text-6xl">
                         <i class="fas fa-bed"></i>
@@ -158,7 +176,7 @@
                     {% if amenity.amenity_image %}
                     <img src="{{ amenity.amenity_image.url }}"
                          alt="{{ amenity.name }}"
-                         class="w-full h-48 object-cover">
+                         class="w-full h-48 object-cover"   loading="lazy"  decoding="async">
                     {% else %}
                     <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
                         No Image
@@ -203,7 +221,7 @@
             {% for image in gallery_images %}
             <div class="relative overflow-hidden rounded-xl h-72 card-hover group cursor-pointer shadow-md">
                 <img src="{{ image.image.url }}" alt="{{ image.title }}"
-                    class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    class="w-full h-full object-cover group-hover:scale-110 transition duration-700"   loading="lazy"  decoding="async">
                 <div
                     class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
                     {% comment %} <h4 class="text-white font-semibold text-lg">{{ image.title }}</h4> {% endcomment %}
@@ -250,6 +268,7 @@
         class="w-full h-full border-0"
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
+          title="Vivaan Farmhouse location on Google Maps"
         allowfullscreen>
       </iframe>
 
@@ -272,7 +291,7 @@
                 <img 
                     src="{% static 'images/vihan-group1.webp' %}" 
                     alt="About Resort"
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover"   loading="lazy"  decoding="async"
                 >
             </div>
 
@@ -376,11 +395,13 @@
 
             <!-- Buttons -->
             <button onclick="slideLeft()"
+             aria-label="Scroll reviews left"
                 class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full hidden md:block">
                 <i class="fas fa-chevron-left"></i>
             </button>
 
             <button onclick="slideRight()"
+             aria-label="Scroll reviews right"
                 class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full hidden md:block">
                 <i class="fas fa-chevron-right"></i>
             </button>
@@ -401,11 +422,11 @@
     <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
       <!-- LEFT: IMAGE CAROUSEL -->
-      <div class="relative z-20 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="relative z-20 rounded-3xl overflow-hidden shadow-2xl"> 
         <div class="relative h-[420px]" id="carousel">
-        <img src="{% static 'images/vihan-group1.webp' %}" class="carousel-img active" alt="contact-image">
-        <img src="{% static 'images/vihan-group2.webp' %}" class="carousel-img" alt="contact-image">
-        <img src="{% static 'images/vihan-group3.webp' %}" class="carousel-img" alt="contact-image">
+        <img src="{% static 'images/vihan-group1.webp' %}" class="carousel-img active" alt="contact-image"  loading="lazy"  decoding="async">
+        <img src="{% static 'images/vihan-group2.webp' %}" class="carousel-img" alt="contact-image"  loading="lazy"  decoding="async">
+        <img src="{% static 'images/vihan-group3.webp' %}" class="carousel-img" alt="contact-image"  loading="lazy"  decoding="async">
 
         </div>
 
@@ -545,7 +566,7 @@
         </div>
 
         <button
-          type="submit"
+          type="submit" aria-label="Send message"
           class="w-full bg-emerald-600 hover:bg-emerald-900
                  text-white font-bold py-3 rounded-lg mt-4 transition">
           Send Message

@@ -1,9 +1,6 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
-from .models import RoomCategory
 
-
-from django.urls import reverse
 from resort.models import RoomCategory
 from blog.models import Blog
 
@@ -11,8 +8,6 @@ from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
 
 
-from django.contrib.sitemaps.views import sitemap
-from django.http import HttpResponse
 
 
 def clean_sitemap(request, sitemaps):
