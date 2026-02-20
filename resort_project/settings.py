@@ -18,7 +18,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "vivaanfarmhouse.com",
     "www.vivaanfarmhouse.com",
-    # '3.111.58.197',
+    '13.205.98.67',
     'localhost',
     '127.0.0.1',
     ]
