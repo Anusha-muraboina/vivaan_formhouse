@@ -5,8 +5,15 @@
 
   <!-- Google Analytics -->
 
-  <meta name="google-site-verification" content="google897de87a6140d20a" />
-  <meta name="robots" content="index, follow">
+<meta name="google-site-verification" content="google897de87a6140d20a" />
+{% comment %} <meta name="robots" content="index, follow"> {% endcomment %}
+
+{% block robots %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+
+
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-54HFYP7FG7"></script>
 <script>
@@ -36,7 +43,13 @@
 
 
       <!-- ✅ CANONICAL TAG -->
-<link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% comment %} <link rel="canonical" href="{{ request.build_absolute_uri }}"> {% endcomment %}
+
+{% block canonical %}
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+{% endblock %}
+
+
     <!-- ✅ FAVICON -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/vivaan_favicon.jpeg' %}" type="image/png" >
 
@@ -67,7 +80,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     {% comment %} <meta name="robots" content="noindex, nofollow"> {% endcomment %}
-
+    
+    {% block meta %}{% endblock %}
 
     {% block extra_css %}{% endblock %}
 </head>

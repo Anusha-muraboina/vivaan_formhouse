@@ -14,6 +14,13 @@ from blog.sitemaps import (
     BlogListSitemap,
     BlogDetailSitemap,
 )
+from django.shortcuts import render
+
+def custom_404(request, exception):
+    return render(request, "resort/404.html", status=404)
+
+# def test_404(request):
+#     return render(request, "resort/404.html")
 
 sitemaps = {
     'static': StaticSitemap,
@@ -36,7 +43,8 @@ urlpatterns = [
         name='sitemap'
     ),
     
-    
+    # path("test404/", test_404),
+
     path(
         "robots.txt",
         TemplateView.as_view(
@@ -45,6 +53,7 @@ urlpatterns = [
         ),
     ),
 ]
+handler404 = "resort_project.urls.custom_404"
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

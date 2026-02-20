@@ -647,3 +647,5 @@ def leave_review(request):
     }
     return render(request, 'resort/leave_review.html', context)
 
+
+

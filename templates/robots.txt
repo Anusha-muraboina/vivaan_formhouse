@@ -18,4 +18,4 @@ Disallow: /gallery/
 Disallow: /comment.php
 Disallow: /*?
 
-Sitemap: https://www.vivaanfarmhouse.com/sitemap.xml
+Sitemap: https://vivaanfarmhouse.com/sitemap.xml
