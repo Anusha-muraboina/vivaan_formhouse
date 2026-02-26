@@ -5,10 +5,83 @@
 
   <!-- Google Analytics -->
 
-<meta name="google-site-verification" content="google897de87a6140d20a" />
-{% comment %} <meta name="robots" content="index, follow"> {% endcomment %}
 
-{% block robots %}
+
+
+  <!-- Google Analytics -->
+
+  <meta name="google-site-verification" content="google897de87a6140d20a" />
+  <meta name="robots" content="index, follow">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-54HFYP7FG7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-54HFYP7FG7');
+</script>
+
+  {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>
+{% block title %}
+{{ seo_title|default:"Vivaan Farmhouse – Elkatta, Hyderabad" }}
+{% endblock %}
+</title>
+
+<meta name="description"
+      content="{{ seo_description|default:'Luxury farmhouse stay in Hyderabad with valley views, private stay and peaceful nature.' }}">
+
+<meta name="keywords"
+      content="{{ seo_keywords|default:'farmhouse in hyderabad, luxury farmhouse, weekend stay hyderabad' }}">
+
+
+      <!-- ✅ CANONICAL TAG -->
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <!-- ✅ FAVICON -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/vivaan_favicon.jpeg' %}" type="image/png" >
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+/>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% comment %} <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"> {% endcomment %}
+    {% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" as="style">
+
+        <link
+  href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
+  rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    {% comment %} <meta name="robots" content="noindex, nofollow"> {% endcomment %}
+
+
+
+
+
+
+
+{% comment %} <meta name="google-site-verification" content="google897de87a6140d20a" /> {% endcomment %}
+
+{% comment %} {% block robots %}
 <meta name="robots" content="noindex, nofollow">
 {% endblock %}
 
@@ -42,15 +115,13 @@
       content="{{ seo_keywords|default:'farmhouse in hyderabad, luxury farmhouse, weekend stay hyderabad' }}">
 
 
-      <!-- ✅ CANONICAL TAG -->
-{% comment %} <link rel="canonical" href="{{ request.build_absolute_uri }}"> {% endcomment %}
 
 {% block canonical %}
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 {% endblock %}
 
 
-    <!-- ✅ FAVICON -->
+  
     <link rel="icon" type="image/x-icon" href="{% static 'images/vivaan_favicon.jpeg' %}" type="image/png" >
 
 <link
@@ -58,29 +129,24 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
 />
 
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com" defer></script>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    {% comment %} <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"> {% endcomment %}
-    {% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script> {% endcomment %}
+
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" as="style">
 
         <link
   href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
   rel="stylesheet">
 
-    <!-- Font Awesome -->
+  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> {% endcomment %}
 
-    {% comment %} <meta name="robots" content="noindex, nofollow"> {% endcomment %}
-    
+
     {% block meta %}{% endblock %}
 
     {% block extra_css %}{% endblock %}
