@@ -10,54 +10,98 @@ from django.http import HttpResponse
 
 
 
-def clean_sitemap(request, sitemaps):
-    response = sitemap(request, sitemaps)
+from django.contrib.sitemaps import Sitemap
+from django.urls import reverse
+from blog.models import Blog
+from resort.models import RoomCategory
 
-    # ✅ VERY IMPORTANT
-    response.render()
 
-    xml = response.content.decode("utf-8")
-
-    # remove xhtml namespace
-    xml = xml.replace(
-        ' xmlns:xhtml="http://www.w3.org/1999/xhtml"', ""
-    )
-
-    return HttpResponse(xml, content_type="application/xml")
-
-# ================= STATIC PAGES =================
-class StaticSitemap(Sitemap):
-    changefreq = "daily"
+class StaticViewSitemap(Sitemap):
+    priority = 0.8
+    changefreq = "weekly"
 
     def items(self):
         return [
             "home",
+            "blog:blog_list",
             "leave_review",
+            "cancel_booking",
         ]
 
     def location(self, item):
         return reverse(item)
 
-    def priority(self, item):
-        if item == "home":
-            return 1.0
-        elif item == "contact":
-            return 0.8
-        elif item == "leave_review":
-            return 0.7
-        return 0.5
 
-
-# ================= ROOM CATEGORY =================
-class RoomCategorySitemap(Sitemap):
-    priority = 0.9
+class BlogSitemap(Sitemap):
     changefreq = "weekly"
+    priority = 0.64
+
+    def items(self):
+        return Blog.objects.filter(status="published")
+
+    def lastmod(self, obj):
+        return obj.updated_at if hasattr(obj, "updated_at") else None
+
+
+class RoomSitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.8
 
     def items(self):
         return RoomCategory.objects.all()
 
-    def location(self, obj):
-        return reverse("room_detail", args=[obj.slug])
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
+# def clean_sitemap(request, sitemaps):
+#     response = sitemap(request, sitemaps)
+
+#     # ✅ VERY IMPORTANT
+#     response.render()
+
+#     xml = response.content.decode("utf-8")
+
+#     # remove xhtml namespace
+#     xml = xml.replace(
+#         ' xmlns:xhtml="http://www.w3.org/1999/xhtml"', ""
+#     )
+
+#     return HttpResponse(xml, content_type="application/xml")
+
+# # ================= STATIC PAGES =================
+# class StaticSitemap(Sitemap):
+#     changefreq = "daily"
+
+#     def items(self):
+#         return [
+#             "home",
+#             "leave_review",
+#         ]
+
+#     def location(self, item):
+#         return reverse(item)
+
+#     def priority(self, item):
+#         if item == "home":
+#             return 1.0
+#         elif item == "contact":
+#             return 0.8
+#         elif item == "leave_review":
+#             return 0.7
+#         return 0.5
+
+
+# # ================= ROOM CATEGORY =================
+# class RoomCategorySitemap(Sitemap):
+#     priority = 0.9
+#     changefreq = "weekly"
+
+#     def items(self):
+#         return RoomCategory.objects.all()
+
+#     def location(self, obj):
+#         return reverse("room_detail", args=[obj.slug])
 
 
 

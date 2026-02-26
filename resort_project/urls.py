@@ -7,13 +7,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from django.views.generic import TemplateView
-from resort.sitemaps import clean_sitemap
+# from resort.sitemaps import clean_sitemap
 from django.contrib.sitemaps.views import sitemap
-from resort.sitemaps import StaticSitemap, RoomCategorySitemap
-from blog.sitemaps import (
-    BlogListSitemap,
-    BlogDetailSitemap,
-)
+# from resort.sitemaps import StaticSitemap, RoomCategorySitemap
+from resort.sitemaps import StaticViewSitemap, BlogSitemap, RoomSitemap
+
 from django.shortcuts import render
 
 def custom_404(request, exception):
@@ -23,10 +21,9 @@ def custom_404(request, exception):
 #     return render(request, "resort/404.html")
 
 sitemaps = {
-    'static': StaticSitemap,
-    'rooms': RoomCategorySitemap,
-    "blog_list": BlogListSitemap,
-    # "blogs": BlogDetailSitemap,
+    "static": StaticViewSitemap,
+    "blogs": BlogSitemap,
+    "rooms": RoomSitemap,
 }
 
 
@@ -36,12 +33,7 @@ urlpatterns = [
     path('', include('resort.urls')),
     path('blog/', include('blog.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path(
-        'sitemap.xml',
-        clean_sitemap,
-        {'sitemaps': sitemaps},
-        name='sitemap'
-    ),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     
     # path("test404/", test_404),
 
