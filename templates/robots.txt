@@ -17,5 +17,8 @@ Disallow: /amenities/
 Disallow: /gallery/
 Disallow: /comment.php
 Disallow: /*?
+Disallow: /products/
+Disallow: /?
+Disallow: /.htm$
 
 Sitemap: https://vivaanfarmhouse.com/sitemap.xml
