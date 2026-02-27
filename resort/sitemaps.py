@@ -9,7 +9,6 @@ from django.http import HttpResponse
 
 
 
-
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from blog.models import Blog
@@ -17,7 +16,6 @@ from resort.models import RoomCategory
 
 
 class StaticViewSitemap(Sitemap):
-    priority = 0.8
     changefreq = "weekly"
 
     def items(self):
@@ -31,29 +29,45 @@ class StaticViewSitemap(Sitemap):
     def location(self, item):
         return reverse(item)
 
+    def priority(self, item):
+        if item == "home":
+            return 1.0
+        elif item == "blog:blog_list":
+            return 0.9
+        else:
+            return 0.8
+
 
 class BlogSitemap(Sitemap):
     changefreq = "weekly"
-    priority = 0.64
 
     def items(self):
         return Blog.objects.filter(status="published")
 
+    def location(self, obj):
+        return reverse("blog:blog_detail", kwargs={"slug": obj.slug})
+
+    def priority(self, obj):
+        return 0.6
+
     def lastmod(self, obj):
-        return obj.updated_at if hasattr(obj, "updated_at") else None
+        return getattr(obj, "updated_at", None)
 
 
 class RoomSitemap(Sitemap):
     changefreq = "weekly"
-    priority = 0.8
 
     def items(self):
         return RoomCategory.objects.all()
 
+    def location(self, obj):
+        return reverse("room_detail", kwargs={"slug": obj.slug})
+
+    def priority(self, obj):
+        return 0.7
+
     def lastmod(self, obj):
-        return obj.updated_at
-
-
+        return getattr(obj, "updated_at", None)
 # def clean_sitemap(request, sitemaps):
 #     response = sitemap(request, sitemaps)
 
