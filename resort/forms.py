@@ -95,6 +95,20 @@ class BookingForm(forms.ModelForm):
             raise forms.ValidationError("Extra guest count cannot exceed 5.")
 
         return extra
+    
+    def clean_coupon_code(self):
+        code = self.cleaned_data.get("coupon_code")
+
+        if not code:
+            return None
+
+        from .models import Coupon
+
+        try:
+            return Coupon.objects.get(code__iexact=code, is_active=True)
+        except Coupon.DoesNotExist:
+            raise forms.ValidationError("Invalid coupon code")
+
 
 class ContactForm(forms.ModelForm):
     class Meta:

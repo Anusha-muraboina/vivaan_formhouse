@@ -4,7 +4,7 @@ from .views import sync_ical
 @shared_task
 def sync_all_calendars():
     urls = [
-        "https://ical.booking.com/v1/export/t/59a7dc20-1fb0-472c-8d56-b97073c7537c.ics",
+        "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics",
         # Add more later
     ]
 

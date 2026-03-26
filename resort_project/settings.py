@@ -124,7 +124,7 @@ DATABASES = {
         'NAME': 'vivaan_db',
         'USER': 'vivaan_user',
         'PASSWORD': 'Vivaanfarmhouse@123',
-        'HOST': '127.0.0.1',
+        'HOST': '13.205.98.67',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -248,7 +248,7 @@ EMAIL_USE_SSL = True
 EMAIL_USE_TLS = False
 
 EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
-EMAIL_HOST_PASSWORD = 'Vivaanfarmhouse.com@#22922' 
+EMAIL_HOST_PASSWORD = 'vivaanfarmhouse@229221' 
 
 DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
 ADMIN_EMAIL = 'info@vivaanfarmhouse.com'

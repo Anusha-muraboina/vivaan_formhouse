@@ -347,9 +347,15 @@ def room_detail(request, slug):
             form.cleaned_data["extra_guest_count"],
         )
 
+        # discount = Decimal("0.00")
+        # coupon = form.cleaned_data.get("coupon_code")
+        # if coupon:
+        #     discount = coupon.discount_amount
+        
         discount = Decimal("0.00")
         coupon = form.cleaned_data.get("coupon_code")
-        if coupon:
+
+        if coupon:   # now this is Coupon object
             discount = coupon.discount_amount
 
         total = base_amount - discount
@@ -848,6 +854,45 @@ from .models import Booking
 from django.http import HttpResponse
 from icalendar import Calendar, Event
 from .models import Booking
+
+
+
+# def export_ical(request):
+#     cal = Calendar()
+#     cal.add('prodid', '-//Vivaan Farmhouse//')
+#     cal.add('version', '2.0')
+
+#     bookings = Booking.objects.filter(status="confirmed")
+
+#     for booking in bookings:
+#         event = Event()
+#         event.add('summary', f"Booking {booking.booking_id}")
+#         event.add('dtstart', booking.check_in)
+#         event.add('dtend', booking.check_out)
+
+#         # 🔥 REQUIRED FIELDS
+#         event.add('uid', f"{booking.booking_id}@vivaanfarmhouse.com")
+#         event.add('dtstamp', datetime.now())
+
+#         cal.add_component(event)
+
+#     return HttpResponse(cal.to_ical(), content_type='text/plain')
+
+# from django.http import JsonResponse
+
+# def sync_airbnb_calendar(request):
+#     ICAL_URL = "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics"
+
+#     sync_ical(ICAL_URL)
+
+#     return JsonResponse({"status": "Synced successfully"})
+
+
+from django.http import HttpResponse, JsonResponse
+from icalendar import Calendar, Event
+from django.utils.timezone import now
+from .models import Booking
+
 def export_ical(request):
     cal = Calendar()
     cal.add('prodid', '-//Vivaan Farmhouse//')
@@ -861,18 +906,21 @@ def export_ical(request):
         event.add('dtstart', booking.check_in)
         event.add('dtend', booking.check_out)
 
-        # 🔥 REQUIRED FIELDS
+        # ✅ Required
         event.add('uid', f"{booking.booking_id}@vivaanfarmhouse.com")
-        event.add('dtstamp', datetime.now())
+        event.add('dtstamp', now())
+
+        # 🔥 Recommended
+        event.add('status', 'CONFIRMED')
+        event.add('transp', 'OPAQUE')
 
         cal.add_component(event)
 
     return HttpResponse(cal.to_ical(), content_type='text/plain')
 
-from django.http import JsonResponse
 
 def sync_airbnb_calendar(request):
-    ICAL_URL = "https://ical.booking.com/v1/export/t/59a7dc20-1fb0-472c-8d56-b97073c7537c.ics"
+    ICAL_URL = "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics"
 
     sync_ical(ICAL_URL)
 
