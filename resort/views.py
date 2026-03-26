@@ -827,27 +827,6 @@ def sync_ical(ical_url):
 from django.http import HttpResponse
 from icalendar import Calendar, Event
 
-# def export_ical(request):
-#     cal = Calendar()
-#     cal.add('prodid', '-//Vivaan Farmhouse//')
-#     cal.add('version', '2.0')
-
-#     bookings = Booking.objects.filter(status="confirmed")
-
-#     for booking in bookings:
-#         event = Event()
-#         event.add('summary', f"Booking {booking.booking_id}")
-#         event.add('dtstart', booking.check_in)
-#         event.add('dtend', booking.check_out)
-#         event.add('description', booking.guest_name)
-
-#         cal.add_component(event)
-
-#     response = HttpResponse(cal.to_ical(), content_type='text/calendar')
-#     response['Content-Disposition'] = 'attachment; filename="vivaan.ics"'
-#     return response
-
-
 from django.http import HttpResponse
 from icalendar import Calendar, Event
 from .models import Booking
@@ -856,6 +835,13 @@ from icalendar import Calendar, Event
 from .models import Booking
 
 
+
+
+
+# from django.http import HttpResponse, JsonResponse
+# from icalendar import Calendar, Event
+# from django.utils.timezone import now
+# from .models import Booking
 
 # def export_ical(request):
 #     cal = Calendar()
@@ -870,15 +856,19 @@ from .models import Booking
 #         event.add('dtstart', booking.check_in)
 #         event.add('dtend', booking.check_out)
 
-#         # 🔥 REQUIRED FIELDS
+#         # ✅ Required
 #         event.add('uid', f"{booking.booking_id}@vivaanfarmhouse.com")
-#         event.add('dtstamp', datetime.now())
+#         event.add('dtstamp', now())
+
+#         # 🔥 Recommended
+#         event.add('status', 'CONFIRMED')
+#         event.add('transp', 'OPAQUE')
 
 #         cal.add_component(event)
 
 #     return HttpResponse(cal.to_ical(), content_type='text/plain')
 
-# from django.http import JsonResponse
+
 
 # def sync_airbnb_calendar(request):
 #     ICAL_URL = "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics"
@@ -888,16 +878,14 @@ from .models import Booking
 #     return JsonResponse({"status": "Synced successfully"})
 
 
-from django.http import HttpResponse, JsonResponse
-from icalendar import Calendar, Event
-from django.utils.timezone import now
-from .models import Booking
-
 def export_ical(request):
     cal = Calendar()
     cal.add('prodid', '-//Vivaan Farmhouse//')
     cal.add('version', '2.0')
 
+    # =========================
+    # 1️⃣ BOOKINGS
+    # =========================
     bookings = Booking.objects.filter(status="confirmed")
 
     for booking in bookings:
@@ -906,11 +894,26 @@ def export_ical(request):
         event.add('dtstart', booking.check_in)
         event.add('dtend', booking.check_out)
 
-        # ✅ Required
         event.add('uid', f"{booking.booking_id}@vivaanfarmhouse.com")
         event.add('dtstamp', now())
+        event.add('status', 'CONFIRMED')
+        event.add('transp', 'OPAQUE')
 
-        # 🔥 Recommended
+        cal.add_component(event)
+
+    # =========================
+    # 2️⃣ ADMIN BLOCKED DATES 🔥
+    # =========================
+    blocks = BlockedDate.objects.exclude(reason__startswith=("BOOKING", "AIRBNB"))
+
+    for block in blocks:
+        event = Event()
+        event.add('summary', "Blocked by Admin")
+        event.add('dtstart', block.start_date)
+        event.add('dtend', block.end_date)
+
+        event.add('uid', f"BLOCK-{block.id}@vivaanfarmhouse.com")
+        event.add('dtstamp', now())
         event.add('status', 'CONFIRMED')
         event.add('transp', 'OPAQUE')
 
@@ -918,10 +921,16 @@ def export_ical(request):
 
     return HttpResponse(cal.to_ical(), content_type='text/plain')
 
-
 def sync_airbnb_calendar(request):
-    ICAL_URL = "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics"
+    urls = [
+        ("BOOKING", "https://ical.booking.com/v1/export/t/9208ef1c-451d-49ab-ad60-38c0710134fc.ics"),
+        ("AIRBNB", "https://www.airbnb.co.in/calendar/ical/1649999518121935223.ics?t=03621f8b7ca24ad9a9b223a5ea2eb68b"),
+    ]
 
-    sync_ical(ICAL_URL)
+    # 🔥 clear old data once
+    BlockedDate.objects.filter(reason__startswith=("BOOKING", "AIRBNB")).delete()
 
-    return JsonResponse({"status": "Synced successfully"})
+    for source, url in urls:
+        sync_ical(url, source)
+
+    return JsonResponse({"status": "Synced Booking + Airbnb successfully"})
