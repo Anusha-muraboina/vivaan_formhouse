@@ -151,7 +151,12 @@ class Booking(models.Model):
 
     booking_id = models.CharField(max_length=20, unique=True, editable=False)
     # room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings', null=True, blank=True)
-
+    room_category = models.ForeignKey(
+        RoomCategory,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     guest_name = models.CharField(max_length=200)
     guest_email = models.EmailField()
     guest_phone = models.CharField(max_length=15)

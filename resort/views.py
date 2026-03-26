@@ -29,7 +29,6 @@ from django.contrib import messages
 
 from .models import Booking, RoomCategory, VillaPricing, Coupon
 from .forms import BookingForm
-from django.conf import settings
 
 import razorpay
 import threading
@@ -317,7 +316,8 @@ def room_detail(request, slug):
     # ================= BLOCKED DATES =================
     blocked_dates = []
 
-    for block in BlockedDate.objects.all():
+    # for block in BlockedDate.objects.all():
+    for block in BlockedDate.objects.filter(end_date__gte=datetime.now().date()):
         d = block.start_date
         # while d <= block.end_date:
         while d < block.end_date: 
@@ -356,27 +356,33 @@ def room_detail(request, slug):
 
         # ================= CREATE BOOKING =================
         booking, created = Booking.objects.get_or_create(
-    guest_email=form.cleaned_data["guest_email"],
-    check_in=form.cleaned_data["check_in"],
-    check_out=form.cleaned_data["check_out"],
-    payment_method=payment_method,
+        guest_email=form.cleaned_data["guest_email"],
+        check_in=form.cleaned_data["check_in"],
+        check_out=form.cleaned_data["check_out"],
+        payment_method=payment_method,
 
-    defaults={
-        "guest_name": form.cleaned_data["guest_name"],
-        "guest_phone": form.cleaned_data["guest_phone"],
-        "guest_count": form.cleaned_data["guest_count"],
-        "extra_guest_count": form.cleaned_data["extra_guest_count"],
+        defaults={
+            "guest_name": form.cleaned_data["guest_name"],
+            "guest_phone": form.cleaned_data["guest_phone"],
+            "guest_count": form.cleaned_data["guest_count"],
+            "extra_guest_count": form.cleaned_data["extra_guest_count"],
 
-        "sub_total": base_amount,
-        "disc_price": discount,
-        "total_amount": total,
-        "remaining_amount": total,
+            "sub_total": base_amount,
+            "disc_price": discount,
+            "total_amount": total,
+            "remaining_amount": total,
 
-        "payment_status": "pending",
-        "status": "pending",
-    }
-)
+            "payment_status": "pending",
+            "status": "pending",
+            
+                    # ✅ ADD THIS
+           "room_category": room_category
+        }
+    )
 
+            # ✅ ADD HERE (CORRECT PLACE)
+        if created:
+            sync_booking_to_farmhouse(booking)
 
         # ================= FARMHOUSE =================
         if payment_method == "farmhouse":
@@ -649,3 +655,225 @@ def leave_review(request):
 
 
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+def sync_booking_to_farmhouse(booking):
+
+    import requests
+
+    try:
+        requests.post(
+            "https://farmhouseshyderabad.com/api/vivaan/receive-booking/",
+            json={
+                "farmhouse_slug": "vivaan",   # ✅ IMPORTANT
+                "check_in": str(booking.check_in),
+                "check_out": str(booking.check_out),
+            },
+            timeout=3
+        )
+
+    except Exception as e:
+        print("Sync error:", e)
+        
+# from rest_framework.decorators import api_view
+# from rest_framework.response import Response
+# from datetime import datetime, timedelta
+# from .models import BlockedDate
+
+@api_view(["POST"])
+def vivaan_receive_booking(request):
+
+    data = request.data
+
+    check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
+    check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
+
+    end_date = check_out - timedelta(days=1)
+
+    exists = BlockedDate.objects.filter(
+        start_date=check_in,
+        end_date=end_date
+    ).exists()
+
+    if not exists:
+        BlockedDate.objects.create(
+            start_date=check_in,
+            end_date=end_date,
+            reason="Farmhouse booking"
+        )
+
+    return Response({"status": "ok"})
+
+
+@api_view(["GET"])
+def vivaan_blocked_dates_api(request):
+
+    blocked_ranges = []
+
+    # bookings
+    bookings = Booking.objects.filter(status="confirmed")
+
+    for booking in bookings:
+        blocked_ranges.append({
+            "from": booking.check_in,
+            "to": booking.check_out - timedelta(days=1)
+        })
+
+    # manual blocks
+    blocks = BlockedDate.objects.all()
+
+    for block in blocks:
+        blocked_ranges.append({
+            "from": block.start_date,
+            "to": block.end_date
+        })
+
+    return Response(blocked_ranges)
+
+
+
+
+
+
+
+
+
+
+
+
+# ================================
+
+
+
+
+import requests
+from icalendar import Calendar
+from datetime import datetime
+from django.utils.timezone import now
+from resort.models import BlockedDate
+
+# def sync_ical(ical_url):
+#     try:
+#         response = requests.get(ical_url, timeout=10)
+#         cal = Calendar.from_ical(response.content)
+
+#         # 🔥 OPTIONAL: clear old external blocks
+#         BlockedDate.objects.filter(reason__startswith="ICAL").delete()
+
+#         for event in cal.walk('VEVENT'):
+#             start = event.get('dtstart').dt
+#             end = event.get('dtend').dt
+#             uid = str(event.get('uid'))
+
+#             if isinstance(start, datetime):
+#                 start = start.date()
+#             if isinstance(end, datetime):
+#                 end = end.date()
+
+#             # ✅ avoid duplicates using UID
+#             BlockedDate.objects.get_or_create(
+#                 start_date=start,
+#                 end_date=end,
+#                 defaults={
+#                     "reason": f"ICAL-{uid}"
+#                 }
+#             )
+
+#     except Exception as e:
+#         print("ICAL SYNC ERROR:", e)
+        
+def sync_ical(ical_url):
+    try:
+        response = requests.get(ical_url, timeout=10)
+
+        if response.status_code != 200:
+            print("❌ ICAL URL INVALID:", ical_url)
+            print(response.text)
+            return
+
+        cal = Calendar.from_ical(response.content)
+
+        BlockedDate.objects.filter(reason__startswith="ICAL").delete()
+
+        for event in cal.walk('VEVENT'):
+            start = event.get('dtstart').dt
+            end = event.get('dtend').dt
+            uid = str(event.get('uid'))
+
+            if isinstance(start, datetime):
+                start = start.date()
+            if isinstance(end, datetime):
+                end = end.date()
+
+            print("SYNC EVENT:", start, end)  # 🔥 debug
+
+            BlockedDate.objects.get_or_create(
+                start_date=start,
+                end_date=end,
+                defaults={"reason": f"ICAL-{uid}"}
+            )
+
+    except Exception as e:
+        print("ICAL SYNC ERROR:", e)
+        
+             
+from django.http import HttpResponse
+from icalendar import Calendar, Event
+
+# def export_ical(request):
+#     cal = Calendar()
+#     cal.add('prodid', '-//Vivaan Farmhouse//')
+#     cal.add('version', '2.0')
+
+#     bookings = Booking.objects.filter(status="confirmed")
+
+#     for booking in bookings:
+#         event = Event()
+#         event.add('summary', f"Booking {booking.booking_id}")
+#         event.add('dtstart', booking.check_in)
+#         event.add('dtend', booking.check_out)
+#         event.add('description', booking.guest_name)
+
+#         cal.add_component(event)
+
+#     response = HttpResponse(cal.to_ical(), content_type='text/calendar')
+#     response['Content-Disposition'] = 'attachment; filename="vivaan.ics"'
+#     return response
+
+
+from django.http import HttpResponse
+from icalendar import Calendar, Event
+from .models import Booking
+from django.http import HttpResponse
+from icalendar import Calendar, Event
+from .models import Booking
+def export_ical(request):
+    cal = Calendar()
+    cal.add('prodid', '-//Vivaan Farmhouse//')
+    cal.add('version', '2.0')
+
+    bookings = Booking.objects.filter(status="confirmed")
+
+    for booking in bookings:
+        event = Event()
+        event.add('summary', f"Booking {booking.booking_id}")
+        event.add('dtstart', booking.check_in)
+        event.add('dtend', booking.check_out)
+
+        # 🔥 REQUIRED FIELDS
+        event.add('uid', f"{booking.booking_id}@vivaanfarmhouse.com")
+        event.add('dtstamp', datetime.now())
+
+        cal.add_component(event)
+
+    return HttpResponse(cal.to_ical(), content_type='text/plain')
+
+from django.http import JsonResponse
+
+def sync_airbnb_calendar(request):
+    ICAL_URL = "https://ical.booking.com/v1/export/t/59a7dc20-1fb0-472c-8d56-b97073c7537c.ics"
+
+    sync_ical(ICAL_URL)
+
+    return JsonResponse({"status": "Synced successfully"})

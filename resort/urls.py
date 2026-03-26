@@ -4,8 +4,16 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     
-
-
+    # path("api/disabled-dates/", views.disabled_dates_api),
+    
+    path("calendar.ics", views.export_ical, name="export_ical"),
+    path("sync-ical/", views.sync_airbnb_calendar),
+    
+    
+    path("api/vivaan/receive-booking/", views.vivaan_receive_booking),
+    path("api/vivaan/blocked-dates/", views.vivaan_blocked_dates_api),
+    
+    
     # path('rooms/', views.rooms, name='rooms'),
     path('room/<slug:slug>/', views.room_detail, name='room_detail'),
     path('booking/<str:booking_id>/', views.booking_confirmation, name='booking_confirmation'),
