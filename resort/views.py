@@ -387,12 +387,12 @@ def room_detail(request, slug):
     )
 
             # ✅ ADD HERE (CORRECT PLACE)
-        if created:
-            sync_booking_to_farmhouse(booking)
+        # if created:
+        #     sync_booking_to_farmhouse(booking)
 
         # ================= FARMHOUSE =================
         if payment_method == "farmhouse":
-
+           
             # send booking received email
             send_email_async(booking, old_status=None)
 
@@ -498,6 +498,10 @@ def razorpay_webhook(request):
             booking.payment_id = payment["id"]
             booking.save()
 
+            # ✅ ADD THIS HERE
+            sync_booking_to_farmhouse(booking)
+
+
             send_email_async(booking, old_status)
 
     elif event == "payment.failed":
@@ -511,6 +515,7 @@ def razorpay_webhook(request):
             booking.payment_status = "failed"
             booking.status = "cancelled"
             booking.save()
+                        # ✅ ADD THIS HERE
 
             send_email_async(booking)
 #     except Exception as e:
@@ -672,7 +677,7 @@ def sync_booking_to_farmhouse(booking):
         requests.post(
             "https://farmhouseshyderabad.com/api/vivaan/receive-booking/",
             json={
-                "farmhouse_slug": "vivaan",   # ✅ IMPORTANT
+                "farmhouse_slug": "vivaan-farmhouse",   # ✅ IMPORTANT
                 "check_in": str(booking.check_in),
                 "check_out": str(booking.check_out),
             },
@@ -712,12 +717,15 @@ def vivaan_receive_booking(request):
     return Response({"status": "ok"})
 
 
+
 @api_view(["GET"])
 def vivaan_blocked_dates_api(request):
 
     blocked_ranges = []
 
-    # bookings
+    ###################################
+    # ✅ VIVAAN BOOKINGS
+    ###################################
     bookings = Booking.objects.filter(status="confirmed")
 
     for booking in bookings:
@@ -726,7 +734,9 @@ def vivaan_blocked_dates_api(request):
             "to": booking.check_out - timedelta(days=1)
         })
 
-    # manual blocks
+    ###################################
+    # ✅ VIVAAN BLOCKED DATES
+    ###################################
     blocks = BlockedDate.objects.all()
 
     for block in blocks:
@@ -735,7 +745,62 @@ def vivaan_blocked_dates_api(request):
             "to": block.end_date
         })
 
+    ###################################
+    # 🔥 FETCH FROM FARMHOUSE HYD
+    ###################################
+    import requests
+    from datetime import datetime
+
+    try:
+        # 👉 IMPORTANT: use correct Vivaan farmhouse ID
+        FARMHOUSE_VIVAAN_ID = 65   # ← replace with your actual ID
+
+        res = requests.get(
+            f"https://farmhouseshyderabad.com/bookings/api/blocked-dates/{FARMHOUSE_VIVAAN_ID}/",
+            timeout=3
+        )
+
+        if res.status_code == 200:
+            data = res.json()
+
+            for date_str in data.get("disabled_dates", []):
+                d = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+                blocked_ranges.append({
+                    "from": d,
+                    "to": d
+                })
+
+    except Exception as e:
+        print("Farmhouse fetch error:", e)
+
+    ###################################
     return Response(blocked_ranges)
+
+# @api_view(["GET"])
+# def vivaan_blocked_dates_api(request):
+
+#     blocked_ranges = []
+
+#     # bookings
+#     bookings = Booking.objects.filter(status="confirmed")
+
+#     for booking in bookings:
+#         blocked_ranges.append({
+#             "from": booking.check_in,
+#             "to": booking.check_out - timedelta(days=1)
+#         })
+
+#     # manual blocks
+#     blocks = BlockedDate.objects.all()
+
+#     for block in blocks:
+#         blocked_ranges.append({
+#             "from": block.start_date,
+#             "to": block.end_date
+#         })
+
+#     return Response(blocked_ranges)
 
 
 

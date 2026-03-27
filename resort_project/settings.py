@@ -18,9 +18,12 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "vivaanfarmhouse.com",
     "www.vivaanfarmhouse.com",
-    '13.205.98.67',
+    'http://13.205.98.67',
     'localhost',
     '127.0.0.1',
+    "farmhouseshyderabad.com",
+    "www.farmhouseshyderabad.com",
+    "http://3.110.215.192" , 
     ]
 
 
@@ -280,7 +283,12 @@ CSRF_TRUSTED_ORIGINS = [
     "https://vivaanfarmhouse.com",
     "https://www.vivaanfarmhouse.com",
     "http://127.0.0.1:8000",
+    
+    "https://farmhouseshyderabad.com",
 ]
+
+
+
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
