@@ -302,15 +302,15 @@ def room_detail(request, slug):
     # ================= BOOKED DATES =================
     booked_dates = []
 
-    # confirmed_bookings = Booking.objects.filter(
-    #     check_out__gt=datetime.now().date(),
-    #     status="confirmed"
-    # )
-    
     confirmed_bookings = Booking.objects.filter(
-    Q(status="confirmed") | Q(status="pending", payment_method="farmhouse"),
-    check_out__gt=datetime.now().date()
-)
+        check_out__gt=datetime.now().date(),
+        status="confirmed"
+    )
+    
+#     confirmed_bookings = Booking.objects.filter(
+#     Q(status="confirmed") | Q(status="pending", payment_method="farmhouse"),
+#     check_out__gt=datetime.now().date()
+# )
 
     for booking in confirmed_bookings:
         d = booking.check_in
@@ -339,7 +339,7 @@ def room_detail(request, slug):
 
     try:
         from django.conf import settings
-        external_url = "http://127.0.0.1:8002/bookings/blocked-dates/65/" if settings.DEBUG else "https://farmhouseshyderabad.com/bookings/blocked-dates/65/"
+        external_url = "https://farmhouseshyderabad.com/bookings/blocked-dates/65/" if settings.DEBUG else "https://farmhouseshyderabad.com/bookings/blocked-dates/65/"
         res = requests.get(external_url, timeout=5)
 
         if res.status_code == 200:
@@ -439,7 +439,7 @@ def room_detail(request, slug):
         if payment_method == "farmhouse":
            
             # send booking received email
-            send_email_async(booking, old_status=None)
+            # send_email_async(booking, old_status=None)
             
                         # ✅ ADD THIS HERE
             sync_booking_to_farmhouse_hyd(booking)
