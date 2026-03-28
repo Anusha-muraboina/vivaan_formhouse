@@ -13,8 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-strawberry-king-resort-secret-key-change-in-production'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 ALLOWED_HOSTS = [
     "vivaanfarmhouse.com",
     "www.vivaanfarmhouse.com",
@@ -127,7 +127,7 @@ DATABASES = {
         'NAME': 'vivaan_db',
         'USER': 'vivaan_user',
         'PASSWORD': 'Vivaanfarmhouse@123',
-        'HOST': '127.0.0.1',
+        'HOST': '13.205.98.67',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
