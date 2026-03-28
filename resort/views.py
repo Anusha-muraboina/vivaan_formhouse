@@ -302,10 +302,15 @@ def room_detail(request, slug):
     # ================= BOOKED DATES =================
     booked_dates = []
 
+    # confirmed_bookings = Booking.objects.filter(
+    #     check_out__gt=datetime.now().date(),
+    #     status="confirmed"
+    # )
+    
     confirmed_bookings = Booking.objects.filter(
-        check_out__gt=datetime.now().date(),
-        status="confirmed"
-    )
+    Q(status="confirmed") | Q(status="pending", payment_method="farmhouse"),
+    check_out__gt=datetime.now().date()
+)
 
     for booking in confirmed_bookings:
         d = booking.check_in
@@ -333,17 +338,20 @@ def room_detail(request, slug):
     external_dates = []
 
     try:
-        res = requests.get(
-            "https://vivaanfarmhouse.com/api/blocked-dates/",
-            timeout=5
-        )
+        from django.conf import settings
+        external_url = "http://127.0.0.1:8002/bookings/blocked-dates/65/" if settings.DEBUG else "https://farmhouseshyderabad.com/bookings/blocked-dates/65/"
+        res = requests.get(external_url, timeout=5)
 
         if res.status_code == 200:
             data = res.json()
 
             for item in data:
-                start = datetime.strptime(item["from"], "%Y-%m-%d").date()
-                end = datetime.strptime(item["to"], "%Y-%m-%d").date()
+                # The 'from' and 'to' fields are strings like "YYYY-MM-DD" or similar length
+                # We extract out the first 10 characters to handle "YYYY-MM-DDTHH:MM:SS" cases gracefully
+                start_str = item["from"][:10]
+                end_str = item["to"][:10]
+                start = datetime.strptime(start_str, "%Y-%m-%d").date()
+                end = datetime.strptime(end_str, "%Y-%m-%d").date()
 
                 d = start
                 while d <= end:
@@ -357,6 +365,7 @@ def room_detail(request, slug):
     all_blocked_dates = list(set(
         booked_dates + blocked_dates + external_dates
     ))
+
 
 
 
@@ -431,6 +440,10 @@ def room_detail(request, slug):
            
             # send booking received email
             send_email_async(booking, old_status=None)
+            
+                        # ✅ ADD THIS HERE
+            sync_booking_to_farmhouse_hyd(booking)
+
 
             return JsonResponse({
                 "redirect": True,
@@ -537,7 +550,9 @@ def razorpay_webhook(request):
             booking.save()
 
             # ✅ ADD THIS HERE
-            sync_booking_to_farmhouse(booking)
+                        # ✅ ADD THIS HERE
+            sync_booking_to_farmhouse_hyd(booking)
+
 
 
             send_email_async(booking, old_status)
@@ -839,8 +854,10 @@ from .models import BlockedDate
 def sync_booking_to_farmhouse_hyd(booking):
     """Sync from Vivaan → Farmhouse Hyd"""
     try:
+        from django.conf import settings
+        webhook_url = "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/" if settings.DEBUG else "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/"
         requests.post(
-            "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/",
+            webhook_url,
             json={
                 "check_in": str(booking.check_in),
                 "check_out": str(booking.check_out),
@@ -863,7 +880,9 @@ def vivaan_receive_booking(request):
         data = request.data
         check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
         check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
-        end_date = check_out - timedelta(days=1)
+        # end_date = check_out - timedelta(days=1)
+        # We store check_out as end_date (non-inclusive) to match ICAL/Booking patterns
+        end_date = check_out
 
         with transaction.atomic():
             if not BlockedDate.objects.filter(start_date=check_in, end_date=end_date).exists():
@@ -897,7 +916,9 @@ def blocked_dates_api_vivaan(request):
     disabled_dates = set()
 
     # 1. Confirmed Bookings on Vivaan site
-    bookings = Booking.objects.filter(status="confirmed")
+    bookings = Booking.objects.filter(
+        Q(status="confirmed") | Q(status="pending", payment_method="farmhouse")
+    )
     for booking in bookings:
         current = booking.check_in
         while current < booking.check_out:
@@ -908,13 +929,14 @@ def blocked_dates_api_vivaan(request):
     blocks = BlockedDate.objects.all()
     for block in blocks:
         current = block.start_date
-        while current <= block.end_date:
+        while current < block.end_date:
             disabled_dates.add(current.strftime("%Y-%m-%d"))
             current += timedelta(days=1)
 
     return Response({
         "disabled_dates": sorted(list(disabled_dates))
     })
+    
     
     
     
