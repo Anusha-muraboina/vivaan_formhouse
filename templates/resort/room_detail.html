@@ -1756,11 +1756,31 @@ document.addEventListener("DOMContentLoaded", function () {
         onChange(selectedDates) {
             if (!selectedDates.length) return;
 
-            const nextDay = new Date(selectedDates[0]);
+            {% comment %} const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            checkOutPicker.clear();
+            checkOutPicker.set("minDate", nextDay); {% endcomment %}
+
+
+            const checkIn = selectedDates[0];
+
+            const nextDay = new Date(checkIn);
             nextDay.setDate(nextDay.getDate() + 1);
 
             checkOutPicker.clear();
             checkOutPicker.set("minDate", nextDay);
+
+            // 🔥 THIS IS THE FIX (IMPORTANT)
+            checkOutPicker.set("disable", [
+                function(date) {
+                    let d = date.toISOString().split('T')[0];
+
+                    // ❌ block only stay days BEFORE checkout
+                    return bookedDates.includes(d) && date <= checkIn;
+                }
+            ]);
+
         }
     });
 
@@ -1771,7 +1791,16 @@ document.addEventListener("DOMContentLoaded", function () {
     dateFormat: "Y-m-d",
 
     // ✅ DO NOT block admin blocked dates
-    disable: bookedDates,
+    {% comment %} disable: bookedDates, {% endcomment %}
+    
+    disable: [
+        function(date) {
+            let d = date.toISOString().split('T')[0];
+
+            // block only if it's start of booking (stay date)
+            return bookedDates.includes(d);
+        }
+        ],
     disableMobile: true,
 
     onChange(selectedDates) {

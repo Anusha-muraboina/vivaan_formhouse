@@ -324,6 +324,42 @@ def room_detail(request, slug):
             blocked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
+
+
+
+
+
+        # ================= 🔥 EXTERNAL WEBSITE =================
+    external_dates = []
+
+    try:
+        res = requests.get(
+            "https://vivaanfarmhouse.com/api/blocked-dates/",
+            timeout=5
+        )
+
+        if res.status_code == 200:
+            data = res.json()
+
+            for item in data:
+                start = datetime.strptime(item["from"], "%Y-%m-%d").date()
+                end = datetime.strptime(item["to"], "%Y-%m-%d").date()
+
+                d = start
+                while d <= end:
+                    external_dates.append(d.strftime("%Y-%m-%d"))
+                    d += timedelta(days=1)
+
+    except Exception as e:
+        print("❌ External API error:", e)
+
+    # ================= ✅ FINAL MERGE =================
+    all_blocked_dates = list(set(
+        booked_dates + blocked_dates + external_dates
+    ))
+
+
+
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
     # ================= AJAX BOOKING =================
@@ -426,8 +462,10 @@ def room_detail(request, slug):
     return render(request, "resort/room_detail.html", {
         "room_category": room_category,
         "form": BookingForm(),
-        "booked_dates": booked_dates,
-        "blocked_dates": blocked_dates,
+        # "booked_dates": booked_dates,
+        # "blocked_dates": blocked_dates,
+        "booked_dates": all_blocked_dates,  # 🔥 IMPORTANT CHANGE
+        "blocked_dates": all_blocked_dates, # 🔥 IMPORTANT CHANGE
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
                 # ✅ SEO
@@ -666,123 +704,66 @@ def leave_review(request):
 
 
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-def sync_booking_to_farmhouse(booking):
-
-    import requests
-
-    try:
-        requests.post(
-            "https://farmhouseshyderabad.com/api/vivaan/receive-booking/",
-            json={
-                "farmhouse_slug": "vivaan-farmhouse",   # ✅ IMPORTANT
-                "check_in": str(booking.check_in),
-                "check_out": str(booking.check_out),
-            },
-            timeout=3
-        )
-
-    except Exception as e:
-        print("Sync error:", e)
-        
 # from rest_framework.decorators import api_view
 # from rest_framework.response import Response
-# from datetime import datetime, timedelta
-# from .models import BlockedDate
 
-@api_view(["POST"])
-def vivaan_receive_booking(request):
+# def sync_booking_to_farmhouse(booking):
 
-    data = request.data
+#     import requests
 
-    check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
-    check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
+#     try:
+#         requests.post(
+#             "https://farmhouseshyderabad.com/api/vivaan/receive-booking/",
+#             json={
+#                 "farmhouse_slug": "vivaan-farmhouse",   # ✅ IMPORTANT
+#                 "check_in": str(booking.check_in),
+#                 "check_out": str(booking.check_out),
+#             },
+#             timeout=3
+#         )
 
-    end_date = check_out - timedelta(days=1)
+#     except Exception as e:
+#         print("Sync error:", e)
+        
+# # from rest_framework.decorators import api_view
+# # from rest_framework.response import Response
+# # from datetime import datetime, timedelta
+# # from .models import BlockedDate
 
-    exists = BlockedDate.objects.filter(
-        start_date=check_in,
-        end_date=end_date
-    ).exists()
+# @api_view(["POST"])
+# def vivaan_receive_booking(request):
 
-    if not exists:
-        BlockedDate.objects.create(
-            start_date=check_in,
-            end_date=end_date,
-            reason="Farmhouse booking"
-        )
+#     data = request.data
 
-    return Response({"status": "ok"})
+#     check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
+#     check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
+
+#     end_date = check_out - timedelta(days=1)
+
+#     exists = BlockedDate.objects.filter(
+#         start_date=check_in,
+#         end_date=end_date
+#     ).exists()
+
+#     if not exists:
+#         BlockedDate.objects.create(
+#             start_date=check_in,
+#             end_date=check_out,
+#             reason="Farmhouse booking"
+#         )
+
+#     return Response({"status": "ok"})
 
 
-
-@api_view(["GET"])
-def vivaan_blocked_dates_api(request):
-
-    blocked_ranges = []
-
-    ###################################
-    # ✅ VIVAAN BOOKINGS
-    ###################################
-    bookings = Booking.objects.filter(status="confirmed")
-
-    for booking in bookings:
-        blocked_ranges.append({
-            "from": booking.check_in,
-            "to": booking.check_out - timedelta(days=1)
-        })
-
-    ###################################
-    # ✅ VIVAAN BLOCKED DATES
-    ###################################
-    blocks = BlockedDate.objects.all()
-
-    for block in blocks:
-        blocked_ranges.append({
-            "from": block.start_date,
-            "to": block.end_date
-        })
-
-    ###################################
-    # 🔥 FETCH FROM FARMHOUSE HYD
-    ###################################
-    import requests
-    from datetime import datetime
-
-    try:
-        # 👉 IMPORTANT: use correct Vivaan farmhouse ID
-        FARMHOUSE_VIVAAN_ID = 65   # ← replace with your actual ID
-
-        res = requests.get(
-            f"https://farmhouseshyderabad.com/bookings/api/blocked-dates/{FARMHOUSE_VIVAAN_ID}/",
-            timeout=3
-        )
-
-        if res.status_code == 200:
-            data = res.json()
-
-            for date_str in data.get("disabled_dates", []):
-                d = datetime.strptime(date_str, "%Y-%m-%d").date()
-
-                blocked_ranges.append({
-                    "from": d,
-                    "to": d
-                })
-
-    except Exception as e:
-        print("Farmhouse fetch error:", e)
-
-    ###################################
-    return Response(blocked_ranges)
 
 # @api_view(["GET"])
 # def vivaan_blocked_dates_api(request):
 
 #     blocked_ranges = []
 
-#     # bookings
+#     ###################################
+#     # ✅ VIVAAN BOOKINGS
+#     ###################################
 #     bookings = Booking.objects.filter(status="confirmed")
 
 #     for booking in bookings:
@@ -791,7 +772,9 @@ def vivaan_blocked_dates_api(request):
 #             "to": booking.check_out - timedelta(days=1)
 #         })
 
-#     # manual blocks
+#     ###################################
+#     # ✅ VIVAAN BLOCKED DATES
+#     ###################################
 #     blocks = BlockedDate.objects.all()
 
 #     for block in blocks:
@@ -800,18 +783,141 @@ def vivaan_blocked_dates_api(request):
 #             "to": block.end_date
 #         })
 
+#     ###################################
+#     # 🔥 FETCH FROM FARMHOUSE HYD
+#     ###################################
+#     import requests
+#     from datetime import datetime
+
+#     try:
+#         # 👉 IMPORTANT: use correct Vivaan farmhouse ID
+#         FARMHOUSE_VIVAAN_ID = 65   # ← replace with your actual ID
+
+#         res = requests.get(
+#             f"https://farmhouseshyderabad.com/bookings/api/blocked-dates/{FARMHOUSE_VIVAAN_ID}/",
+#             timeout=3
+#         )
+
+#         if res.status_code == 200:
+#             data = res.json()
+
+#             for date_str in data.get("disabled_dates", []):
+#                 d = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+#                 blocked_ranges.append({
+#                     "from": d,
+#                     "to": d
+#                 })
+
+#     except Exception as e:
+#         print("Farmhouse fetch error:", e)
+
+#     ###################################
 #     return Response(blocked_ranges)
 
 
 
+import requests
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from datetime import datetime, timedelta
+from django.db import transaction
+
+# from farmhouse.models import Farmhouse
+from .models import BlockedDate   # your BlockedDate model
+import requests
+from datetime import datetime, timedelta
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django.db import transaction
+
+from .models import BlockedDate
+
+
+def sync_booking_to_farmhouse_hyd(booking):
+    """Sync from Vivaan → Farmhouse Hyd"""
+    try:
+        requests.post(
+            "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/",
+            json={
+                "check_in": str(booking.check_in),
+                "check_out": str(booking.check_out),
+                "booking_id": booking.booking_id,
+                "source": "vivaan_site"
+            },
+            timeout=8,
+            headers={"Content-Type": "application/json"}
+        )
+        print(f"✅ Synced to Farmhouse Hyd")
+    except Exception as e:
+        print(f"❌ Sync failed: {e}")
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def vivaan_receive_booking(request):
+    """Receive booking from Farmhouse Hyd"""
+    try:
+        data = request.data
+        check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
+        check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
+        end_date = check_out - timedelta(days=1)
+
+        with transaction.atomic():
+            if not BlockedDate.objects.filter(start_date=check_in, end_date=end_date).exists():
+                BlockedDate.objects.create(
+                    start_date=check_in,
+                    end_date=end_date,
+                    reason="Synced from Farmhouse Hyderabad"
+                )
+        return Response({"status": "ok"})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 
 
 
 
+# from rest_framework.decorators import api_view, permission_classes
+# from rest_framework.permissions import AllowAny
+# from rest_framework.response import Response
+# from datetime import timedelta
+
+# from .models import BlockedDate, Booking   # Vivaan's models
 
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def blocked_dates_api_vivaan(request):
+    """
+    Blocked dates API for Vivaan Farmhouse calendar
+    """
+    disabled_dates = set()
 
+    # 1. Confirmed Bookings on Vivaan site
+    bookings = Booking.objects.filter(status="confirmed")
+    for booking in bookings:
+        current = booking.check_in
+        while current < booking.check_out:
+            disabled_dates.add(current.strftime("%Y-%m-%d"))
+            current += timedelta(days=1)
+
+    # 2. Blocked Dates (including ones synced from Farmhouse Hyd)
+    blocks = BlockedDate.objects.all()
+    for block in blocks:
+        current = block.start_date
+        while current <= block.end_date:
+            disabled_dates.add(current.strftime("%Y-%m-%d"))
+            current += timedelta(days=1)
+
+    return Response({
+        "disabled_dates": sorted(list(disabled_dates))
+    })
+    
+    
+    
 
 # ================================
 

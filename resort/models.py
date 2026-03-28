@@ -291,7 +291,7 @@ class Gallery(models.Model):
 
     def __str__(self):
         return self.title
-
+ 
 
 class ContactMessage(models.Model):
     """Contact form messages"""

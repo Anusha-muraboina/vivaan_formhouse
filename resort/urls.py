@@ -10,9 +10,9 @@ urlpatterns = [
     path("sync-ical/", views.sync_airbnb_calendar),
     
     
-    path("api/vivaan/receive-booking/", views.vivaan_receive_booking),
-    path("api/vivaan/blocked-dates/", views.vivaan_blocked_dates_api),
-    
+    # path("api/vivaan/receive-booking/", views.vivaan_receive_booking),
+    path('api/vivaan/receive-booking/', views.vivaan_receive_booking, name='vivaan-receive-booking'),
+    path('api/blocked-dates/', views.blocked_dates_api_vivaan, name='blocked-dates-vivaan'),
     
     # path('rooms/', views.rooms, name='rooms'),
     path('room/<slug:slug>/', views.room_detail, name='room_detail'),

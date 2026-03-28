@@ -221,46 +221,46 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_USE_TLS = True
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'anushamuraboina9@gmail.com'
-# EMAIL_HOST_PASSWORD = 'mpywwnwfrubgkxoe'
-# DEFAULT_FROM_EMAIL = 'anushamuraboina9@gmail.com'
-# ADMIN_EMAIL = 'anushamuraboina9@gmail.com' 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'laxminarayaninfotech1@gmail.com'
+EMAIL_HOST_PASSWORD = 'odcqvzvymjixrlha'
+DEFAULT_FROM_EMAIL = 'laxminarayaninfotech1@gmail.com'
+ADMIN_EMAIL = 'laxminarayaninfotech1@gmail.com' 
 
-# # FRONTEND_URL = 'http://127.0.0.1:9000'  
+# FRONTEND_URL = 'http://127.0.0.1:9000'  
 
-# CC_EMAIL = [
-#     'anushamuraboina9@gmail.com',
-#     'info@vivaanfarmhouse.com',
-# ]
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-# ACCOUNT_EMAIL_REQUIRED = True
+CC_EMAIL = [
+    'anushamuraboina9@gmail.com',
+    'laxminarayaninfotech1@gmail.com',
+]
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
 
 
 
 # EMAIL CONFIGURATION (HOSTINGER)
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp.hostinger.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
+# EMAIL_HOST = 'smtp.hostinger.com'
+# EMAIL_PORT = 465
+# EMAIL_USE_SSL = True
+# EMAIL_USE_TLS = False
 
-EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
-EMAIL_HOST_PASSWORD = 'vivaanfarmhouse@229221' 
+# EMAIL_HOST_USER = 'info@vivaanfarmhouse.com'
+# EMAIL_HOST_PASSWORD = 'vivaanfarmhouse@229221' 
 
-DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
-ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
+# DEFAULT_FROM_EMAIL = 'Vivaan Farmhouse <info@vivaanfarmhouse.com>'
+# ADMIN_EMAIL = 'info@vivaanfarmhouse.com'
 
-# Optional CC emails
-CC_EMAIL = [
-    # 'info@vivaanfarmhouse.com',
-    'anushamuraboina9@gmail.com'
-]
+# # Optional CC emails
+# CC_EMAIL = [
+#     # 'info@vivaanfarmhouse.com',
+#     'anushamuraboina9@gmail.com'
+# ]
 
 # Django allauth (if you are using it)
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
