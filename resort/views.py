@@ -719,116 +719,6 @@ def leave_review(request):
 
 
 
-# from rest_framework.decorators import api_view
-# from rest_framework.response import Response
-
-# def sync_booking_to_farmhouse(booking):
-
-#     import requests
-
-#     try:
-#         requests.post(
-#             "https://farmhouseshyderabad.com/api/vivaan/receive-booking/",
-#             json={
-#                 "farmhouse_slug": "vivaan-farmhouse",   # ✅ IMPORTANT
-#                 "check_in": str(booking.check_in),
-#                 "check_out": str(booking.check_out),
-#             },
-#             timeout=3
-#         )
-
-#     except Exception as e:
-#         print("Sync error:", e)
-        
-# # from rest_framework.decorators import api_view
-# # from rest_framework.response import Response
-# # from datetime import datetime, timedelta
-# # from .models import BlockedDate
-
-# @api_view(["POST"])
-# def vivaan_receive_booking(request):
-
-#     data = request.data
-
-#     check_in = datetime.strptime(data["check_in"], "%Y-%m-%d").date()
-#     check_out = datetime.strptime(data["check_out"], "%Y-%m-%d").date()
-
-#     end_date = check_out - timedelta(days=1)
-
-#     exists = BlockedDate.objects.filter(
-#         start_date=check_in,
-#         end_date=end_date
-#     ).exists()
-
-#     if not exists:
-#         BlockedDate.objects.create(
-#             start_date=check_in,
-#             end_date=check_out,
-#             reason="Farmhouse booking"
-#         )
-
-#     return Response({"status": "ok"})
-
-
-
-# @api_view(["GET"])
-# def vivaan_blocked_dates_api(request):
-
-#     blocked_ranges = []
-
-#     ###################################
-#     # ✅ VIVAAN BOOKINGS
-#     ###################################
-#     bookings = Booking.objects.filter(status="confirmed")
-
-#     for booking in bookings:
-#         blocked_ranges.append({
-#             "from": booking.check_in,
-#             "to": booking.check_out - timedelta(days=1)
-#         })
-
-#     ###################################
-#     # ✅ VIVAAN BLOCKED DATES
-#     ###################################
-#     blocks = BlockedDate.objects.all()
-
-#     for block in blocks:
-#         blocked_ranges.append({
-#             "from": block.start_date,
-#             "to": block.end_date
-#         })
-
-#     ###################################
-#     # 🔥 FETCH FROM FARMHOUSE HYD
-#     ###################################
-#     import requests
-#     from datetime import datetime
-
-#     try:
-#         # 👉 IMPORTANT: use correct Vivaan farmhouse ID
-#         FARMHOUSE_VIVAAN_ID = 65   # ← replace with your actual ID
-
-#         res = requests.get(
-#             f"https://farmhouseshyderabad.com/bookings/api/blocked-dates/{FARMHOUSE_VIVAAN_ID}/",
-#             timeout=3
-#         )
-
-#         if res.status_code == 200:
-#             data = res.json()
-
-#             for date_str in data.get("disabled_dates", []):
-#                 d = datetime.strptime(date_str, "%Y-%m-%d").date()
-
-#                 blocked_ranges.append({
-#                     "from": d,
-#                     "to": d
-#                 })
-
-#     except Exception as e:
-#         print("Farmhouse fetch error:", e)
-
-#     ###################################
-#     return Response(blocked_ranges)
 
 
 
@@ -851,12 +741,20 @@ from django.db import transaction
 from .models import BlockedDate
 
 
+
+
 def sync_booking_to_farmhouse_hyd(booking):
     """Sync from Vivaan → Farmhouse Hyd"""
     try:
         from django.conf import settings
-        webhook_url = "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/" if settings.DEBUG else "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/"
-        requests.post(
+
+        # ✅ FIXED URL
+        if settings.DEBUG:
+            webhook_url = "https://farmhouseshyderabad.com/api/vivaan/receive-booking-from-vivaan/"
+        else:
+            webhook_url = "https://farmhouseshyderabad.com/bookings/api/vivaan/receive-booking-from-vivaan/"
+
+        response = requests.post(
             webhook_url,
             json={
                 "check_in": str(booking.check_in),
@@ -867,10 +765,13 @@ def sync_booking_to_farmhouse_hyd(booking):
             timeout=8,
             headers={"Content-Type": "application/json"}
         )
-        print(f"✅ Synced to Farmhouse Hyd")
+
+        print("🚀 SYNC STATUS:", response.status_code, response.text)
+
     except Exception as e:
         print(f"❌ Sync failed: {e}")
-
+        
+        
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -907,6 +808,39 @@ def vivaan_receive_booking(request):
 # from .models import BlockedDate, Booking   # Vivaan's models
 
 
+# @api_view(["GET"])
+# @permission_classes([AllowAny])
+# def blocked_dates_api_vivaan(request):
+#     """
+#     Blocked dates API for Vivaan Farmhouse calendar
+#     """
+#     disabled_dates = set()
+
+#     # 1. Confirmed Bookings on Vivaan site
+#     bookings = Booking.objects.filter(
+#         Q(status="confirmed") | Q(status="pending", payment_method="farmhouse")
+#     )
+#     for booking in bookings:
+#         current = booking.check_in
+#         while current < booking.check_out:
+#             disabled_dates.add(current.strftime("%Y-%m-%d"))
+#             current += timedelta(days=1)
+
+#     # 2. Blocked Dates (including ones synced from Farmhouse Hyd)
+#     blocks = BlockedDate.objects.all()
+#     for block in blocks:
+#         current = block.start_date
+#         while current < block.end_date:
+#             disabled_dates.add(current.strftime("%Y-%m-%d"))
+#             current += timedelta(days=1)
+
+#     return Response({
+#         "disabled_dates": sorted(list(disabled_dates))
+#     })
+    
+    
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def blocked_dates_api_vivaan(request):
@@ -915,30 +849,54 @@ def blocked_dates_api_vivaan(request):
     """
     disabled_dates = set()
 
-    # 1. Confirmed Bookings on Vivaan site
+    # ================= LOCAL BOOKINGS =================
     bookings = Booking.objects.filter(
         Q(status="confirmed") | Q(status="pending", payment_method="farmhouse")
     )
+
     for booking in bookings:
         current = booking.check_in
         while current < booking.check_out:
             disabled_dates.add(current.strftime("%Y-%m-%d"))
             current += timedelta(days=1)
 
-    # 2. Blocked Dates (including ones synced from Farmhouse Hyd)
+    # ================= LOCAL BLOCKED =================
     blocks = BlockedDate.objects.all()
+
     for block in blocks:
         current = block.start_date
         while current < block.end_date:
             disabled_dates.add(current.strftime("%Y-%m-%d"))
             current += timedelta(days=1)
 
+    # ================= 🔥 FETCH FROM FARMHOUSE HYD =================
+    try:
+        import requests
+
+        # ✅ USE LOCAL OR PRODUCTION BASED ON ENV
+        # hyd_url = "http://127.0.0.1:9000/bookings/api/blocked-dates/65/"
+        hyd_url = "https://farmhouseshyderabad.com/bookings/api/blocked-dates/65/"
+
+        res = requests.get(hyd_url, timeout=5)
+
+        if res.status_code == 200:
+            data = res.json()
+
+            for item in data:
+                start = datetime.strptime(item["from"], "%Y-%m-%d").date()
+                end = datetime.strptime(item["to"], "%Y-%m-%d").date()
+
+                current = start
+                while current <= end:
+                    disabled_dates.add(current.strftime("%Y-%m-%d"))
+                    current += timedelta(days=1)
+
+    except Exception as e:
+        print("❌ Hyd fetch error:", e)
+
     return Response({
         "disabled_dates": sorted(list(disabled_dates))
     })
-    
-    
-    
     
 
 # ================================
@@ -952,36 +910,7 @@ from datetime import datetime
 from django.utils.timezone import now
 from resort.models import BlockedDate
 
-# def sync_ical(ical_url):
-#     try:
-#         response = requests.get(ical_url, timeout=10)
-#         cal = Calendar.from_ical(response.content)
-
-#         # 🔥 OPTIONAL: clear old external blocks
-#         BlockedDate.objects.filter(reason__startswith="ICAL").delete()
-
-#         for event in cal.walk('VEVENT'):
-#             start = event.get('dtstart').dt
-#             end = event.get('dtend').dt
-#             uid = str(event.get('uid'))
-
-#             if isinstance(start, datetime):
-#                 start = start.date()
-#             if isinstance(end, datetime):
-#                 end = end.date()
-
-#             # ✅ avoid duplicates using UID
-#             BlockedDate.objects.get_or_create(
-#                 start_date=start,
-#                 end_date=end,
-#                 defaults={
-#                     "reason": f"ICAL-{uid}"
-#                 }
-#             )
-
-#     except Exception as e:
-#         print("ICAL SYNC ERROR:", e)
-        
+ 
 def sync_ical(ical_url):
     try:
         response = requests.get(ical_url, timeout=10)

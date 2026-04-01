@@ -542,9 +542,10 @@ document.addEventListener("DOMContentLoaded", function () {
     checkOutPicker = flatpickr("input[name='check_out']", {
         dateFormat: "Y-m-d",
         minDate: "today",
+        disable: blockedDates, 
 
         // ❌ checkout day itself can be booked (hotel logic)
-        disable: blockedDates,
+        {% comment %} disable: blockedDates, {% endcomment %}
 
         allowInput: false,
 
@@ -587,7 +588,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("✅ Admin booking calendar loaded successfully");
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
+
+
+
+
+
+
+
+
+
+
 
 {% endblock %}
 

@@ -575,10 +575,91 @@ from resort.views import *
 
 
 
+# @login_required(login_url="vivaan_admin:login")
+# @user_passes_test(is_admin)
+# def admin_booking_create(request):
+
+#     booked_dates = []
+#     for b in Booking.objects.filter(status__in=["confirmed"]):
+#         d = b.check_in
+#         while d < b.check_out:
+#             booked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     blocked_dates = []
+#     for block in BlockedDate.objects.all():
+#         d = block.start_date
+#         while d < block.end_date:
+#             blocked_dates.append(d.strftime("%Y-%m-%d"))
+#             d += timedelta(days=1)
+
+#     pricing = VillaPricing.objects.first()
+
+#     if request.method == "POST":
+#         form = AdminBookingForm(request.POST)
+
+#         if form.is_valid():
+#             booking = form.save(commit=False)
+
+#             # ================= DEFAULTS =================
+#             # booking.payment_status = booking.payment_status or "pending"
+#             # booking.payment_method = booking.payment_method or "farmhouse"
+#             # booking.status = booking.status or "confirmed"
+#             # ================= FORCE VALUES =================
+#             booking.status = (booking.status or "confirmed").strip().lower()
+#             booking.payment_status = (booking.payment_status or "pending").strip().lower()
+#             booking.payment_method = (booking.payment_method or "farmhouse").strip().lower()
+#             # ================= PRICE =================
+#             nights = (booking.check_out - booking.check_in).days
+#             base = pricing.weekday_price * nights
+#             extra = (booking.extra_guest_count or 0) * pricing.extra_guest_price
+
+#             sub_total = base + extra
+
+#             # ================= COUPON =================
+#             coupon = form.cleaned_data.get("coupon_code")
+#             discount = Decimal("0.00")
+
+#             if coupon:
+#                 discount = coupon.discount_amount
+#                 booking.disc_price = coupon
+
+#             booking.sub_total = sub_total
+#             booking.disc_price = discount
+#             booking.total_amount = sub_total - discount
+#             booking.remaining_amount = booking.total_amount
+
+#             booking.save()
+
+#             # ================= EMAIL =================
+#             # send_email_async(booking, old_status=None)
+            
+#             # ✅ ADD THIS (VERY IMPORTANT)
+#             if booking.status == "confirmed":
+#                 sync_booking_to_farmhouse_hyd(booking)
+#             send_booking_emails(booking, old_status="pending")
+
+
+
+#             messages.success(request, "Booking created successfully")
+#             return redirect("vivaan_admin:booking_list")
+
+#     else:
+#         form = AdminBookingForm()
+
+#     return render(request, "adminpanel/booking_form.html", {
+#         "form": form,
+#         "booked_dates": booked_dates,
+#         "blocked_dates": blocked_dates,
+#     })
+
+
+
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
 def admin_booking_create(request):
 
+    # ================= LOCAL BOOKINGS =================
     booked_dates = []
     for b in Booking.objects.filter(status__in=["confirmed", "pending"]):
         d = b.check_in
@@ -586,12 +667,41 @@ def admin_booking_create(request):
             booked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
 
+    # ================= LOCAL BLOCKED =================
     blocked_dates = []
     for block in BlockedDate.objects.all():
         d = block.start_date
-        while d <= block.end_date:
+        while d < block.end_date:
             blocked_dates.append(d.strftime("%Y-%m-%d"))
             d += timedelta(days=1)
+
+    # ================= 🔥 FETCH HYD DATA =================
+    external_dates = []
+    try:
+        import requests
+
+        # ✅ LOCAL URL (VERY IMPORTANT)
+        url = "http://127.0.0.1:9000/bookings/blocked-dates/65/"
+
+        res = requests.get(url, timeout=5)
+
+        if res.status_code == 200:
+            data = res.json()
+
+            for item in data:
+                start = datetime.strptime(item["from"], "%Y-%m-%d").date()
+                end = datetime.strptime(item["to"], "%Y-%m-%d").date()
+
+                d = start
+                while d <= end:
+                    external_dates.append(d.strftime("%Y-%m-%d"))
+                    d += timedelta(days=1)
+
+    except Exception as e:
+        print("❌ Hyd fetch error:", e)
+
+    # ================= FINAL MERGE =================
+    all_blocked = list(set(booked_dates + blocked_dates + external_dates))
 
     pricing = VillaPricing.objects.first()
 
@@ -601,22 +711,16 @@ def admin_booking_create(request):
         if form.is_valid():
             booking = form.save(commit=False)
 
-            # ================= DEFAULTS =================
-            # booking.payment_status = booking.payment_status or "pending"
-            # booking.payment_method = booking.payment_method or "farmhouse"
-            # booking.status = booking.status or "confirmed"
-            # ================= FORCE VALUES =================
             booking.status = (booking.status or "confirmed").strip().lower()
             booking.payment_status = (booking.payment_status or "pending").strip().lower()
             booking.payment_method = (booking.payment_method or "farmhouse").strip().lower()
-            # ================= PRICE =================
+
             nights = (booking.check_out - booking.check_in).days
             base = pricing.weekday_price * nights
             extra = (booking.extra_guest_count or 0) * pricing.extra_guest_price
 
             sub_total = base + extra
 
-            # ================= COUPON =================
             coupon = form.cleaned_data.get("coupon_code")
             discount = Decimal("0.00")
 
@@ -631,11 +735,11 @@ def admin_booking_create(request):
 
             booking.save()
 
-            # ================= EMAIL =================
-            # send_email_async(booking, old_status=None)
+            # 🔥 SYNC TO HYD
+            if booking.status == "confirmed":
+                sync_booking_to_farmhouse_hyd(booking)
+
             send_booking_emails(booking, old_status="pending")
-
-
 
             messages.success(request, "Booking created successfully")
             return redirect("vivaan_admin:booking_list")
@@ -645,12 +749,14 @@ def admin_booking_create(request):
 
     return render(request, "adminpanel/booking_form.html", {
         "form": form,
-        "booked_dates": booked_dates,
-        "blocked_dates": blocked_dates,
+
+        # 🔥 IMPORTANT
+        "booked_dates": all_blocked,
+        "blocked_dates": all_blocked,
     })
-
-
-
+    
+    
+    
 
 @login_required(login_url="vivaan_admin:login")
 @user_passes_test(is_admin)
