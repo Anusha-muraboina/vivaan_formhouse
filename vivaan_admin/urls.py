@@ -21,7 +21,13 @@ urlpatterns = [
     path('bookings/detail/<int:pk>/', views.booking_detail, name='booking_detail'),
     path('bookings/edit/<int:pk>/', views.booking_edit, name='booking_edit'),
     path('bookings/delete/<int:pk>/', views.booking_delete, name='booking_delete'),
-    
+     
+    path(
+    "booking-api-detail/<int:pk>/",
+            views.booking_api_detail,
+            name="booking_api_detail"
+        ),
+     
     # Rooms & Pricing
     # path('rooms/', views.room_list, name='room_list'),
     # path('rooms/pricing/edit/', views.pricing_edit, name='pricing_edit'),

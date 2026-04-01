@@ -885,6 +885,14 @@ def booking_detail(request, pk):
     return render(request, "adminpanel/booking_detail.html", {"booking": booking})
 
 
+@login_required(login_url='vivaan_admin:login')
+@user_passes_test(is_admin)
+def booking_api_detail(request, pk):
+    return render(request, "adminpanel/booking_api_detail.html", {
+        "booking_id": pk
+    })
+
+
 # DELETE
 @login_required(login_url='vivaan_admin:login')
 @user_passes_test(is_admin)

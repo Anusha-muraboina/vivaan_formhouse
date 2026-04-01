@@ -1,0 +1,125 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Booking Details | Vivaan Admin{% endblock %}
+{% block header %}Booking Details{% endblock %}
+
+{% block content %}
+
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    
+    <!-- HEADER -->
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="booking-title">Booking #...</h2>
+        <a href="/vivvan_admin/bookings/" class="btn-action btn-view">← Back</a>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="booking-detail" style="padding: 2rem;">
+        <p>Loading booking details...</p>
+    </div>
+
+</div>
+
+<style>
+.section-title {
+    font-weight:600;
+    margin-bottom:10px;
+    color:#374151;
+    border-bottom:1px solid #eee;
+    padding-bottom:6px;
+}
+
+.info-box {
+    background:#f9fafb;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #e5e7eb;
+}
+
+.badge {
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.badge-confirmed { background:#dcfce7; color:#166534; }
+.badge-pending { background:#fef3c7; color:#92400e; }
+.badge-cancelled { background:#fee2e2; color:#991b1b; }
+</style>
+
+<script>
+const bookingId = "{{ booking_id }}";
+
+fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/${bookingId}/`, {
+    method: "GET",
+    credentials: "include"
+})
+.then(res => res.json())
+.then(data => {
+
+    let statusClass = "badge-pending";
+    if (data.status === "confirmed") statusClass = "badge-confirmed";
+    if (data.status === "cancelled") statusClass = "badge-cancelled";
+
+    document.getElementById("booking-title").innerText = 
+        "Booking #" + data.booking_id;
+
+    document.getElementById("booking-detail").innerHTML = `
+        
+        <!-- STATUS -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <span class="badge ${statusClass}" style="font-size:14px;">
+                ${data.status.toUpperCase()}
+            </span>
+        </div>
+
+        <!-- GRID -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+            <!-- GUEST -->
+            <div>
+                <div class="section-title">Guest Info</div>
+                <div class="info-box">
+                    <p><strong>Name:</strong> ${data.guest_name}</p>
+                    <p><strong>Email:</strong> ${data.guest_email}</p>
+                    <p><strong>Phone:</strong> ${data.guest_phone}</p>
+                </div>
+            </div>
+
+            <!-- STAY -->
+            <div>
+                <div class="section-title">Stay Details</div>
+                <div class="info-box">
+                    <p><strong>Check-in:</strong> ${data.check_in}</p>
+                    <p><strong>Check-out:</strong> ${data.check_out}</p>
+                </div>
+            </div>
+
+            <!-- PAYMENT -->
+            <div>
+                <div class="section-title">Payment</div>
+                <div class="info-box">
+                    <p><strong>Status:</strong> ${data.payment_status}</p>
+                    <p><strong>Total:</strong> ₹${data.total_amount}</p>
+                </div>
+            </div>
+
+            <!-- META -->
+            <div>
+                <div class="section-title">Meta</div>
+                <div class="info-box">
+                    <p><strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                </div>
+            </div>
+
+        </div>
+    `;
+})
+.catch(err => {
+    document.getElementById("booking-detail").innerHTML =
+        "<p style='color:red;'>Failed to load booking</p>";
+});
+</script>
+
+{% endblock %}

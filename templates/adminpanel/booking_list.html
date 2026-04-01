@@ -230,7 +230,7 @@
             </tr>
         </thead>
 
-        <tbody>
+        {% comment %} <tbody>
         {% for b in bookings %}
             <tr>
                 <td>
@@ -280,7 +280,71 @@
                 </td>
             </tr>
         {% endfor %}
-        </tbody>
+        </tbody> {% endcomment %}
+
+
+
+<tbody id="booking-table-body">
+
+    <!-- 🔹 DJANGO BOOKINGS (INITIAL LOAD) -->
+    {% for b in bookings %}
+    <tr>
+        <td>
+            <strong>{{ b.booking_id }}</strong><br>
+            <small>{{ b.created_at|date:"d M Y" }}</small>
+        </td>
+
+        <td>
+            <strong>{{ b.guest_name }}</strong><br>
+            <small>{{ b.guest_phone }}</small>
+        </td>
+
+        <td>
+            {{ b.check_in|date:"d M Y" }} → {{ b.check_out|date:"d M Y" }}
+        </td>
+
+        <td>
+            <span class="badge 
+                {% if b.status == 'confirmed' %}badge-confirmed
+                {% elif b.status == 'cancelled' %}badge-cancelled
+                {% else %}badge-pending{% endif %}">
+                {{ b.get_status_display }}
+            </span>
+        </td>
+
+        <td>
+            <span class="badge badge-pending">
+                {{ b.get_payment_status_display }}
+            </span>
+        </td>
+
+        <td>
+            <a href="{% url 'vivaan_admin:booking_detail' b.id %}" class="btn-action btn-view">View</a>
+            <a href="{% url 'vivaan_admin:booking_edit' b.id %}" class="btn-action btn-view">Edit</a>
+            <a href="{% url 'vivaan_admin:booking_delete' b.id %}"
+               class="btn-action btn-delete"
+               onclick="return confirm('Delete booking?');">
+               Delete
+            </a>
+        </td>
+    </tr>
+
+    {% empty %}
+    <tr id="no-bookings-row">
+        <td colspan="6" style="text-align:center;padding:20px;">
+            No bookings found
+        </td>
+    </tr>
+    {% endfor %}
+
+
+
+
+
+    
+</tbody>
+
+
     </table>
 </div>
 
@@ -301,6 +365,102 @@
     {% endif %}
 
 </div>
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    fetch("https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/lists/", {
+        method: "GET",
+        credentials: "include"
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+    })
+    .then(data => {
+
+        const tbody = document.getElementById("booking-table-body");
+
+        if (!tbody) {
+            console.error("❌ tbody not found");
+            return;
+        }
+
+        // 🔥 Collect existing booking IDs (avoid duplicates)
+        let existingIds = new Set();
+        document.querySelectorAll("#booking-table-body tr").forEach(row => {
+            const id = row.querySelector("td strong")?.innerText;
+            if (id) existingIds.add(id);
+        });
+
+        if (!data.results || data.results.length === 0) return;
+
+        data.results.forEach(b => {
+
+            // ❌ skip duplicates
+            if (existingIds.has(b.booking_id)) return;
+
+            let statusClass = "badge-pending";
+            if (b.status === "confirmed") statusClass = "badge-confirmed";
+            if (b.status === "cancelled") statusClass = "badge-cancelled";
+
+            const row = `
+                <tr style="background:#ecfdf5;"> <!-- API rows highlight -->
+                    <td>
+                        <strong>${b.booking_id}</strong><br>
+                        <small>${b.created_at}</small>
+                    </td>
+
+                    <td>
+                        <strong>${b.guest_name}</strong><br>
+                        <small>${b.guest_phone}</small>
+                    </td>
+
+                    <td>
+                        ${b.check_in} → ${b.check_out}
+                    </td>
+
+                    <td>
+                        <span class="badge ${statusClass}">
+                            ${b.status}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${b.payment_status}
+                    </td>
+
+                    <td>
+                        <a href="/vivvan_admin/booking-api-detail/${b.id}/" class="btn-action btn-view">View</a>
+                    </td>
+                </tr>
+            `;
+
+            tbody.insertAdjacentHTML("beforeend", row);
+        });
+
+    })
+    .catch(err => {
+        console.error("❌ API error:", err);
+    });
+
+});
+</script>
+
+
+
+
+
+
+
+
 
 {% endblock %}
 
