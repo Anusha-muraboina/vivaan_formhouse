@@ -31,10 +31,10 @@ class AmenityAdmin(admin.ModelAdmin):
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-    list_display = ['title', 'discount_percentage', 'valid_from', 'valid_until', 'is_active']
+    list_display = ['title', 'offer_price', 'valid_from', 'valid_until', 'is_active']
     list_filter = ['is_active', 'valid_from']
     search_fields = ['title', 'description']
-    prepopulated_fields = {'slug': ('title',)}
+    # prepopulated_fields = {'slug': ('title',)}
 
 
 @admin.register(Booking)

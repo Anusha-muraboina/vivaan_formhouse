@@ -82,17 +82,11 @@ class Amenity(models.Model):
 class Offer(models.Model):
     """Special offers and deals"""
     title = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
-    description = models.TextField()
-    discount_percentage = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    terms = models.TextField(blank=True)
     valid_from = models.DateField()
     valid_until = models.DateField()
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         ordering = ['-created_at']
 

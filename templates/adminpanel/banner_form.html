@@ -7,46 +7,156 @@
 {% block content %}
 
 <style>
+
+/* ===== WRAPPER ===== */
 .form-wrapper {
     max-width: 900px;
-    margin: auto;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    overflow: hidden;
 }
+
+/* HEADER */
+.card-header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* FORM */
+.form-body {
+    padding: 1.5rem;
+}
+
+/* GRID */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 16px;
 }
+
+/* INPUT GROUP */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
 .form-group label {
     font-weight: 600;
-    font-size: 0.85rem;
-    display: block;
-    margin-bottom: 4px;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #374151;
 }
+
+/* INPUT */
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border-radius: 8px;
     border: 1px solid #d1d5db;
+    font-size: 14px;
 }
-.btn-add{
-        background: #033910ff;
+
+/* CHECKBOX */
+.checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+/* IMAGE */
+.preview-img {
+    margin-top: 10px;
+    height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* BUTTONS */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-add {
+    background: #033910;
     color: white;
-    padding: 10px 22px;
+    padding: 10px 18px;
     border-radius: 8px;
     border: none;
     cursor: pointer;
 }
+
+.btn-view {
+    background: #f3f4f6;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+
+    /* WRAPPER */
+    .form-wrapper {
+        margin: 10px;
+    }
+
+    /* GRID → 1 COLUMN */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    /* FULL WIDTH FIELDS */
+    .form-group[style*="span 2"] {
+        grid-column: span 1 !important;
+    }
+
+    /* INPUT TOUCH */
+    .form-group input,
+    .form-group textarea {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    /* CHECKBOX */
+    .checkbox-group input {
+        transform: scale(1.2);
+    }
+
+    /* IMAGE */
+    .preview-img {
+        width: 100%;
+        height: auto;
+    }
+
+    /* BUTTONS STACK */
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-add,
+    .btn-view {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+    }
+}
+
 </style>
 
-<div class="form-wrapper card">
+<div class="form-wrapper">
     <div class="card-header">
-        <h2>
-            {% if banner %}Edit Banner{% else %}Add Banner{% endif %}
-        </h2>
+        <h2>{% if banner %}Edit Banner{% else %}Add Banner{% endif %}</h2>
     </div>
 
-    <form method="post" enctype="multipart/form-data" style="padding:2rem;">
+    <form method="post" enctype="multipart/form-data" class="form-body">
         {% csrf_token %}
 
         <div class="form-grid">
@@ -81,18 +191,15 @@
                 <input type="number" name="slot_position" value="{{ banner.slot_position|default:0 }}">
             </div>
 
-            <div class="form-group">
-                <label>Status</label><br>
-                <label>
-                    <input type="checkbox" name="active"
-                        {% if banner %}
-                            {% if banner.active %}checked{% endif %}
-                        {% else %}
-                            checked
-                        {% endif %}
-                    >
-                    Active
-                </label>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" name="active"
+                    {% if banner %}
+                        {% if banner.active %}checked{% endif %}
+                    {% else %}
+                        checked
+                    {% endif %}
+                >
+                <label>Active</label>
             </div>
 
             <div class="form-group" style="grid-column: span 2;">
@@ -105,18 +212,15 @@
                 {% endif %}
 
                 {% if banner and banner.image %}
-                    <img src="{{ banner.image.url }}"
-                         style="margin-top:10px; height:120px; border-radius:8px;">
+                    <img src="{{ banner.image.url }}" class="preview-img">
                 {% endif %}
             </div>
 
         </div>
 
-        <div class="form-actions" style="margin-top:2rem; text-align:right;">
-            <a href="{% url 'vivaan_admin:banner_list' %}" class="btn-action btn-view">
-                Cancel
-            </a>
-            <button type="submit" class="btn-action btn-add ">
+        <div class="form-actions">
+            <a href="{% url 'vivaan_admin:banner_list' %}" class="btn-view">Cancel</a>
+            <button type="submit" class="btn-add">
                 {% if banner %}Update{% else %}Create{% endif %} Banner
             </button>
         </div>

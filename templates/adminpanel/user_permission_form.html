@@ -1,0 +1,29 @@
+{% extends "adminpanel/base.html" %}
+{% block title %}Users{% endblock %}
+{% block header %}User Management{% endblock %}
+
+{% block content %}
+
+<h2>{% if group %}Edit{% else %}Create{% endif %} Group</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <input type="text" name="name" placeholder="Group Name"
+           value="{{ group.name|default:'' }}">
+
+    <h3>Permissions</h3>
+
+    {% for perm in permissions %}
+        <label>
+            <input type="checkbox" name="permissions"
+                   value="{{ perm.id }}"
+                   {% if group and perm in group.permissions.all %}checked{% endif %}>
+            {{ perm.name }}
+        </label><br>
+    {% endfor %}
+
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}

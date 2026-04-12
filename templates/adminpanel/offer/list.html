@@ -1,0 +1,158 @@
+{% extends "adminpanel/base.html" %}
+{% block title %}Offers{% endblock %}
+{% block header %}Offers{% endblock %}
+
+{% block content %}
+<style>
+/* ===== CARD ===== */
+.offer-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    overflow: hidden;
+}
+
+/* HEADER */
+.offer-card .card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.offer-card h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* BUTTON */
+.btn-primary {
+    background: #034012ff;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+/* TABLE */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.offer-table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+}
+
+.offer-table th {
+    padding: 14px 20px;
+    background: #f9fafb;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.offer-table td {
+    padding: 14px 20px;
+    border-top: 1px solid #eee;
+}
+
+.offer-table tr:hover {
+    background: #f9fafb;
+}
+
+/* BADGE */
+.badge {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-green { background: #16a34a; color: white; }
+.badge-red { background: #dc2626; color: white; }
+
+/* ACTION */
+.btn-sm {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.btn-view { background: #e0e7ff; color: #3730a3; }
+.btn-delete { background: #fee2e2; color: #991b1b; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .table-responsive::after {
+        content: "← Swipe →";
+        text-align: center;
+        display: block;
+        font-size: 12px;
+    }
+}
+</style>
+
+<div class="offer-card">
+    <div class="card-header">
+        <h2>Offers</h2>
+
+        {% if perms.resort.add_offer %}
+        <a href="{% url 'vivaan_admin:offer_create' %}" class="btn-primary">
+            + Add Offer
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="offer-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Validity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for offer in offers %}
+                <tr>
+                    <td><b>{{ offer.title }}</b></td>
+                    <td>₹{{ offer.offer_price }}</td>
+                    <td>{{ offer.valid_from }} → {{ offer.valid_until }}</td>
+
+                    <td>
+                        {% if offer.is_active %}
+                        <span class="badge badge-green">Active</span>
+                        {% else %}
+                        <span class="badge badge-red">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if perms.resort.change_offer %}
+                        <a href="{% url 'vivaan_admin:offer_edit' offer.id %}" class="btn-sm btn-view">Edit</a>
+                        {% endif %}
+
+                        {% if perms.resort.delete_offer %}
+                        <a href="{% url 'vivaan_admin:offer_delete' offer.id %}"
+                           onclick="return confirm('Delete this offer?');"
+                           class="btn-sm btn-delete">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;">No offers found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

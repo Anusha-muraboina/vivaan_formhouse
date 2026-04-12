@@ -105,7 +105,7 @@
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 2rem;
+            padding: 1rem;
             width: calc(100% - var(--sidebar-width));
             transition: all 0.3s ease;
         }
@@ -567,7 +567,7 @@
 
 
 
-    .btn-sm {
+.btn-sm {
     padding: 6px 14px;
     border-radius: 8px;
     font-size: 13px;
@@ -700,6 +700,25 @@
                     class="menu-text">Coupons</span></a>
             <a href="{% url 'vivaan_admin:gallery_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
                 <span class="menu-text">Gallery</span></a>
+
+            <a href="{% url 'vivaan_admin:offer_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
+                <span class="menu-text">offer</span></a>
+
+
+            {% comment %} <a href="{% url 'vivaan_admin:user_permissions' user_id %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
+                <span class="menu-text">user permission</span></a> {% endcomment %}
+            {% comment %} <a href="{% url 'vivaan_admin:user_list' %}" class="menu-item">
+    <i class="fa-solid fa-users"></i>
+    <span class="menu-text">Users</span>
+</a> {% endcomment %}
+
+            {% comment %} <a href="{% url 'vivaan_admin:group_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
+                <span class="menu-text">group permission</span></a>
+ {% endcomment %}
+
+
+
+
             <a href="{% url 'vivaan_admin:testimonial_list' %}" class="menu-item"><i class="fa-solid fa-star"></i> <span
                     class="menu-text">Ratings</span></a>
             <a href="{% url 'vivaan_admin:user_list' %}" class="menu-item"><i class="fa-solid fa-users-gear"></i> <span

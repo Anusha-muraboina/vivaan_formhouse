@@ -198,6 +198,35 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
     background: #047857;
     border-radius: 4px;
 } {% endcomment %}
+
+
+
+/* 🔥 Fix calendar cell layout */
+.flatpickr-day {
+    position: relative;
+    height: 50px !important;   /* increase height */
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 6px;
+        border: 1px solid #e5e7eb;   /* 🔥 ADD BORDER */
+    border-radius: 6px;
+}
+
+/* 🔥 Price at bottom */
+.price-tag {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #444;
+    pointer-events: none;
+}
+
+.flatpickr-day{
+    line-height: 25px;
+}
 </style>
 
 <div class="fixed inset-0 -z-10">
@@ -948,6 +977,8 @@ Book {{ room_category.name }} at Vivaan Farmhouse. Enjoy comfortable stay, premi
 {{ booked_info|json_script:"booked-info-data" }}
 {{ blocked_dates|json_script:"blocked-dates-data" }}
 
+{{ offer_dates|json_script:"offer-dates-data" }}
+
 {% comment %}
 <script id="blocked-dates-data" type="application/json">
     {{ blocked_dates|json_script:"blocked-dates-data" }}
@@ -1210,6 +1241,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const weekend = parseFloat(`{{ pricing.weekend_price }}`);
         const extraGuestPrice = parseFloat(`{{ extra_price }}`);
 
+
+        const offerDates = JSON.parse(
+            document.getElementById("offer-dates-data")?.textContent || "{}"
+        );
         // Calculate Base Amount
         function calculateTotal() {
             const inDate = new Date(checkIn.value);
@@ -1222,7 +1257,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let total = 0;
             let date = new Date(inDate);
 
-            // Loop through each night
+            {% comment %} // Loop through each night
             while (date < outDate) {
                 let day = date.getDay();
                 if (day === 6 || day === 0) {
@@ -1231,7 +1266,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     total += weekday;
                 }
                 date.setDate(date.getDate() + 1);
+            } {% endcomment %}
+            while (date < outDate) {
+
+                let day = date.getDay();
+                let dateStr = date.toISOString().split('T')[0];
+
+                // 🔥 OFFER FIRST
+                if (offerDates[dateStr]) {
+                    total += offerDates[dateStr];
+                } else {
+                    // NORMAL PRICE
+                    if (day === 6 || day === 0) {
+                        total += weekend;
+                    } else {
+                        total += weekday;
+                    }
+                }
+
+                date.setDate(date.getDate() + 1);
             }
+
 
             // EXTRA GUEST COUNT logic (user entered)
             let extra = parseInt(extraGuest.value || 0);
@@ -1740,6 +1795,84 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${y}-${m}-${d}`;
     }
 
+        // 🔥 ADD THIS (FIX)
+    const offerDates = JSON.parse(
+        document.getElementById("offer-dates-data")?.textContent || "{}"
+    );
+
+    const weekday = parseFloat(`{{ pricing.weekday_price }}`);
+    const weekend = parseFloat(`{{ pricing.weekend_price }}`);
+
+function decorateDay(dayElem) {
+
+    const date = dayElem.dateObj;
+    const dateStr = date.toISOString().split('T')[0];
+    const day = date.getDay();
+
+    let price = 0;
+
+    if (offerDates[dateStr]) {
+        price = offerDates[dateStr];
+    } else {
+        price = (day === 6 || day === 0) ? weekend : weekday;
+    }
+
+    // REMOVE OLD
+    const old = dayElem.querySelector(".price-tag");
+    if (old) old.remove();
+
+    // CREATE PRICE
+    const priceDiv = document.createElement("div");
+    priceDiv.className = "price-tag";
+    priceDiv.innerText = "₹" + price;
+
+    dayElem.appendChild(priceDiv);
+}
+
+
+
+    {% comment %} function decorateDay(dayElem) {
+
+    const date = dayElem.dateObj;
+    const dateStr = date.toISOString().split('T')[0];
+    const day = date.getDay();
+
+    let price = 0;
+
+    // ✅ OFFER OR NORMAL PRICE
+    if (offerDates[dateStr]) {
+        price = offerDates[dateStr];
+    } else {
+        price = (day === 6 || day === 0) ? weekend : weekday;
+    }
+
+    // 🔥 MAKE DAY VERTICAL (DATE + PRICE)
+    dayElem.style.display = "flex";
+    dayElem.style.flexDirection = "column";
+    dayElem.style.alignItems = "center";
+    dayElem.style.justifyContent = "center";
+
+    // 🔥 REMOVE OLD PRICE (avoid duplicates)
+    const old = dayElem.querySelector(".price-tag");
+    if (old) old.remove();
+
+    // 🔥 ADD PRICE BELOW DATE
+    const priceDiv = document.createElement("div");
+    priceDiv.className = "price-tag";
+    priceDiv.style.fontSize = "10px";
+    priceDiv.style.marginTop = "2px";
+    priceDiv.innerText = "₹" + price;
+
+    dayElem.appendChild(priceDiv);
+} {% endcomment %}
+
+
+
+
+
+
+
+
     const disabledCheckInDates = [
         ...new Set([...bookedDates, ...blockedDates])
     ];
@@ -1752,6 +1885,11 @@ document.addEventListener("DOMContentLoaded", function () {
         minDate: "today",
         disableMobile: true,
         disable: disabledCheckInDates,
+
+
+        onDayCreate(_, __, ___, dayElem) {
+            decorateDay(dayElem);
+        },
 
         onChange(selectedDates) {
             if (!selectedDates.length) return;
@@ -1803,6 +1941,10 @@ document.addEventListener("DOMContentLoaded", function () {
         ],
     disableMobile: true,
 
+
+    onDayCreate(_, __, ___, dayElem) {
+        decorateDay(dayElem);
+    },
     onChange(selectedDates) {
         if (!selectedDates.length) return;
 

@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 
 
-
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -370,7 +370,8 @@ from django.db.models import Q
 # from .models import Booking
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_booking', raise_exception=True)
 def booking_list(request):
     
     bookings = Booking.objects.all()
@@ -656,7 +657,8 @@ from resort.views import *
 
 
 @login_required(login_url="vivaan_admin:login")
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_booking', raise_exception=True)
 def admin_booking_create(request):
 
     # ================= LOCAL BOOKINGS =================
@@ -759,7 +761,8 @@ def admin_booking_create(request):
     
 
 @login_required(login_url="vivaan_admin:login")
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_booking', raise_exception=True)
 def booking_edit(request, pk):
 
     booking = get_object_or_404(Booking, pk=pk)
@@ -879,14 +882,16 @@ def booking_edit(request, pk):
 
 # DETAIL
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_booking', raise_exception=True)
 def booking_detail(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     return render(request, "adminpanel/booking_detail.html", {"booking": booking})
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_booking', raise_exception=True)
 def booking_api_detail(request, pk):
     return render(request, "adminpanel/booking_api_detail.html", {
         "booking_id": pk
@@ -895,7 +900,8 @@ def booking_api_detail(request, pk):
 
 # DELETE
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_booking', raise_exception=True)
 def booking_delete(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     booking.delete()
@@ -903,7 +909,6 @@ def booking_delete(request, pk):
     return redirect("vivaan_admin:booking_list")
 
 # --- Rooms & Categories ---
-
 
 # ================================
 # ROOM CATEGORY LIST
@@ -920,7 +925,8 @@ from django.utils.text import slugify
 # LIST PAGE
 # =========================
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+@permission_required('resort.view_roomcategory', raise_exception=True)
+# @user_passes_test(is_admin)
 def room_list(request):
     categories = RoomCategory.objects.all()
     pricing = VillaPricing.objects.first()
@@ -934,7 +940,8 @@ def room_list(request):
 # ADD ROOM CATEGORY
 # =========================
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_roomcategory', raise_exception=True)
 def category_add(request):
     if request.method == "POST":
         name = request.POST.get('name')
@@ -962,7 +969,8 @@ def category_add(request):
 # =========================
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_roomcategory', raise_exception=True)
 def category_edit(request, pk):
     category = get_object_or_404(RoomCategory, pk=pk)
 
@@ -995,7 +1003,8 @@ def category_edit(request, pk):
 # DELETE ROOM CATEGORY
 # =========================
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_roomcategory', raise_exception=True)
 def category_delete(request, pk):
     get_object_or_404(RoomCategory, pk=pk).delete()
     messages.success(request, "Room category deleted.")
@@ -1006,7 +1015,8 @@ def category_delete(request, pk):
 # ADD / EDIT VILLA PRICING
 # =========================
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_villapricing', raise_exception=True)
 def pricing_add_edit(request):
     pricing = VillaPricing.objects.first()
 
@@ -1028,44 +1038,45 @@ def pricing_add_edit(request):
 # ================================
 # EDIT ROOM CATEGORY
 # ================================
-@login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
-def category_edit(request, pk):
-    category = get_object_or_404(RoomCategory, pk=pk)
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+# def category_edit(request, pk):
+#     category = get_object_or_404(RoomCategory, pk=pk)
 
-    if request.method == 'POST':
-        category.name = request.POST.get('name')
-        category.base_price = request.POST.get('base_price')
-        category.max_occupancy = request.POST.get('max_occupancy')
-        category.size_sqft = request.POST.get('size_sqft')
-        category.floor = request.POST.get('floor')
-        category.view_type = request.POST.get('view_type')
-        category.slug = slugify(category.name)
-        category.save()
+#     if request.method == 'POST':
+#         category.name = request.POST.get('name')
+#         category.base_price = request.POST.get('base_price')
+#         category.max_occupancy = request.POST.get('max_occupancy')
+#         category.size_sqft = request.POST.get('size_sqft')
+#         category.floor = request.POST.get('floor')
+#         category.view_type = request.POST.get('view_type')
+#         category.slug = slugify(category.name)
+#         category.save()
 
-        messages.success(request, "Room category updated.")
-        return redirect('vivaan_admin:room_list')
+#         messages.success(request, "Room category updated.")
+#         return redirect('vivaan_admin:room_list')
 
-    return render(request, 'adminpanel/category_edit.html', {'category': category})
+#     return render(request, 'adminpanel/category_edit.html', {'category': category})
 
 
 # ================================
 # DELETE ROOM CATEGORY
 # ================================
-@login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
-def category_delete(request, pk):
-    category = get_object_or_404(RoomCategory, pk=pk)
-    category.delete()
-    messages.success(request, "Room category deleted.")
-    return redirect('vivaan_admin:room_list')
+# @login_required(login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+# def category_delete(request, pk):
+#     category = get_object_or_404(RoomCategory, pk=pk)
+#     category.delete()
+#     messages.success(request, "Room category deleted.")
+#     return redirect('vivaan_admin:room_list')
 
 
 # ================================
 # EDIT VILLA PRICING (SINGLE)
 # ================================
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+@permission_required('resort.change_villapricing', raise_exception=True)
 def pricing_edit(request):
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
@@ -1085,7 +1096,8 @@ def pricing_edit(request):
 
 # --- LIST ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+@permission_required('resort.view_amenity', raise_exception=True)
 def amenity_list(request):
     amenity_qs = Amenity.objects.all().order_by('-id')
 
@@ -1098,7 +1110,8 @@ def amenity_list(request):
     })
 # --- CREATE ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_amenity', raise_exception=True)
 def amenity_create(request):
     form = AmenityForm(request.POST or None, request.FILES or None)
     if form.is_valid():
@@ -1109,7 +1122,8 @@ def amenity_create(request):
 
 # --- EDIT ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_amenity', raise_exception=True)
 def amenity_edit(request, pk):
     amenity = get_object_or_404(Amenity, pk=pk)
     form = AmenityForm(request.POST or None, request.FILES or None, instance=amenity)
@@ -1121,7 +1135,8 @@ def amenity_edit(request, pk):
 
 # --- DELETE ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_amenity', raise_exception=True)
 def amenity_delete(request, pk):
     amenity = get_object_or_404(Amenity, pk=pk)
     amenity.delete()
@@ -1132,7 +1147,8 @@ def amenity_delete(request, pk):
 
 # --- Banners ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+@permission_required('resort.view_mainbanner', raise_exception=True)
 def banner_list(request):
     banner_qs = MainBanner.objects.all().order_by('-id')
 
@@ -1144,7 +1160,8 @@ def banner_list(request):
         'banners': banners
     })
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_mainbanner', raise_exception=True)
 def banner_create(request):
     if request.method == 'POST':
         MainBanner.objects.create(
@@ -1163,7 +1180,8 @@ def banner_create(request):
     return render(request, 'adminpanel/banner_form.html')
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_mainbanner', raise_exception=True)
 def banner_edit(request, pk):
     banner = get_object_or_404(MainBanner, pk=pk)
 
@@ -1186,14 +1204,16 @@ def banner_edit(request, pk):
     return render(request, 'adminpanel/banner_form.html', {'banner': banner})
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin, login_url='vivaan_admin:login')
+# @user_passes_test(is_admin, login_url='vivaan_admin:login')
+@permission_required('resort.delete_mainbanner', raise_exception=True)
 def banner_delete(request, pk):
     get_object_or_404(MainBanner, pk=pk).delete()
     return redirect('vivaan_admin:banner_list')
 
 # --- Blocked Dates ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_blockeddate', raise_exception=True)
 def blocked_date_list(request):
     blocked_dates = BlockedDate.objects.all().order_by('-start_date')
     return render(request, 'adminpanel/blocked_date_list.html', {
@@ -1203,7 +1223,8 @@ from resort.models import *
 from resort.forms import *
 
 @login_required(login_url="vivaan_admin:login")
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_blockeddate', raise_exception=True)
 def blocked_date_create(request):
 
     booked_dates = []
@@ -1238,7 +1259,8 @@ def blocked_date_create(request):
     })
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_blockeddate', raise_exception=True)
 def blocked_date_edit(request, pk):
 
     blocked_date = get_object_or_404(BlockedDate, pk=pk)
@@ -1282,7 +1304,8 @@ def blocked_date_edit(request, pk):
 
 # DELETE
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_blockeddate', raise_exception=True)
 def blocked_date_delete(request, pk):
     blocked = get_object_or_404(BlockedDate, pk=pk)
     blocked.delete()
@@ -1292,14 +1315,16 @@ def blocked_date_delete(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_coupon', raise_exception=True)
 def coupon_list(request):
     coupons = Coupon.objects.all().order_by("-created_at")
     return render(request, "adminpanel/coupon_list.html", {"coupons": coupons})
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_coupon', raise_exception=True)
 def coupon_create(request):
     form = CouponForm(request.POST or None)
     if form.is_valid():
@@ -1310,7 +1335,8 @@ def coupon_create(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_coupon', raise_exception=True)
 def coupon_edit(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     form = CouponForm(request.POST or None, instance=coupon)
@@ -1325,7 +1351,8 @@ def coupon_edit(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_coupon', raise_exception=True)
 def coupon_delete(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     coupon.delete()
@@ -1334,7 +1361,8 @@ def coupon_delete(request, pk):
 
 # --- Gallery ---
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_gallery', raise_exception=True)
 def gallery_list(request):
     photos = Gallery.objects.all()
     return render(request, "adminpanel/gallery_list.html", {
@@ -1343,7 +1371,8 @@ def gallery_list(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_gallery', raise_exception=True)
 def gallery_create(request):
     form = GalleryForm(request.POST or None, request.FILES or None)
 
@@ -1358,7 +1387,8 @@ def gallery_create(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_gallery', raise_exception=True)
 def gallery_edit(request, pk):
     photo = get_object_or_404(Gallery, pk=pk)
     form = GalleryForm(request.POST or None, request.FILES or None, instance=photo)
@@ -1375,7 +1405,8 @@ def gallery_edit(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_gallery', raise_exception=True)
 def gallery_delete(request, pk):
     photo = get_object_or_404(Gallery, pk=pk)
     photo.delete()
@@ -1386,7 +1417,8 @@ def gallery_delete(request, pk):
 from django.core.paginator import Paginator
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_testimonial', raise_exception=True)
 def testimonial_list(request):
     testimonials_qs = Testimonial.objects.all().order_by("-created_at")
 
@@ -1400,7 +1432,8 @@ def testimonial_list(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_testimonial', raise_exception=True)
 def testimonial_create(request):
     form = TestimonialForm(request.POST or None)
     if form.is_valid():
@@ -1414,7 +1447,8 @@ def testimonial_create(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_testimonial', raise_exception=True)
 def testimonial_edit(request, pk):
     testimonial = get_object_or_404(Testimonial, pk=pk)
     form = TestimonialForm(request.POST or None, instance=testimonial)
@@ -1431,7 +1465,8 @@ def testimonial_edit(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_testimonial', raise_exception=True)
 def testimonial_delete(request, pk):
     testimonial = get_object_or_404(Testimonial, pk=pk)
     testimonial.delete()
@@ -1439,9 +1474,10 @@ def testimonial_delete(request, pk):
     return redirect("vivaan_admin:testimonial_list")
 
 # --- Messages & Users (Existing) ---
-# LIST
+
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.view_contactmessage', raise_exception=True)
 def message_list(request):
     qs = ContactMessage.objects.all()
 
@@ -1454,7 +1490,8 @@ def message_list(request):
     })
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.add_contactmessage', raise_exception=True)
 def message_create(request):
     if request.method == "POST":
         ContactMessage.objects.create(
@@ -1472,7 +1509,8 @@ def message_create(request):
 
 # VIEW / DETAIL
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.change_contactmessage', raise_exception=True)
 def message_detail(request, pk):
     msg = get_object_or_404(ContactMessage, pk=pk)
 
@@ -1487,7 +1525,8 @@ def message_detail(request, pk):
 
 # DELETE
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('resort.delete_contactmessage', raise_exception=True)
 def message_delete(request, pk):
     msg = get_object_or_404(ContactMessage, pk=pk)
     msg.delete()
@@ -1498,7 +1537,7 @@ def message_delete(request, pk):
 
 # LIST
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
 def user_list(request):
     users = User.objects.all().order_by('-date_joined')
     return render(request, 'adminpanel/user_list.html', {'users': users})
@@ -1587,36 +1626,6 @@ def user_delete(request, pk):
 
 
 
-# @login_required(login_url='vivaan_admin:login')
-# @user_passes_test(is_admin, login_url='vivaan_admin:login')
-# def user_list(request):
-#     users = User.objects.all().order_by('-date_joined')
-#     return render(request, 'adminpanel/user_list.html', {'users': users})
-
-# @login_required(login_url='vivaan_admin:login')
-# @user_passes_test(is_admin, login_url='vivaan_admin:login')
-# def user_create(request):
-#     if request.method == 'POST':
-#         username = request.POST.get('username')
-#         email = request.POST.get('email')
-#         password = request.POST.get('password')
-#         role = request.POST.get('role')
-
-#         if User.objects.filter(username=username).exists():
-#             return render(request, 'adminpanel/user_form.html', {'error': 'Username already exists.'})
-
-#         user = User.objects.create_user(username=username, email=email, password=password)
-#         if role == 'superuser':
-#             user.is_superuser = True
-#             user.is_staff = True
-#         elif role == 'staff':
-#             user.is_staff = True
-        
-#         user.save()
-#         messages.success(request, f"User {username} created successfully.")
-#         return redirect('vivaan_admin:user_list')
-
-#     return render(request, 'adminpanel/user_form.html')
 
 
 
@@ -1626,72 +1635,21 @@ def user_delete(request, pk):
 
 
 
-
-
-
-
-
-# from django.http import HttpResponse
-
-# def admin(request):
-#     return HttpResponse("sdfhjjhgasvbx")
-
-
-# from django.shortcuts import render
-# from django.contrib.auth.decorators import login_required
-
-# @login_required
-# def dashboard(request):
-#     return render(request, "vivaan_admin/dashboard.html")
-
-# @login_required
-# def bookings(request):
-#     return render(request, "vivaan_admin/booking_list.html")
-
-# @login_required
-# def rooms(request):
-#     return render(request, "vivaan_admin/rooms.html")
-
-# @login_required
-# def amenities(request):
-#     return render(request, "vivaan_admin/amenities.html")
-
-# @login_required
-# def gallery(request):
-#     return render(request, "vivaan_admin/gallery.html")
-
-# @login_required
-# def testimonials(request):
-#     return render(request, "vivaan_admin/testimonials.html")
-
-# @login_required
-# def offers(request):
-#     return render(request, "vivaan_admin/offers.html")
-
-# @login_required
-# def pricing(request):
-#     return render(request, "vivaan_admin/pricing.html")
-
-# @login_required
-# def blocked_dates(request):
-#     return render(request, "vivaan_admin/blocked_dates.html")
-
-# @login_required
-# def messages(request):
-#     return render(request, "vivaan_admin/messages.html")
 
 from blog.models import Blog, BlogCategory, BlogTag, BlogComment
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.view_blogcategory', raise_exception=True)
 def blog_category_list(request):
     categories = BlogCategory.objects.all()
     return render(request, 'adminpanel/blog/category_list.html', {
         'categories': categories
     })
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.add_blogcategory', raise_exception=True)
 def blog_category_add(request):
 
     if request.method == "POST":
@@ -1709,7 +1667,8 @@ def blog_category_add(request):
 
     return render(request, 'adminpanel/blog/category_add_edit.html')
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.change_blogcategory', raise_exception=True)
 def blog_category_edit(request, pk):
 
     category = get_object_or_404(BlogCategory, pk=pk)
@@ -1729,7 +1688,8 @@ def blog_category_edit(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.delete_blogcategory', raise_exception=True)
 def blog_category_delete(request, pk):
     get_object_or_404(BlogCategory, pk=pk).delete()
     messages.success(request, "Blog category deleted.")
@@ -1737,7 +1697,8 @@ def blog_category_delete(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.view_blog', raise_exception=True)
 def blog_list(request):
     blogs = Blog.objects.all().order_by('-created_at')
     return render(request, 'adminpanel/blog/blog_list.html', {
@@ -1745,7 +1706,8 @@ def blog_list(request):
     })
     
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.add_blog', raise_exception=True)
 def blog_add(request):
 
     if request.method == "POST":
@@ -1780,7 +1742,8 @@ def blog_add(request):
 
     return render(request, 'adminpanel/blog/blog_form.html')
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.change_blog', raise_exception=True)
 def blog_edit(request, pk):
 
     blog = get_object_or_404(Blog, pk=pk)
@@ -1814,105 +1777,11 @@ def blog_edit(request, pk):
         'blog': blog
     })
 
-# @login_required(login_url='vivaan_admin:login')
-# @user_passes_test(is_admin)
-# def blog_add(request):
-
-#     categories = BlogCategory.objects.all()
-#     tags = BlogTag.objects.all()
-
-#     if request.method == "POST":
-
-#         title = request.POST.get('title')
-
-#         blog = Blog.objects.create(
-#             title=title,
-#             slug=slugify(title),
-#             category_id=request.POST.get('category'),
-#             short_description=request.POST.get('short_description'),
-#             content=request.POST.get('content'),
-#             status=request.POST.get('status'),
-#             is_featured=True if request.POST.get('is_featured') else False,
-#             meta_title=request.POST.get('meta_title'),
-#             meta_description=request.POST.get('meta_description'),
-#             meta_keywords=request.POST.get('meta_keywords'),
-#             author=request.user
-#         )
-
-#         # publish date
-#         if blog.status == "published":
-#             blog.published_date = timezone.now()
-#             blog.save()
-
-#         # image
-#         if request.FILES.get('featured_image'):
-#             blog.featured_image = request.FILES.get('featured_image')
-#             blog.save()
-
-#         # ✅ SINGLE TAG
-#         tag_id = request.POST.get('tags')
-#         if tag_id:
-#             blog.tags.set([tag_id])
-
-#         messages.success(request, "Blog created successfully.")
-#         return redirect('vivaan_admin:blog_list')
-
-#     return render(request, 'adminpanel/blog/blog_form.html', {
-#         'categories': categories,
-#         'tags': tags
-#     })
-# @login_required(login_url='vivaan_admin:login')
-# @user_passes_test(is_admin)
-# def blog_edit(request, pk):
-
-#     blog = get_object_or_404(Blog, pk=pk)
-#     categories = BlogCategory.objects.all()
-#     tags = BlogTag.objects.all()
-
-#     if request.method == "POST":
-
-#         blog.title = request.POST.get('title')
-#         blog.slug = slugify(blog.title)
-#         blog.category_id = request.POST.get('category')
-#         blog.short_description = request.POST.get('short_description')
-#         blog.content = request.POST.get('content')
-#         blog.status = request.POST.get('status')
-#         blog.is_featured = True if request.POST.get('is_featured') else False
-#         blog.meta_title = request.POST.get('meta_title')
-#         blog.meta_description = request.POST.get('meta_description')
-#         blog.meta_keywords = request.POST.get('meta_keywords')
-
-#         # publish date logic
-#         if blog.status == "published" and not blog.published_date:
-#             blog.published_date = timezone.now()
-
-#         # image update
-#         if request.FILES.get('featured_image'):
-#             blog.featured_image = request.FILES.get('featured_image')
-
-#         blog.save()
-
-#         # ✅ SINGLE TAG UPDATE
-#         tag_id = request.POST.get('tags')
-
-#         if tag_id:
-#             blog.tags.set([tag_id])
-#         else:
-#             blog.tags.clear()
-
-#         messages.success(request, "Blog updated successfully.")
-#         return redirect('vivaan_admin:blog_list')
-
-#     return render(request, 'adminpanel/blog/blog_form.html', {
-#         'blog': blog,
-#         'categories': categories,
-#         'tags': tags
-#     })
-
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.delete_blog', raise_exception=True)
 def blog_delete(request, pk):
     get_object_or_404(Blog, pk=pk).delete()
     messages.success(request, "Blog deleted.")
@@ -1920,7 +1789,8 @@ def blog_delete(request, pk):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.view_blogcomment', raise_exception=True)
 def blog_comment_list(request):
     comments = BlogComment.objects.select_related('blog').order_by('-created_at')
     return render(request, 'adminpanel/blog/comment_list.html', {
@@ -1929,7 +1799,8 @@ def blog_comment_list(request):
 
 
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.add_blogcomment', raise_exception=True)
 def blog_comment_approve(request, pk):
     comment = get_object_or_404(BlogComment, pk=pk)
     comment.is_approved = True
@@ -1937,8 +1808,198 @@ def blog_comment_approve(request, pk):
     messages.success(request, "Comment approved.")
     return redirect('vivaan_admin:blog_comment_list')
 @login_required(login_url='vivaan_admin:login')
-@user_passes_test(is_admin)
+# @user_passes_test(is_admin)
+@permission_required('blog.delete_blogcomment', raise_exception=True)
 def blog_comment_delete(request, pk):
     get_object_or_404(BlogComment, pk=pk).delete()
     messages.success(request, "Comment deleted.")
     return redirect('vivaan_admin:blog_comment_list')
+
+
+
+
+
+
+
+
+
+
+@login_required(login_url='vivaan_admin:login')
+@permission_required('resort.view_offer', raise_exception=True)
+def offer_list(request):
+
+    offers = Offer.objects.all()
+
+    return render(request, 'adminpanel/offer/list.html', {
+        'offers': offers
+    })
+
+
+@login_required(login_url='vivaan_admin:login')
+@permission_required('resort.add_offer', raise_exception=True)
+def offer_create(request):
+
+    if request.method == "POST":
+        form = OfferForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('offer_list')
+    else:
+        form = OfferForm()
+
+    return render(request, 'adminpanel/offer/form.html', {'form': form})
+
+@login_required(login_url='vivaan_admin:login')
+@permission_required('resort.change_offer', raise_exception=True)
+def offer_edit(request, pk):
+
+    offer = get_object_or_404(Offer, pk=pk)
+
+    if request.method == "POST":
+        form = OfferForm(request.POST, instance=offer)
+        if form.is_valid():
+            form.save()
+            return redirect('offer_list')
+    else:
+        form = OfferForm(instance=offer)
+
+    return render(request, 'adminpanel/offer/form.html', {'form': form})
+
+@login_required(login_url='vivaan_admin:login')
+@permission_required('resort.delete_offer', raise_exception=True)
+def offer_delete(request, pk):
+
+    offer = get_object_or_404(Offer, pk=pk)
+    offer.delete()
+
+    return redirect('offer_list')
+
+
+
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.contenttypes.models import ContentType
+
+@login_required
+def group_list(request):
+    groups = Group.objects.all()
+    return render(request, "adminpanel/group/group_list.html", {"groups": groups})
+@login_required
+def group_create(request):
+    permissions = Permission.objects.all()
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        perms = request.POST.getlist("permissions")
+
+        group = Group.objects.create(name=name)
+        group.permissions.set(perms)
+
+        return redirect("vivaan_admin:group_list")
+
+    return render(request, "adminpanel/group/group_form.html", {
+        "permissions": permissions
+    })
+    
+    
+@login_required
+def group_create(request):
+    permissions = Permission.objects.all()
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        perms = request.POST.getlist("permissions")
+
+        group = Group.objects.create(name=name)
+        group.permissions.set(perms)
+
+        return redirect("vivaan_admin:group_list")
+
+    return render(request, "adminpanel/group/group_form.html", {
+        "permissions": permissions
+    })
+    
+@login_required
+def group_delete(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    group.delete()
+    return redirect("vivaan_admin:group_list")
+
+
+@login_required
+def group_edit(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    permissions = Permission.objects.all()
+
+    if request.method == "POST":
+        group.name = request.POST.get("name")
+        perms = request.POST.getlist("permissions")
+
+        group.permissions.set(perms)
+        group.save()
+
+        return redirect("vivaan_admin:group_list")
+
+    return render(request, "adminpanel/group/group_form.html", {
+        "group": group,
+        "permissions": permissions
+    })
+    
+
+@login_required
+def user_permission_assign(request, user_id):
+
+    user = get_object_or_404(User, id=user_id)
+
+    groups = Group.objects.all()
+    permissions = Permission.objects.all()
+
+    # ✅ USER CURRENT
+    user_groups = user.groups.all()
+    user_permissions = user.user_permissions.all()
+
+    # ✅ GROUP PERMISSIONS (INHERITED)
+    group_permissions = Permission.objects.filter(group__user=user).distinct()
+
+    if request.method == "POST":
+        selected_groups = request.POST.getlist("groups")
+        selected_perms = request.POST.getlist("permissions")
+
+        user.groups.set(selected_groups)
+        user.user_permissions.set(selected_perms)
+
+        return redirect("vivaan_admin:user_list")
+
+    return render(request, "adminpanel/user_permission_form.html", {
+        "user": user,
+        "groups": groups,
+        "permissions": permissions,
+        "user_groups": user_groups,
+        "user_permissions": user_permissions,
+        "group_permissions": group_permissions,
+    })
+
+
+# @login_required
+# def user_permission_assign(request, user_id):
+
+#     user = get_object_or_404(User, id=user_id)
+#     groups = Group.objects.all()
+#     permissions = Permission.objects.all()
+
+#     if request.method == "POST":
+#         selected_groups = request.POST.getlist("groups")
+#         selected_perms = request.POST.getlist("permissions")
+
+#         # Assign groups
+#         user.groups.set(selected_groups)
+
+#         # Assign individual permissions
+#         user.user_permissions.set(selected_perms)
+
+#         return redirect("vivaan_admin:user_list")
+
+#     return render(request, "adminpanel/user_permission_form.html", {
+#         "user": user,
+#         "groups": groups,
+#         "permissions": permissions
+#     })

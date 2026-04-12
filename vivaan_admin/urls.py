@@ -22,11 +22,7 @@ urlpatterns = [
     path('bookings/edit/<int:pk>/', views.booking_edit, name='booking_edit'),
     path('bookings/delete/<int:pk>/', views.booking_delete, name='booking_delete'),
      
-    path(
-    "booking-api-detail/<int:pk>/",
-            views.booking_api_detail,
-            name="booking_api_detail"
-        ),
+    path("booking-api-detail/<int:pk>/",views.booking_api_detail,name="booking_api_detail" ),
      
     # Rooms & Pricing
     # path('rooms/', views.room_list, name='room_list'),
@@ -116,9 +112,18 @@ urlpatterns = [
 
 
 
+    path('offers/', views.offer_list, name='offer_list'),
+    path('offers/create/', views.offer_create, name='offer_create'),
+    path('offers/edit/<int:pk>/', views.offer_edit, name='offer_edit'),
+    path('offers/delete/<int:pk>/', views.offer_delete, name='offer_delete'),
 
 
+    path("groups/", views.group_list, name="group_list"),
+    path("groups/create/", views.group_create, name="group_create"),
+    path("groups/<int:pk>/edit/", views.group_edit, name="group_edit"),
+    path("groups/<int:pk>/delete/", views.group_delete, name="group_delete"),
 
+    path("users/<int:user_id>/permissions/", views.user_permission_assign, name="user_permissions"),
 
 ]
 

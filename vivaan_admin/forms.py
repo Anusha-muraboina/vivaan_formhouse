@@ -288,3 +288,43 @@ class GalleryForm(forms.ModelForm):
 #                 "placeholder": "Optional display order"
 #             }),
 #         }
+
+
+
+
+class OfferForm(forms.ModelForm):
+    class Meta:
+        model = Offer
+        fields = ['title', 'valid_from', 'valid_until', 'offer_price', 'is_active']
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-input",
+                "placeholder": "Enter offer title"
+            }),
+            "offer_price": forms.NumberInput(attrs={
+                "class": "form-input",
+                "placeholder": "Enter price"
+            }),
+            "valid_from": forms.DateInput(attrs={
+                "type": "date",
+                "class": "form-input"
+            }),
+            "valid_until": forms.DateInput(attrs={
+                "type": "date",
+                "class": "form-input"
+            }),
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-checkbox"
+            }),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("valid_from")
+        end = cleaned_data.get("valid_until")
+
+        if start and end and start > end:
+            raise forms.ValidationError("End date must be after start date")
+
+        return cleaned_data

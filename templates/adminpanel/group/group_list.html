@@ -1,0 +1,149 @@
+{% extends "adminpanel/base.html" %}
+{% block title %}Groups{% endblock %}
+{% block header %}Groups{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* CARD */
+.group-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    overflow: hidden;
+}
+
+/* HEADER */
+.group-card .card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* BUTTON */
+.btn-add {
+    background: #034012;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* TABLE */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.group-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.group-table th {
+    padding: 12px;
+    background: #f9fafb;
+    font-size: 13px;
+}
+
+.group-table td {
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+
+/* ACTION */
+.btn-sm {
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-edit { background: #e0e7ff; color: #3730a3; }
+.btn-delete { background: #fee2e2; color: #991b1b; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    .group-table thead {
+        display: none;
+    }
+
+    .group-table,
+    .group-table tbody,
+    .group-table tr,
+    .group-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .group-table tr {
+        background: #fff;
+        margin: 10px;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,.05);
+    }
+
+    .group-table td {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .group-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+    }
+}
+
+</style>
+
+<div class="group-card">
+
+    <div class="card-header">
+        <h2>Groups</h2>
+        <a href="{% url 'vivaan_admin:group_create' %}" class="btn-add">
+            + Add Group
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="group-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Permissions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for group in groups %}
+                <tr>
+                    <td data-label="Name"><b>{{ group.name }}</b></td>
+
+                    <td data-label="Permissions">
+                        {{ group.permissions.count }} permissions
+                    </td>
+
+                    <td data-label="Actions">
+                        <a href="{% url 'vivaan_admin:group_edit' group.id %}" class="btn-sm btn-edit">Edit</a>
+                        <a href="{% url 'vivaan_admin:group_delete' group.id %}"
+                           onclick="return confirm('Delete this group?')"
+                           class="btn-sm btn-delete">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No groups found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

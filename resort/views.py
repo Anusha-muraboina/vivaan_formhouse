@@ -146,10 +146,40 @@ def rooms(request):
     return render(request, 'resort/rooms.html', context)
 
 
+# def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
+#     pricing = VillaPricing.objects.first()
+#     if not pricing:
+#         pricing = VillaPricing.objects.create()
+
+#     total_cost = Decimal(0)
+#     current_date = check_in
+
+#     nights = (check_out - check_in).days
+
+#     while current_date < check_out:
+
+#         # Weekend means Saturday (5) & Sunday (6)
+#         if current_date.weekday() in [5, 6]:
+#             total_cost += pricing.weekend_price
+#         else:
+#             total_cost += pricing.weekday_price
+
+#         current_date += timedelta(days=1)
+
+#     # Extra Guest Charges
+#     extra_cost = Decimal(extra_guest_count) * pricing.extra_guest_price * nights
+#     total_cost += extra_cost
+
+#     return total_cost
+
+
+
+from .models import VillaPricing, Offer
+from decimal import Decimal
+from datetime import timedelta
+
 def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
-    pricing = VillaPricing.objects.first()
-    if not pricing:
-        pricing = VillaPricing.objects.create()
+    pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
     total_cost = Decimal(0)
     current_date = check_in
@@ -158,21 +188,29 @@ def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
 
     while current_date < check_out:
 
-        # Weekend means Saturday (5) & Sunday (6)
-        if current_date.weekday() in [5, 6]:
-            total_cost += pricing.weekend_price
+        # ✅ CHECK OFFER
+        offer = Offer.objects.filter(
+            valid_from__lte=current_date,
+            valid_until__gte=current_date,
+            is_active=True
+        ).first()
+
+        if offer:
+            total_cost += offer.offer_price   # 🔥 USE OFFER PRICE
         else:
-            total_cost += pricing.weekday_price
+            # NORMAL PRICE
+            if current_date.weekday() in [5, 6]:
+                total_cost += pricing.weekend_price
+            else:
+                total_cost += pricing.weekday_price
 
         current_date += timedelta(days=1)
 
-    # Extra Guest Charges
+    # EXTRA GUEST
     extra_cost = Decimal(extra_guest_count) * pricing.extra_guest_price * nights
     total_cost += extra_cost
 
     return total_cost
-
-
 
 
 
@@ -411,6 +449,8 @@ def room_detail(request, slug):
         check_in=form.cleaned_data["check_in"],
         check_out=form.cleaned_data["check_out"],
         payment_method=payment_method,
+        
+        
 
         defaults={
             "guest_name": form.cleaned_data["guest_name"],
@@ -431,6 +471,18 @@ def room_detail(request, slug):
         }
     )
 
+
+     # 🔥 ADD HERE (AFTER booking created)
+
+        offer = Offer.objects.filter(
+            valid_from__lte=form.cleaned_data["check_in"],
+            valid_until__gte=form.cleaned_data["check_in"],
+            is_active=True
+        ).first()
+
+        if offer:
+            booking.offer_applied = offer
+            booking.save(update_fields=["offer_applied"])
             # ✅ ADD HERE (CORRECT PLACE)
         # if created:
         #     sync_booking_to_farmhouse(booking)
@@ -471,6 +523,18 @@ def room_detail(request, slug):
         f"Enjoy a private luxury farmhouse stay with premium amenities, "
         f"perfect for family outings, weekend getaways, and celebrations."
     )
+    
+    
+    # ================= OFFER DATES =================
+    offers = Offer.objects.filter(is_active=True)
+
+    offer_dates = {}
+
+    for offer in offers:
+        current = offer.valid_from
+        while current <= offer.valid_until:
+            offer_dates[str(current)] = float(offer.offer_price)
+            current += timedelta(days=1)
     # ================= PAGE LOAD =================
     return render(request, "resort/room_detail.html", {
         "room_category": room_category,
@@ -481,6 +545,10 @@ def room_detail(request, slug):
         "blocked_dates": all_blocked_dates, # 🔥 IMPORTANT CHANGE
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
+        
+            # 🔥 ADD THIS
+        "offer_dates": offer_dates,
+    
                 # ✅ SEO
         "seo_title": seo_title,
         "seo_description": seo_description,
