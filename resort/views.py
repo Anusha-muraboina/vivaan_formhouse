@@ -11,7 +11,8 @@ from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 
 
-
+from datetime import timedelta
+import requests
 # from .models import VillaPricing, Booking, RoomCategory, Coupon
 
 
@@ -526,15 +527,58 @@ def room_detail(request, slug):
     
     
     # ================= OFFER DATES =================
-    offers = Offer.objects.filter(is_active=True)
+    
+    
+    
+    
+    
+
 
     offer_dates = {}
 
-    for offer in offers:
+    # =========================
+    # 1. LOCAL VIVAAN OFFERS
+    # =========================
+    local_offers = Offer.objects.filter(is_active=True)
+
+    for offer in local_offers:
         current = offer.valid_from
         while current <= offer.valid_until:
             offer_dates[str(current)] = float(offer.offer_price)
             current += timedelta(days=1)
+
+
+    # =========================
+    # 2. EXTERNAL HYD OFFERS
+    # =========================
+    try:
+        res = requests.get(
+            "https://farmhouseshyderabad.com/api/vivaan-hyd-offers/",
+            timeout=5
+        )
+
+        if res.status_code == 200:
+            hyd_offers = res.json()
+
+            for date, price in hyd_offers.items():
+
+                # 🔥 RULE: LOWEST PRICE WINS
+                if date in offer_dates:
+                    offer_dates[date] = min(offer_dates[date], price)
+                else:
+                    offer_dates[date] = price
+
+    except Exception as e:
+        print("❌ External Offer API Error:", e)
+    # offers = Offer.objects.filter(is_active=True)
+
+    # offer_dates = {}
+
+    # for offer in offers:
+    #     current = offer.valid_from
+    #     while current <= offer.valid_until:
+    #         offer_dates[str(current)] = float(offer.offer_price)
+    #         current += timedelta(days=1)
     # ================= PAGE LOAD =================
     return render(request, "resort/room_detail.html", {
         "room_category": room_category,
