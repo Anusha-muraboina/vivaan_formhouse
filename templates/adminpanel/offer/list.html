@@ -101,7 +101,7 @@
         <h2>Offers</h2>
 
         {% if perms.resort.add_offer %}
-        <a href="{% url 'vivaan_admin:offer_create' %}" class="btn-primary">
+        <a href="{% url 'vivaan_admin:offercreate' %}" class="btn-primary">
             + Add Offer
         </a>
         {% endif %}
@@ -136,11 +136,11 @@
 
                     <td>
                         {% if perms.resort.change_offer %}
-                        <a href="{% url 'vivaan_admin:offer_edit' offer.id %}" class="btn-sm btn-view">Edit</a>
+                        <a href="{% url 'vivaan_admin:offeredit' offer.id %}" class="btn-sm btn-view">Edit</a>
                         {% endif %}
 
                         {% if perms.resort.delete_offer %}
-                        <a href="{% url 'vivaan_admin:offer_delete' offer.id %}"
+                        <a href="{% url 'vivaan_admin:offerdelete' offer.id %}"
                            onclick="return confirm('Delete this offer?');"
                            class="btn-sm btn-delete">Delete</a>
                         {% endif %}

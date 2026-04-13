@@ -1843,7 +1843,7 @@ def offer_create(request):
         form = OfferForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('offer_list')
+            return redirect('offerlist')
     else:
         form = OfferForm()
 
@@ -1859,7 +1859,7 @@ def offer_edit(request, pk):
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
             form.save()
-            return redirect('offer_list')
+            return redirect('offerlist')
     else:
         form = OfferForm(instance=offer)
 
@@ -1872,7 +1872,7 @@ def offer_delete(request, pk):
     offer = get_object_or_404(Offer, pk=pk)
     offer.delete()
 
-    return redirect('offer_list')
+    return redirect('offerlist')
 
 
 

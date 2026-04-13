@@ -112,10 +112,10 @@ urlpatterns = [
 
 
 
-    path('offers/', views.offer_list, name='offer_list'),
-    path('offers/create/', views.offer_create, name='offer_create'),
-    path('offers/edit/<int:pk>/', views.offer_edit, name='offer_edit'),
-    path('offers/delete/<int:pk>/', views.offer_delete, name='offer_delete'),
+    path('offers/', views.offer_list, name='offerlist'),
+    path('offers/create/', views.offer_create, name='offercreate'),
+    path('offers/edit/<int:pk>/', views.offer_edit, name='offeredit'),
+    path('offers/delete/<int:pk>/', views.offer_delete, name='offerdelete'),
 
 
     path("groups/", views.group_list, name="group_list"),
