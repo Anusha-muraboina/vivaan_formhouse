@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from .views import VivaanOfferAPI
 urlpatterns = [
     path('', views.home, name='home'),
     
@@ -37,7 +37,5 @@ urlpatterns = [
     path("payment-processing/", views.payment_processing, name="payment_processing"),
     path("check-booking-status/", views.check_booking_status, name="check_booking_status"),
     
-    
-    path('api/vivaan-offers/', views.VivaanOfferAPI , name="vivaan-offers-farmhouse"),
-
+    path('api/vivaan-offers/', VivaanOfferAPI.as_view()),
 ]

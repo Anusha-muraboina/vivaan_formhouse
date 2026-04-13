@@ -1135,13 +1135,14 @@ def sync_airbnb_calendar(request):
 
 
 # vivaan project
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from .models import Offer
-@api_view(["GET"])
-@permission_classes([AllowAny])
+
 class VivaanOfferAPI(APIView):
+
+    permission_classes = [AllowAny]   # ✅ correct way
 
     def get(self, request):
 
@@ -1152,7 +1153,7 @@ class VivaanOfferAPI(APIView):
                 "title": o.title,
                 "start_date": o.valid_from,
                 "end_date": o.valid_until,
-                "price": o.offer_price
+                "price": float(o.offer_price)
             }
             for o in offers
         ]
