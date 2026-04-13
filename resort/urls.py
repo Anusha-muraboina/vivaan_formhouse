@@ -36,5 +36,8 @@ urlpatterns = [
     
     path("payment-processing/", views.payment_processing, name="payment_processing"),
     path("check-booking-status/", views.check_booking_status, name="check_booking_status"),
+    
+    
+    path('api/vivaan-offers/', views.VivaanOfferAPI , name="vivaan-offers-farmhouse"),
 
 ]

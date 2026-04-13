@@ -23,8 +23,10 @@
         <div class="update-box">
 
             <!-- STATUS DROPDOWN -->
-            <div class="dropdown" onclick="toggleDropdown('statusDropdown')">
-                <div id="statusSelected">Select Status</div>
+            <div class="dropdown">
+                <div class="dropdown-selected" onclick="toggleDropdown('statusDropdown', event)">
+                    <span id="statusSelected">Select Status</span>
+                </div>
                 <div class="dropdown-menu" id="statusDropdown">
                     <div onclick="selectOption('status','pending')">Pending</div>
                     <div onclick="selectOption('status','confirmed')">Confirmed</div>
@@ -34,8 +36,10 @@
             </div>
 
             <!-- PAYMENT DROPDOWN -->
-            <div class="dropdown" onclick="toggleDropdown('paymentDropdown')">
-                <div id="paymentSelected">Payment</div>
+            <div class="dropdown">
+                <div class="dropdown-selected" onclick="toggleDropdown('paymentDropdown', event)">
+                    <span id="paymentSelected">Payment</span>
+                </div>
                 <div class="dropdown-menu" id="paymentDropdown">
                     <div onclick="selectOption('payment','pending')">Pending</div>
                     <div onclick="selectOption('payment','partial')">Partial</div>
@@ -104,16 +108,20 @@
     position:relative;
     background:#fff;
     border:1px solid #ddd;
-    padding:12px;
     border-radius:10px;
     cursor:pointer;
-    min-width:150px;
+    min-width:160px;
 }
 
-.dropdown:after {
+.dropdown-selected {
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.dropdown-selected::after {
     content:"▼";
-    position:absolute;
-    right:10px;
     font-size:10px;
 }
 
@@ -192,14 +200,6 @@
         width:100%;
     }
 
-    .update-box {
-        position:sticky;
-        bottom:0;
-        background:#fff;
-        padding:10px;
-        border-top:1px solid #eee;
-    }
-
 }
 
 </style>
@@ -209,29 +209,46 @@
 let selectedStatus = "pending";
 let selectedPayment = "pending";
 
-/* TOGGLE */
-function toggleDropdown(id) {
-    document.getElementById(id).style.display =
-        document.getElementById(id).style.display === "block" ? "none" : "block";
+/* TOGGLE DROPDOWN */
+function toggleDropdown(id, event) {
+    event.stopPropagation();
+
+    document.querySelectorAll(".dropdown-menu").forEach(menu => {
+        if (menu.id !== id) {
+            menu.style.display = "none";
+        }
+    });
+
+    let dropdown = document.getElementById(id);
+
+    dropdown.style.display =
+        dropdown.style.display === "block" ? "none" : "block";
 }
 
-/* SELECT */
+/* SELECT OPTION */
 function selectOption(type, value) {
 
     if(type === "status"){
         selectedStatus = value;
-        document.getElementById("statusSelected").innerText = value;
+        document.getElementById("statusSelected").innerText = value.toUpperCase();
         document.getElementById("statusDropdown").style.display="none";
     }
 
     if(type === "payment"){
         selectedPayment = value;
-        document.getElementById("paymentSelected").innerText = value;
+        document.getElementById("paymentSelected").innerText = value.toUpperCase();
         document.getElementById("paymentDropdown").style.display="none";
     }
 }
 
-/* LOAD */
+/* CLOSE ON OUTSIDE CLICK */
+document.addEventListener("click", function () {
+    document.querySelectorAll(".dropdown-menu").forEach(menu => {
+        menu.style.display = "none";
+    });
+});
+
+/* LOAD BOOKING */
 function loadBooking() {
 
 fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/{{ booking_id }}/`, {
@@ -254,8 +271,8 @@ fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/{{ 
     selectedStatus = data.status;
     selectedPayment = data.payment_status;
 
-    document.getElementById("statusSelected").innerText = data.status;
-    document.getElementById("paymentSelected").innerText = data.payment_status;
+    document.getElementById("statusSelected").innerText = data.status.toUpperCase();
+    document.getElementById("paymentSelected").innerText = data.payment_status.toUpperCase();
 
     document.getElementById("booking-detail").innerHTML = `
         <div class="section">
@@ -284,7 +301,7 @@ fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/{{ 
 });
 }
 
-/* UPDATE */
+/* UPDATE BOOKING */
 function updateBooking() {
 
 fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking_id }}/update/`, {
@@ -300,12 +317,12 @@ fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking
     })
 })
 .then(()=>{
-    alert("Updated the status");
+    alert("Updated successfully ✅");
     loadBooking();
 });
 }
 
-
+/* CSRF */
 function getCSRFToken(){
     return document.cookie
         .split("; ")

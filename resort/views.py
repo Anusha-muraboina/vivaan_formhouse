@@ -1124,3 +1124,37 @@ def sync_airbnb_calendar(request):
         sync_ical(url, source)
 
     return JsonResponse({"status": "Synced Booking + Airbnb successfully"})
+
+
+
+
+
+
+
+
+
+
+# vivaan project
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Offer
+@api_view(["GET"])
+@permission_classes([AllowAny])
+class VivaanOfferAPI(APIView):
+
+    def get(self, request):
+
+        offers = Offer.objects.filter(is_active=True)
+
+        data = [
+            {
+                "title": o.title,
+                "start_date": o.valid_from,
+                "end_date": o.valid_until,
+                "price": o.offer_price
+            }
+            for o in offers
+        ]
+
+        return Response(data)
