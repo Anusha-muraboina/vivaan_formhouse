@@ -287,7 +287,7 @@ fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/{{ 
 /* UPDATE */
 function updateBooking() {
 
-fetch(`https://farmhouseshyderabad.com/vivvan_admin/owner/bookings/{{ booking_id }}/update/`, {
+fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking_id }}/update/`, {
     method:"PATCH",
     headers:{
         "Content-Type":"application/json",
@@ -300,10 +300,11 @@ fetch(`https://farmhouseshyderabad.com/vivvan_admin/owner/bookings/{{ booking_id
     })
 })
 .then(()=>{
-    alert("Updated ✅");
+    alert("Updated the status");
     loadBooking();
 });
 }
+
 
 function getCSRFToken(){
     return document.cookie
