@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'django_celery_beat',
+    
+    'corsheaders',
 
 ]
 
@@ -65,6 +67,7 @@ SITE_ID = 1
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -283,7 +286,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://vivaanfarmhouse.com",
     "https://www.vivaanfarmhouse.com",
     "http://127.0.0.1:8000",
-    
+    'http://13.205.98.67',
     "https://farmhouseshyderabad.com",
 ]
 
@@ -300,27 +303,44 @@ CSRF_TRUSTED_ORIGINS = [
 # SECURE_HSTS_PRELOAD = True
 
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://3.110.215.192",
+    "https://farmhouseshyderabad.com",
+    'http://13.205.98.67',
+    "https://vivaanfarmhouse.com",
+    "http://127.0.0.1:9000",
+
+]
 
 
 
-# CSRF_COOKIE_SECURE = not DEBUG
-# SESSION_COOKIE_SECURE = not DEBUG
-
-# CSRF_COOKIE_HTTPONLY = False   # required for JS fetch
-# CSRF_USE_SESSIONS = False
-
-# SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-# SECURE_HSTS_PRELOAD = True
 
 
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# X_FRAME_OPTIONS = "DENY"
-# SECURE_HSTS_SECONDS = 31536000
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_SSL_REDIRECT = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+
+
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_HTTPONLY = False   # required for JS fetch
+CSRF_USE_SESSIONS = False
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+SECURE_HSTS_PRELOAD = True
+
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
 
