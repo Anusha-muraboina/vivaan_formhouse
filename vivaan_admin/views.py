@@ -1872,7 +1872,7 @@ def offer_delete(request, pk):
     offer = get_object_or_404(Offer, pk=pk)
     offer.delete()
 
-    return redirect('offerlist')
+    return redirect('vivaan_admin:offerlist')
 
 
 
