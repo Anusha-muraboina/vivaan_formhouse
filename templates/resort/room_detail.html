@@ -1806,7 +1806,16 @@ document.addEventListener("DOMContentLoaded", function () {
 function decorateDay(dayElem) {
 
     const date = dayElem.dateObj;
-    const dateStr = date.toISOString().split('T')[0];
+    {% comment %} const dateStr = date.toISOString().split('T')[0]; {% endcomment %}
+
+
+    function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+    const dateStr = formatLocalDate(date);
     const day = date.getDay();
 
     let price = 0;

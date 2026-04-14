@@ -286,7 +286,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://vivaanfarmhouse.com",
     "https://www.vivaanfarmhouse.com",
     "http://127.0.0.1:8000",
-    'http://13.205.98.67',
+     'http://13.205.98.67',
     "https://farmhouseshyderabad.com",
 ]
 
@@ -310,7 +310,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://3.110.215.192",
     "https://farmhouseshyderabad.com",
-     'http://13.205.98.67',
+    
     "https://vivaanfarmhouse.com",
     "http://127.0.0.1:9000",
 
