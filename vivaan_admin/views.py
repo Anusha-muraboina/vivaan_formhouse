@@ -1835,19 +1835,72 @@ def offer_list(request):
     })
 
 
-@login_required(login_url='vivaan_admin:login')
-@permission_required('resort.add_offer', raise_exception=True)
+import requests
+from datetime import timedelta
+
 def offer_create(request):
 
-    if request.method == "POST":
-        form = OfferForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('offerlist')
-    else:
-        form = OfferForm()
+    offers = Offer.objects.filter(is_active=True)
 
-    return render(request, 'adminpanel/offer/form.html', {'form': form})
+    offer_dates = {}
+
+    # =========================
+    # 1. VIVAAN OFFERS (DB)
+    # =========================
+    for o in offers:
+        current = o.valid_from
+
+        while current <= o.valid_until:
+            date_str = current.strftime("%Y-%m-%d")
+            offer_dates[date_str] = float(o.offer_price)
+            current += timedelta(days=1)
+
+    # =========================
+    # 2. FARMHOUSE HYD API
+    # =========================
+    try:
+        res = requests.get(
+            "https://farmhouseshyderabad.com/api/vivaan-hyd-offers/",
+            timeout=5
+        )
+
+        if res.status_code == 200:
+            hyd_offers = res.json()
+
+            for date, price in hyd_offers.items():
+
+                date = str(date)
+                price = float(price)
+
+                # 🔥 LOWEST PRICE WINS
+                if date in offer_dates:
+                    offer_dates[date] = min(offer_dates[date], price)
+                else:
+                    offer_dates[date] = price
+
+    except Exception as e:
+        print("❌ API ERROR:", e)
+
+    print("FINAL MERGED OFFERS:", offer_dates)
+
+    return render(request, "adminpanel/offer/form.html", {
+        "form": OfferForm(),
+        "offer_dates": offer_dates
+    })
+
+# @login_required(login_url='vivaan_admin:login')
+# @permission_required('resort.add_offer', raise_exception=True)
+# def offer_create(request):
+
+#     if request.method == "POST":
+#         form = OfferForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('offerlist')
+#     else:
+#         form = OfferForm()
+
+#     return render(request, 'adminpanel/offer/form.html', {'form': form})
 
 @login_required(login_url='vivaan_admin:login')
 @permission_required('resort.change_offer', raise_exception=True)

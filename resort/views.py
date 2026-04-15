@@ -178,8 +178,8 @@ def rooms(request):
 from .models import VillaPricing, Offer
 from decimal import Decimal
 from datetime import timedelta
-
 def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
+
     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
 
     total_cost = Decimal(0)
@@ -187,31 +187,95 @@ def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
 
     nights = (check_out - check_in).days
 
+    # ===============================
+    # 🔥 FETCH EXTERNAL API ONCE
+    # ===============================
+    api_offers = {}
+
+    try:
+        res = requests.get(
+            "https://farmhouseshyderabad.com/api/vivaan-hyd-offers/",
+            timeout=3
+        )
+
+        if res.status_code == 200:
+            api_offers = res.json()  # { "2026-04-26": 10000 }
+
+    except Exception as e:
+        print("API Error:", e)
+
+    # ===============================
+    # 🔥 LOOP DATES
+    # ===============================
     while current_date < check_out:
 
-        # ✅ CHECK OFFER
-        offer = Offer.objects.filter(
-            valid_from__lte=current_date,
-            valid_until__gte=current_date,
-            is_active=True
-        ).first()
+        date_str = str(current_date)
 
-        if offer:
-            total_cost += offer.offer_price   # 🔥 USE OFFER PRICE
+        # ✅ 1. API PRICE (HIGHEST PRIORITY)
+        if date_str in api_offers:
+            day_price = Decimal(api_offers[date_str])
+
         else:
-            # NORMAL PRICE
-            if current_date.weekday() in [5, 6]:
-                total_cost += pricing.weekend_price
-            else:
-                total_cost += pricing.weekday_price
+            # ✅ 2. DB OFFER
+            offer = Offer.objects.filter(
+                valid_from__lte=current_date,
+                valid_until__gte=current_date,
+                is_active=True
+            ).order_by("offer_price").first()
 
+            if offer:
+                day_price = offer.offer_price
+
+            else:
+                # ✅ 3. NORMAL PRICE
+                if current_date.weekday() in [5, 6]:
+                    day_price = pricing.weekend_price
+                else:
+                    day_price = pricing.weekday_price
+
+        total_cost += day_price
         current_date += timedelta(days=1)
 
+    # ===============================
     # EXTRA GUEST
+    # ===============================
     extra_cost = Decimal(extra_guest_count) * pricing.extra_guest_price * nights
     total_cost += extra_cost
 
     return total_cost
+# def calculate_booking_cost(check_in, check_out, guest_count, extra_guest_count):
+#     pricing = VillaPricing.objects.first() or VillaPricing.objects.create()
+
+#     total_cost = Decimal(0)
+#     current_date = check_in
+
+#     nights = (check_out - check_in).days
+
+#     while current_date < check_out:
+
+#         # ✅ CHECK OFFER
+#         offer = Offer.objects.filter(
+#             valid_from__lte=current_date,
+#             valid_until__gte=current_date,
+#             is_active=True
+#         ).first()
+
+#         if offer:
+#             total_cost += offer.offer_price   # 🔥 USE OFFER PRICE
+#         else:
+#             # NORMAL PRICE
+#             if current_date.weekday() in [5, 6]:
+#                 total_cost += pricing.weekend_price
+#             else:
+#                 total_cost += pricing.weekday_price
+
+#         current_date += timedelta(days=1)
+
+#     # EXTRA GUEST
+#     extra_cost = Decimal(extra_guest_count) * pricing.extra_guest_price * nights
+#     total_cost += extra_cost
+
+#     return total_cost
 
 
 
@@ -334,7 +398,6 @@ def send_email_async(booking, old_status=None):
         daemon=True
     ).start()
 
-
 def room_detail(request, slug):
     room_category = get_object_or_404(RoomCategory, slug=slug)
 
@@ -343,6 +406,7 @@ def room_detail(request, slug):
 
     confirmed_bookings = Booking.objects.filter(
         check_out__gt=datetime.now().date(),
+        payment_method__in=["partial_razorpay", "full_razorpay"],
         status="confirmed"
     )
     
@@ -401,10 +465,19 @@ def room_detail(request, slug):
         print("❌ External API error:", e)
 
     # ================= ✅ FINAL MERGE =================
+    # all_blocked_dates = list(set(
+    #     booked_dates + blocked_dates + external_dates
+    # ))
+    
+    # ✅ ONLY CONFIRMED + ADMIN BLOCKED
     all_blocked_dates = list(set(
-        booked_dates + blocked_dates + external_dates
+        booked_dates + blocked_dates
     ))
-
+    
+    # ✅ API / external (DO NOT USE FOR DISABLE)
+    all_display_dates = list(set(
+        external_dates
+    ))
 
 
 
@@ -471,7 +544,12 @@ def room_detail(request, slug):
            "room_category": room_category
         }
     )
-
+     
+    # ADD THIS EXACTLY HERE
+    if booking.payment_method == "farmhouse":
+        booking.status = "pending"
+        booking.payment_status = "pending"
+        booking.save()
 
      # 🔥 ADD HERE (AFTER booking created)
 
@@ -587,6 +665,9 @@ def room_detail(request, slug):
         # "blocked_dates": blocked_dates,
         "booked_dates": all_blocked_dates,  # 🔥 IMPORTANT CHANGE
         "blocked_dates": all_blocked_dates, # 🔥 IMPORTANT CHANGE
+        
+        
+        "display_dates": all_display_dates,
         "pricing": pricing,
         "extra_price": float(pricing.extra_guest_price),
         
@@ -597,9 +678,11 @@ def room_detail(request, slug):
         "seo_title": seo_title,
         "seo_description": seo_description,
         
+        
+        
     })
 
-
+from decimal import Decimal
 
 @csrf_exempt
 def create_razorpay_order(request):
@@ -611,11 +694,40 @@ def create_razorpay_order(request):
 
     booking = get_object_or_404(Booking, booking_id=booking_id)
 
-    amount = booking.total_amount
+    # amount = booking.total_amount
 
+    # if booking.payment_method == "partial_razorpay":
+    #     amount = booking.total_amount * Decimal("0.30")
+    
+
+
+    # ===============================
+    # 🔥 RECALCULATE PRICE (IMPORTANT)
+    # ===============================
+    base_amount = calculate_booking_cost(
+        booking.check_in,
+        booking.check_out,
+        booking.guest_count,
+        booking.extra_guest_count or 0
+    )
+
+    # APPLY DISCOUNT
+    discount = booking.disc_price or Decimal("0.00")
+    total = base_amount - discount
+
+    # UPDATE BOOKING (VERY IMPORTANT)
+    booking.sub_total = base_amount
+    booking.total_amount = total
+    booking.remaining_amount = total
+    booking.save()
+
+    # ===============================
+    # 💳 PAYMENT CALCULATION
+    # ===============================
     if booking.payment_method == "partial_razorpay":
-        amount = booking.total_amount * Decimal("0.30")
-
+        amount = (total * Decimal("0.30")).quantize(Decimal("1"))
+    else:
+        amount = total
     order = razorpay_client.order.create({
         "amount": int(amount * 100),
         "currency": "INR",
@@ -657,7 +769,10 @@ def razorpay_webhook(request):
                 booking.payment_status = "paid"
                 booking.remaining_amount = Decimal("0.00")
 
-            booking.status = "confirmed"
+            # booking.status = "confirmed"
+            if booking.payment_method in ["partial_razorpay", "full_razorpay"]:
+                booking.status = "confirmed"
+                booking.payment_status = "paid"
             booking.payment_id = payment["id"]
             booking.save()
 
@@ -962,10 +1077,10 @@ def blocked_dates_api_vivaan(request):
     disabled_dates = set()
 
     # ================= LOCAL BOOKINGS =================
-    bookings = Booking.objects.filter(
-        Q(status="confirmed") | Q(status="pending", payment_method="farmhouse")
-    )
-
+    # bookings = Booking.objects.filter(
+    #     Q(status="confirmed") | Q(status="pending", payment_method="farmhouse")
+    # )
+    bookings = Booking.objects.filter(status="confirmed")
     for booking in bookings:
         current = booking.check_in
         while current < booking.check_out:
