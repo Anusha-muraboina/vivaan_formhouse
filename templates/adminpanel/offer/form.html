@@ -230,7 +230,58 @@
     </form>
 </div>
 
+
+
 {{ offer_dates|json_script:"offer-data" }}
+
+<script>
+const offerData = JSON.parse(document.getElementById("offer-data").textContent);
+
+// Format date properly (IMPORTANT)
+function formatDate(dateObj) {
+    let year = dateObj.getFullYear();
+    let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    let day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function initCalendar(selector) {
+
+    flatpickr(selector, {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+
+            let date = formatDate(dayElem.dateObj);
+
+            // ✅ USE BACKEND DATA (DB + API)
+            if (offerData[date]) {
+
+                // remove old
+                let old = dayElem.querySelector(".price-tag");
+                if (old) old.remove();
+
+                // create price tag
+                let span = document.createElement("span");
+                span.className = "price-tag";
+                span.innerText = "₹" + Number(offerData[date]).toLocaleString("en-IN");
+
+                dayElem.appendChild(span);
+
+                // highlight
+                dayElem.classList.add("offer-day");
+            }
+        }
+    });
+}
+
+// INIT
+initCalendar('[name="valid_from"]');
+initCalendar('[name="valid_until"]');
+</script>
+
+{% comment %} {{ offer_dates|json_script:"offer-data" }}
 <script>
 function getValues() {
     return {
@@ -301,6 +352,6 @@ document.querySelectorAll('[name="offer_price"], [name="valid_from"], [name="val
         });
     });
 });
-</script>
+</script> {% endcomment %}
 
 {% endblock %}

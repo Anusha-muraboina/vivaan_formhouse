@@ -1888,6 +1888,69 @@ def offer_create(request):
         "offer_dates": offer_dates
     })
 
+
+
+@login_required(login_url='vivaan_admin:login')
+@permission_required('resort.change_offer', raise_exception=True)
+def offer_edit(request, pk):
+
+    offer = get_object_or_404(Offer, pk=pk)
+
+    # =========================
+    # BUILD OFFER DATES (SAME AS CREATE)
+    # =========================
+    offers = Offer.objects.filter(is_active=True)
+
+    offer_dates = {}
+
+    # 1. DB OFFERS
+    for o in offers:
+        current = o.valid_from
+
+        while current <= o.valid_until:
+            date_str = current.strftime("%Y-%m-%d")
+            offer_dates[date_str] = float(o.offer_price)
+            current += timedelta(days=1)
+
+    # 2. API OFFERS
+    try:
+        res = requests.get(
+            "https://farmhouseshyderabad.com/api/vivaan-hyd-offers/",
+            timeout=5
+        )
+
+        if res.status_code == 200:
+            hyd_offers = res.json()
+
+            for date, price in hyd_offers.items():
+                date = str(date)
+                price = float(price)
+
+                if date in offer_dates:
+                    offer_dates[date] = min(offer_dates[date], price)
+                else:
+                    offer_dates[date] = price
+
+    except Exception as e:
+        print("❌ API ERROR:", e)
+
+    # =========================
+    # FORM HANDLING
+    # =========================
+    if request.method == "POST":
+        form = OfferForm(request.POST, instance=offer)
+        if form.is_valid():
+            form.save()
+            return redirect('offerlist')
+    else:
+        form = OfferForm(instance=offer)
+
+    # ✅ PASS offer_dates ALSO
+    return render(request, 'adminpanel/offer/form.html', {
+        'form': form,
+        'offer': offer,
+        'offer_dates': offer_dates   # 🔥 THIS WAS MISSING
+    })
 # @login_required(login_url='vivaan_admin:login')
 # @permission_required('resort.add_offer', raise_exception=True)
 # def offer_create(request):
@@ -1902,21 +1965,21 @@ def offer_create(request):
 
 #     return render(request, 'adminpanel/offer/form.html', {'form': form})
 
-@login_required(login_url='vivaan_admin:login')
-@permission_required('resort.change_offer', raise_exception=True)
-def offer_edit(request, pk):
+# @login_required(login_url='vivaan_admin:login')
+# @permission_required('resort.change_offer', raise_exception=True)
+# def offer_edit(request, pk):
 
-    offer = get_object_or_404(Offer, pk=pk)
+#     offer = get_object_or_404(Offer, pk=pk)
 
-    if request.method == "POST":
-        form = OfferForm(request.POST, instance=offer)
-        if form.is_valid():
-            form.save()
-            return redirect('offerlist')
-    else:
-        form = OfferForm(instance=offer)
+#     if request.method == "POST":
+#         form = OfferForm(request.POST, instance=offer)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('offerlist')
+#     else:
+#         form = OfferForm(instance=offer)
 
-    return render(request, 'adminpanel/offer/form.html', {'form': form})
+#     return render(request, 'adminpanel/offer/form.html', {'form': form})
 
 @login_required(login_url='vivaan_admin:login')
 @permission_required('resort.delete_offer', raise_exception=True)
