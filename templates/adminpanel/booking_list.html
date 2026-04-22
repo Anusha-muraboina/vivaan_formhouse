@@ -385,8 +385,13 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const FARMHOUSE_SLUG = "vivaan-farmhouse";
+    {% comment %} fetch("https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/lists/", {
+        method: "GET",
+        credentials: "include"
+    }) {% endcomment %}
 
-    fetch("https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/lists/", {
+    fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/lists/?farmhouse=${FARMHOUSE_SLUG}`, {
         method: "GET",
         credentials: "include"
     })

@@ -303,8 +303,11 @@ fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/detail/{{ 
 
 /* UPDATE BOOKING */
 function updateBooking() {
+    const FARMHOUSE_SLUG = "vivaan-farmhouse";
 
-fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking_id }}/update/`, {
+{% comment %} fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking_id }}/update/`, { {% endcomment %}
+    
+    fetch(`https://farmhouseshyderabad.com/farmhouse_admin/owner/bookings/{{ booking_id }}/update/?farmhouse=${FARMHOUSE_SLUG}`, {
     method:"PATCH",
     headers:{
         "Content-Type":"application/json",
