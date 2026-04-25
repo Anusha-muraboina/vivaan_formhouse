@@ -6,9 +6,12 @@
 <div class="card p-4">
     <div class="card-header flex-between">
         <h2>Banners</h2>
+
+         {% if perms.resort.add_mainbanner %}
         <a href="{% url 'vivaan_admin:banner_create' %}" class="bg-green-900 text-white p-1  md:p-2 rounded">
             + Banner
         </a>
+{% endif %}
     </div>
 <div class="table-responsive">
     <table>
@@ -40,11 +43,17 @@
                     {% endif %}
                 </td>
                 <td style="text-align:center;">
+
+                     {% if perms.resort.change_mainbanner %}
                     <a href="{% url 'vivaan_admin:banner_edit' banner.id %}"
                        class="btn-action btn-view btn-sm">Edit</a>
+{% endif %}
+                     {% if perms.resort.delete_mainbanner %}
                     <a href="{% url 'vivaan_admin:banner_delete' banner.id %}"
                        class="btn-action btn-delete btn-sm"
                        onclick="return confirm('Delete this banner?')">Delete</a>
+
+                       {% endif %}
                 </td>
             </tr>
             {% empty %}

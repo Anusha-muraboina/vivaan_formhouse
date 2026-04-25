@@ -113,9 +113,13 @@
 <div class="card p-2">
     <div class="card-header flex-between">
         <h2>Guest Reviews</h2>
+
+        {% if perms.resort.add_testimonial %}
         <a href="{% url 'vivaan_admin:testimonial_create' %}" class="bg-green-900 text-white md:p-2 p-1 rounded">
             + Add Review
         </a>
+
+   {% endif %}
     </div>
 <div class="table-responsive">
     <table class="admin-table">
@@ -165,14 +169,20 @@
 
                 <!-- ACTIONS -->
                 <td>
+
+                    {% if perms.resort.change_testimonial %}
                     <a href="{% url 'vivaan_admin:testimonial_edit' review.id %}" class="btn-sm btn-view">
                         Edit
                     </a>
+   {% endif %}
+                    {% if perms.resort.delete_testimonial %}
                     <a href="{% url 'vivaan_admin:testimonial_delete' review.id %}"
                        class="btn-sm btn-delete"
                        onclick="return confirm('Delete this testimonial?');">
                         Delete
                     </a>
+
+                       {% endif %}
                 </td>
             </tr>
         {% empty %}

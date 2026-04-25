@@ -36,8 +36,11 @@
 <div class="card">
     <div class="card-header">
         <h2>Photo Gallery</h2>
+             {% if perms.resort.add_gallery %}
         <a href="{% url 'vivaan_admin:gallery_create' %}" class="btn-action btn-view"><i class="fa-solid fa-plus"></i>
             Add Photo</a>
+  {% endif %}
+
     </div>
     <div class="table-responsive">
     <table>
@@ -63,15 +66,20 @@
                  
                 <td>
                     <div class="gallery-actions">
+
+                             {% if perms.resort.chnage_gallery %}
     <a href="{% url 'vivaan_admin:gallery_edit' photo.id %}" class="btn-view btn-sm">
         Edit
     </a>
 
+  {% endif %}
+         {% if perms.resort.delete_gallery %}
     <a href="{% url 'vivaan_admin:gallery_delete' photo.id %}"
        class="btn-delete btn-sm"
        onclick="return confirm('Delete this photo?');">
         Delete
     </a>
+      {% endif %}
 </div>
 
                     {% comment %} <a href="{% url 'vivaan_admin:gallery_delete' photo.id %}" class="btn-action btn-delete"

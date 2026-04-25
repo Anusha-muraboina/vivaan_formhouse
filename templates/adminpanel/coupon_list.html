@@ -149,9 +149,13 @@
 <div class="coupon-card">
     <div class="card-header">
         <h2 class="">Discount Coupons</h2>
+
+        {% if perms.resort.add_coupon %}
         <a href="{% url 'vivaan_admin:coupon_create' %}" class="btn-primary">
             + Coupon
         </a>
+ {% endif %}
+
     </div>
 
     <div class="table-responsive">
@@ -180,12 +184,20 @@
                         {% endif %}
                     </td>
                     <td>
+
+                         {% if perms.resort.change_coupon %}
                         <a href="{% url 'vivaan_admin:coupon_edit' coupon.id %}" class="btn-sm btn-view">Edit</a>
+
+        {% endif %}
+                         {% if perms.resort.delete_coupon %}
                         <a href="{% url 'vivaan_admin:coupon_delete' coupon.id %}"
                            class="btn-sm btn-delete"
                            onclick="return confirm('Delete this coupon?');">
                             Delete
                         </a>
+
+                        
+        {% endif %}
                     </td>
                 </tr>
             {% empty %}

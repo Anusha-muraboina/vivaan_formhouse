@@ -1,29 +1,134 @@
 {% extends "adminpanel/base.html" %}
-{% block title %}Users{% endblock %}
-{% block header %}User Management{% endblock %}
+{% block title %}Assign Permissions{% endblock %}
+{% block header %}User Permissions{% endblock %}
 
 {% block content %}
 
-<h2>{% if group %}Edit{% else %}Create{% endif %} Group</h2>
+<style>
+.card {
+    max-width: 900px;
+    margin: 30px auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
 
-<form method="post">
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+
+/* BOX */
+.box {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* ITEM */
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: #f9fafb;
+}
+
+/* TITLE */
+h3 {
+    margin-bottom: 10px;
+}
+
+/* BUTTON */
+.btn {
+    margin-top: 20px;
+    background: #78350f;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+}
+</style>
+
+<div class="card">
+
+```
+<h2>Assign Permissions → {{ user.username }}</h2>
+
+<form method="POST">
     {% csrf_token %}
 
-    <input type="text" name="name" placeholder="Group Name"
-           value="{{ group.name|default:'' }}">
+    <div class="grid">
 
-    <h3>Permissions</h3>
+        <!-- GROUPS -->
+        <div>
+            <h3>Groups</h3>
+            <div class="box">
+                {% for group in groups %}
+                    <label class="item">
+                        <input type="checkbox" name="groups" value="{{ group.id }}"
+                               {% if group in user_groups %}checked{% endif %}
+                               class="group-checkbox"
+                               data-group-id="{{ group.id }}">
+                        {{ group.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
 
-    {% for perm in permissions %}
-        <label>
-            <input type="checkbox" name="permissions"
-                   value="{{ perm.id }}"
-                   {% if group and perm in group.permissions.all %}checked{% endif %}>
-            {{ perm.name }}
-        </label><br>
-    {% endfor %}
+        <!-- USER PERMISSIONS -->
+        <div>
+            <h3>User Permissions</h3>
+            <div class="box">
+                {% for perm in permissions %}
+                    <label class="item">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}"
+                               {% if perm in user_permissions %}checked{% endif %}>
+                        {{ perm.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
 
-    <button type="submit">Save</button>
+    </div>
+
+    <!-- GROUP PERMISSIONS DISPLAY -->
+    <div style="margin-top:20px;">
+        <h3>Permissions from Selected Groups</h3>
+        <div class="box" id="group-permissions-box">
+            {% for perm in group_permissions %}
+                <div class="item">{{ perm.name }}</div>
+            {% empty %}
+                <p>No group permissions</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <button type="submit" class="btn">Save</button>
+
 </form>
+```
+
+</div>
+
+<script>
+// OPTIONAL: dynamic update (basic demo)
+document.querySelectorAll(".group-checkbox").forEach(cb => {
+    cb.addEventListener("change", () => {
+        // You can enhance with AJAX later
+        alert("Group changed — reload to see updated permissions");
+    });
+});
+</script>
 
 {% endblock %}

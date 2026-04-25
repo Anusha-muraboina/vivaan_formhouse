@@ -6,9 +6,13 @@
 <div class="card">
     <div class="card-header">
         <h2>Blocked Periods</h2>
+
+        {% if perms.resort.add_blockeddate %}
         <a href="{% url 'vivaan_admin:blocked_date_create' %}" class="btn-action btn-view">
             + Block Date
         </a>
+         {% endif %}
+         
     </div>
 <div class="table-responsive">
     <table>
@@ -27,12 +31,18 @@
                 <td>{{ date.end_date }}</td>
                 <td>{{ date.reason|default:"—" }}</td>
                 <td>
+
+                    {% if perms.resort.change_blockeddate %}
                     <a href="{% url 'vivaan_admin:blocked_date_edit' date.id %}" class="btn-action btn-view">Edit</a>
+                   {% endif %}
+
+                    {% if perms.resort.delete_blockeddate %}
                     <a href="{% url 'vivaan_admin:blocked_date_delete' date.id %}"
                        class="btn-action btn-delete"
                        onclick="return confirm('Unblock this date range?');">
                         Delete
                     </a>
+                     {% endif %}
                 </td>
             </tr>
             {% empty %}

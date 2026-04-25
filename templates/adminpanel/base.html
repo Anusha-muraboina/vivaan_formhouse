@@ -678,33 +678,54 @@
             </a>
         </div>
         <nav class="sidebar-menu">
+
+
             <a href="{% url 'vivaan_admin:dashboard' %}"
                 class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                 <i class="fa-solid fa-gauge-high"></i> <span class="menu-text">Dashboard</span>
             </a>
+
+            {% if perms.resort.view_booking %}
             <a href="{% url 'vivaan_admin:booking_list' %}"
                 class="menu-item {% if request.resolver_match.url_name == 'booking_list' %}active{% endif %}">
                 <i class="fa-solid fa-calendar-check"></i> <span class="menu-text">Bookings</span>
             </a>
+             {% endif %}
+{% if perms.resort.view_roomcategory %}
             <a href="{% url 'vivaan_admin:room_list' %}"
                 class="menu-item {% if request.resolver_match.url_name == 'room_list' %}active{% endif %}">
                 <i class="fa-solid fa-bed"></i> <span class="menu-text">Rooms & Villa</span>
             </a>
+ {% endif %}
+    {% if perms.resort.view_mainbanner %}
             <a href="{% url 'vivaan_admin:banner_list' %}" class="menu-item"><i class="fa-solid fa-images"></i> <span
                     class="menu-text">Banners</span></a>
+ {% endif %}
+     {% if perms.resort.view_amenity %}
             <a href="{% url 'vivaan_admin:amenity_list' %}" class="menu-item"><i class="fa-solid fa-spa"></i> <span
                     class="menu-text">Amenities</span></a>
+ {% endif %}
+   {% if perms.resort.view_blockeddate %}
             <a href="{% url 'vivaan_admin:blocked_date_list' %}" class="menu-item"><i class="fa-solid fa-ban"></i> <span
                     class="menu-text">Blocked Dates</span></a>
+ {% endif %}
+
+
+            {% if perms.resort.view_coupon %}
             <a href="{% url 'vivaan_admin:coupon_list' %}" class="menu-item"><i class="fa-solid fa-ticket"></i> <span
                     class="menu-text">Coupons</span></a>
+ {% endif %}
+
+            {% if perms.resort.view_gallery %}
             <a href="{% url 'vivaan_admin:gallery_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
                 <span class="menu-text">Gallery</span></a>
+ {% endif %}
 
+            {% if perms.resort.view_offer %}
             <a href="{% url 'vivaan_admin:offerlist' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
                 <span class="menu-text">offer</span></a>
 
-
+ {% endif %}
             {% comment %} <a href="{% url 'vivaan_admin:user_permissions' user_id %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
                 <span class="menu-text">user permission</span></a> {% endcomment %}
             {% comment %} <a href="{% url 'vivaan_admin:user_list' %}" class="menu-item">
@@ -712,25 +733,37 @@
     <span class="menu-text">Users</span>
 </a> {% endcomment %}
 
-            {% comment %} <a href="{% url 'vivaan_admin:group_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
+
+{% if perms.auth.view_group %}
+            <a href="{% url 'vivaan_admin:group_list' %}" class="menu-item"><i class="fa-solid fa-photo-film"></i>
                 <span class="menu-text">group permission</span></a>
- {% endcomment %}
+
+ {% endif %}
 
 
-
-
+            {% if perms.resort.view_testimonial %}
             <a href="{% url 'vivaan_admin:testimonial_list' %}" class="menu-item"><i class="fa-solid fa-star"></i> <span
                     class="menu-text">Ratings</span></a>
+ {% endif %}
+ {% if perms.resort.view_user %}
             <a href="{% url 'vivaan_admin:user_list' %}" class="menu-item"><i class="fa-solid fa-users-gear"></i> <span
                     class="menu-text">Users</span></a>
+ {% endif %}
+
+  
+               
+            {% if perms.resort.view_contactmessage %}
             <a href="{% url 'vivaan_admin:message_list' %}" class="menu-item"><i class="fa-solid fa-envelope"></i> <span
                     class="menu-text">Messages</span></a>
+ {% endif %}
 
+ {% if perms.resort.view_blog %}
                     <a href="{% url 'vivaan_admin:blog_list' %}" class="menu-item">
     <i class="fa-solid fa-blog"></i>
     <span class="menu-text">Blogs</span>
 </a>
 
+ {% endif %}
 {% comment %} <a href="{% url 'vivaan_admin:blog_category_list' %}" class="menu-item">
     <i class="fa-solid fa-folder"></i>
     <span class="menu-text">Blog Categories</span>

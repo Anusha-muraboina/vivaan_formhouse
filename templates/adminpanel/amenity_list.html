@@ -7,9 +7,12 @@
 <div class="card pb-3">
     <div class="card-header">
         <h2>Amenity List</h2>
+         {% if perms.resort.add_amenity %}
         <a href="{% url 'vivaan_admin:amenity_create' %}" class="btn-action btn-view">
             + Add Amenity
         </a>
+
+         {% endif %}
     </div>
 
 <div class="table-responsive">
@@ -35,12 +38,18 @@
                     {% endif %}
                 </td>
                 <td>
+
+                     {% if perms.resort.change_amenity %}
                     <a href="{% url 'vivaan_admin:amenity_edit' amenity.id %}" class="btn-action btn-view">Edit</a>
+ {% endif %}
+ {% if perms.resort.delete_amenity %}
                     <a href="{% url 'vivaan_admin:amenity_delete' amenity.id %}"
                        class="btn-action btn-delete"
                        onclick="return confirm('Delete this amenity?');">
                        Delete
                     </a>
+
+ {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -72,6 +81,8 @@
         {% else %}
             <li class="disabled"><span>Next »</span></li>
         {% endif %}
+
+
 
     </ul>
 </div>

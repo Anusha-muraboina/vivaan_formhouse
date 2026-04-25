@@ -169,9 +169,13 @@
         <div class="subtitle">Manage and track villa bookings</div>
     </div>
 
+{% if perms.resort.add_booking %}
     <a href="{% url 'vivaan_admin:booking_create' %}" class="btn-add">
         + Add Booking
     </a>
+ {% endif %}
+
+
 </div>
 
 <!-- FILTER BAR -->
@@ -329,12 +333,18 @@
 
         <td>
             <a href="{% url 'vivaan_admin:booking_detail' b.id %}" class="btn-action btn-view">View</a>
+
+            {% if perms.resort.change_booking %}
             <a href="{% url 'vivaan_admin:booking_edit' b.id %}" class="btn-action btn-view">Edit</a>
+ {% endif %}
+            {% if perms.resort.delete_booking %}
             <a href="{% url 'vivaan_admin:booking_delete' b.id %}"
                class="btn-action btn-delete"
                onclick="return confirm('Delete booking?');">
                Delete
             </a>
+
+             {% endif %}
         </td>
     </tr>
 
