@@ -28,11 +28,22 @@ def admin_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        remember = request.POST.get('remember_me')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             # if user.is_superuser:
             if user.is_staff or user.is_superuser: 
                 login(request, user)
+                
+                
+                                                # 🔥 SESSION CONTROL
+                if not remember:
+                    request.session.set_expiry(0)  # expire on browser close
+                else:
+                    request.session.set_expiry(1209600)  # 2 weeks
+
+
+
                 return redirect('vivaan_admin:dashboard')
             else:
                 messages.error(request, "Access denied.")

@@ -128,10 +128,25 @@
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autofocus>
             </div>
-            <div class="form-group">
+
+  <div class="form-group" style="position: relative;">
+    <label for="password">Password</label>
+
+    <input type="password" id="password" name="password" required>
+
+    <!-- 👁️ Eye Icon -->
+    <i class="fa-solid fa-eye" id="togglePassword"
+       style="position: absolute; right: 12px; top: 38px; cursor: pointer; color: #6b7280;"></i>
+</div>
+       <div class="remember-box">
+    <input type="checkbox" name="remember_me" id="remember_me">
+    <label for="remember_me">Remember me</label>
+</div>
+
+            {% comment %} <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
-            </div>
+            </div>  {% endcomment %}
             <button type="submit" class="btn-login">
                 Sign In <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
             </button>
@@ -141,6 +156,24 @@
             <a href="/" style="color: inherit; text-decoration: none;">&larr; Back to Website</a>
         </p>
     </div>
+
+
+
+        <script>
+const toggle = document.getElementById("togglePassword");
+const password = document.getElementById("password");
+
+toggle.addEventListener("click", function () {
+    const type = password.getAttribute("type") === "password" ? "text" : "password";
+    password.setAttribute("type", type);
+
+    // change icon
+    this.classList.toggle("fa-eye");
+    this.classList.toggle("fa-eye-slash");
+});
+</script>
+
+
 </body>
 
 </html>
