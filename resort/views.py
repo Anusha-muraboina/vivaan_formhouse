@@ -48,33 +48,35 @@ def home(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
 
-
-
-       
-        # 🔥 RECAPTCHA
         recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        is_captcha_valid = False
 
         if not recaptcha_response:
             messages.error(request, "Please verify captcha.")
-            return redirect("home")
+        else:
+            data = {
+                "secret": settings.RECAPTCHA_SECRET_KEY,
+                "response": recaptcha_response
+            }
 
-        data = {
-            "secret": settings.RECAPTCHA_SECRET_KEY,
-            "response": recaptcha_response
-        }
+            r = requests.post(
+                "https://www.google.com/recaptcha/api/siteverify",
+                data=data
+            )
 
-        r = requests.post(
-            "https://www.google.com/recaptcha/api/siteverify",
-            data=data
-        )
+            result = r.json()
+            print("RECAPTCHA RESULT:", result)
 
-        result = r.json()
-        print("RECAPTCHA RESULT:", result)  # 🔥 DEBUG
+            if result.get("success"):
+                is_captcha_valid = True
+            else:
+                messages.error(request, "Captcha failed. Try again.")
 
-        # ✅ IMPORTANT (v3 score check)
-        if not result.get("success") or result.get("score", 0) < 0.5:
-            messages.error(request, "Captcha failed. Try again.")
-            return redirect("home")
+
+        # ✅ ONLY SAVE IF VALID
+        if is_captcha_valid and form.is_valid():
+            contact_msg = form.save()
 
 
 

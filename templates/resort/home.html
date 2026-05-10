@@ -473,13 +473,13 @@
  rounded-l-[60px] z-0">
   </div>
 </section>
-{% if messages %}
+{% comment %} {% if messages %}
   <script>
     {% for message in messages %}
       alert("{{ message|escapejs }}");
     {% endfor %}
   </script>
-{% endif %}
+{% endif %} {% endcomment %}
 
 <section id="contact" class="py-4 md:py-10">
   <div class="container mx-auto px-2 max-w-2xl">
@@ -487,6 +487,21 @@
     <h3 class="text-4xl font-bold text-center mb-6">
       Reach Out to Us
     </h3>
+
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-3 rounded-lg 
+                {% if message.tags == 'error' %}
+                    bg-red-100 text-red-700
+                {% else %}
+                    bg-green-100 text-green-700
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
     <div class="rounded-2xl p-8 shadow-2xl text-gray-800 bg-emerald-50">
 
@@ -567,6 +582,7 @@
         </div>
     <div class="mt-4">
         <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+        
     </div>
         <button
           type="submit" aria-label="Send message"
@@ -678,13 +694,8 @@
 
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-grecaptcha.ready(function () {
-    grecaptcha.execute("{{ RECAPTCHA_SITE_KEY }}", {action: "contact"}).then(function (token) {
-        document.getElementById("recaptchaToken").value = token;
-    });
-});
-</script>
+
+
 <script>
 let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel-img');
