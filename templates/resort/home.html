@@ -555,6 +555,8 @@
             Message
           </label>
 
+
+
           <textarea
             name="message"
             rows="4"
@@ -563,7 +565,9 @@
                    focus:outline-none focus:ring-2 focus:ring-emerald-600"
             required></textarea>
         </div>
-
+    <div class="mt-4">
+        <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+    </div>
         <button
           type="submit" aria-label="Send message"
           class="w-full bg-emerald-600 hover:bg-emerald-900
@@ -671,6 +675,16 @@
 
     </div>
 
+
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+grecaptcha.ready(function () {
+    grecaptcha.execute("{{ RECAPTCHA_SITE_KEY }}", {action: "contact"}).then(function (token) {
+        document.getElementById("recaptchaToken").value = token;
+    });
+});
+</script>
 <script>
 let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel-img');

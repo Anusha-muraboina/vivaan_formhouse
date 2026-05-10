@@ -48,6 +48,36 @@ def home(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
 
+
+
+       
+        # 🔥 RECAPTCHA
+        recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        if not recaptcha_response:
+            messages.error(request, "Please verify captcha.")
+            return redirect("home")
+
+        data = {
+            "secret": settings.RECAPTCHA_SECRET_KEY,
+            "response": recaptcha_response
+        }
+
+        r = requests.post(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data=data
+        )
+
+        result = r.json()
+        print("RECAPTCHA RESULT:", result)  # 🔥 DEBUG
+
+        # ✅ IMPORTANT (v3 score check)
+        if not result.get("success") or result.get("score", 0) < 0.5:
+            messages.error(request, "Captcha failed. Try again.")
+            return redirect("home")
+
+
+
         if form.is_valid():
             contact_msg = form.save()
 
@@ -123,6 +153,9 @@ def home(request):
         "seo_title": seo_banner.page_title if seo_banner and seo_banner.page_title else "Vivaan Farmhouse – Elkatta, Hyderabad",
         "seo_description": seo_banner.meta_description if seo_banner else "",
         "seo_keywords": seo_banner.meta_keyword if seo_banner else "",
+        
+        
+        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY,
     }
     return render(request, 'resort/home.html', context)
 
