@@ -47,13 +47,13 @@ def home(request):
       # ================= CONTACT FORM =================
     if request.method == "POST":
         form = ContactForm(request.POST)
-
+        
+        
         recaptcha_response = request.POST.get("g-recaptcha-response")
-
         is_captcha_valid = False
 
         if not recaptcha_response:
-            messages.error(request, "Please verify captcha.")
+            messages.error(request, "Please verify reCAPTCHA.")
         else:
             data = {
                 "secret": settings.RECAPTCHA_SECRET_KEY,
@@ -66,19 +66,52 @@ def home(request):
             )
 
             result = r.json()
-            print("RECAPTCHA RESULT:", result)
+            print(result)
 
             if result.get("success"):
                 is_captcha_valid = True
             else:
-                messages.error(request, "Captcha failed. Try again.")
-
+                messages.error(request, "Invalid reCAPTCHA. Try again.")
 
         # ✅ ONLY SAVE IF VALID
         if is_captcha_valid and form.is_valid():
-            contact_msg = form.save()
+            form.save()
+            messages.success(request, "Message sent successfully.")
+
+            # redirect ONLY on success
+            # return redirect(f"{reverse('home')}#contact")
+            return redirect("home")
 
 
+        # recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        # is_captcha_valid = False
+
+        # if not recaptcha_response:
+        #     messages.error(request, "Please verify captcha.")
+        # else:
+        #     data = {
+        #         "secret": settings.RECAPTCHA_SECRET_KEY,
+        #         "response": recaptcha_response
+        #     }
+
+        #     r = requests.post(
+        #         "https://www.google.com/recaptcha/api/siteverify",
+        #         data=data
+        #     )
+
+        #     result = r.json()
+        #     print("RECAPTCHA RESULT:", result)
+
+        #     if result.get("success"):
+        #         is_captcha_valid = True
+        #     else:
+        #         messages.error(request, "Captcha failed. Try again.")
+
+
+        # # ✅ ONLY SAVE IF VALID
+        # if is_captcha_valid and form.is_valid():
+        #     contact_msg = form.save()
 
         if form.is_valid():
             contact_msg = form.save()
@@ -158,6 +191,7 @@ def home(request):
         
         
         "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY,
+        "form" : form,
     }
     return render(request, 'resort/home.html', context)
 
