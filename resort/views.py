@@ -709,39 +709,39 @@ def room_detail(request, slug):
 
         # ================= CREATE BOOKING =================
         booking, created = Booking.objects.get_or_create(
-        guest_email=form.cleaned_data["guest_email"],
-        check_in=form.cleaned_data["check_in"],
-        check_out=form.cleaned_data["check_out"],
-        payment_method=payment_method,
-        
-        
-
-        defaults={
-            "guest_name": form.cleaned_data["guest_name"],
-            "guest_phone": form.cleaned_data["guest_phone"],
-            "guest_count": form.cleaned_data["guest_count"],
-            "extra_guest_count": form.cleaned_data["extra_guest_count"],
-
-            "sub_total": base_amount,
-            "disc_price": discount,
-            "total_amount": total,
-            "remaining_amount": total,
-
-            "payment_status": "pending",
-            "status": "pending",
+            guest_email=form.cleaned_data["guest_email"],
+            check_in=form.cleaned_data["check_in"],
+            check_out=form.cleaned_data["check_out"],
+            payment_method=payment_method,
             
-                    # ✅ ADD THIS
-           "room_category": room_category
-        }
-    )
-     
-    # ADD THIS EXACTLY HERE
-    if booking.payment_method == "farmhouse":
-        booking.status = "pending"
-        booking.payment_status = "pending"
-        booking.save()
+            
 
-     # 🔥 ADD HERE (AFTER booking created)
+            defaults={
+                "guest_name": form.cleaned_data["guest_name"],
+                "guest_phone": form.cleaned_data["guest_phone"],
+                "guest_count": form.cleaned_data["guest_count"],
+                "extra_guest_count": form.cleaned_data["extra_guest_count"],
+
+                "sub_total": base_amount,
+                "disc_price": discount,
+                "total_amount": total,
+                "remaining_amount": total,
+
+                "payment_status": "pending",
+                "status": "pending",
+                
+                        # ✅ ADD THIS
+            "room_category": room_category
+            }
+        )
+     
+        # ADD THIS EXACTLY HERE
+        if booking.payment_method == "farmhouse":
+            booking.status = "pending"
+            booking.payment_status = "pending"
+            booking.save()
+
+        # 🔥 ADD HERE (AFTER booking created)
 
         offer = Offer.objects.filter(
             valid_from__lte=form.cleaned_data["check_in"],
