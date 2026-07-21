@@ -18,7 +18,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "vivaanfarmhouse.com",
     "www.vivaanfarmhouse.com",
-    'http://13.205.98.67',
+    'http://200.97.169.193',
     'localhost',
     '127.0.0.1',
     "farmhouseshyderabad.com",
@@ -145,7 +145,7 @@ DATABASES = {
         'NAME': 'vivaandb',
         'USER': 'vivaanuser',
         'PASSWORD': 'Vivaanfarmhouse@123',
-        'HOST': '13.205.98.67',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -302,7 +302,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.vivaanfarmhouse.com",
     "http://127.0.0.1:8000",
     "http://127.0.0.1:9000",
-     'http://13.205.98.67',
+     'http://200.97.169.193',
     "https://farmhouseshyderabad.com",
 
 ]
